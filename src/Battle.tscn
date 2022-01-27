@@ -1,0 +1,112 @@
+[gd_scene load_steps=16 format=2]
+
+[ext_resource path="res://src/Battle.gd" type="Script" id=1]
+[ext_resource path="res://src/Units/Enemy.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/UnitUI.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://src/Moves.gd" type="Script" id=5]
+[ext_resource path="res://src/StatusManager.gd" type="Script" id=6]
+[ext_resource path="res://src/Items.gd" type="Script" id=7]
+[ext_resource path="res://src/BattleUI.gd" type="Script" id=8]
+[ext_resource path="res://src/Magic.gd" type="Script" id=9]
+[ext_resource path="res://src/Equipment.gd" type="Script" id=10]
+[ext_resource path="res://src/Units/Player.tscn" type="PackedScene" id=11]
+[ext_resource path="res://src/Units/Enemies.gd" type="Script" id=12]
+
+[sub_resource type="DynamicFont" id=1]
+size = 80
+font_data = ExtResource( 4 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 25
+font_data = ExtResource( 4 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 40
+font_data = ExtResource( 4 )
+
+[node name="Battle" type="Node2D"]
+script = ExtResource( 1 )
+Player = ExtResource( 11 )
+Enemy = ExtResource( 2 )
+
+[node name="BattleUI" type="Node2D" parent="."]
+script = ExtResource( 8 )
+UnitUI = ExtResource( 3 )
+
+[node name="ColorRect" type="ColorRect" parent="BattleUI"]
+margin_left = 1.12247
+margin_top = -1.25992
+margin_right = 1033.12
+margin_bottom = 601.74
+color = Color( 0.168627, 0.141176, 0.141176, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Pointer" type="Label" parent="BattleUI"]
+margin_top = 302.247
+margin_right = 42.0
+margin_bottom = 398.247
+custom_fonts/font = SubResource( 1 )
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Description" type="Label" parent="BattleUI"]
+margin_left = 534.0
+margin_top = 397.0
+margin_right = 1027.0
+margin_bottom = 599.0
+custom_fonts/font = SubResource( 2 )
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CommandList" type="ItemList" parent="BattleUI"]
+margin_left = 3.0
+margin_top = 397.0
+margin_right = 251.0
+margin_bottom = 597.0
+custom_fonts/font = SubResource( 3 )
+max_columns = 4
+same_column_width = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Submenu" type="ItemList" parent="BattleUI"]
+margin_left = 262.0
+margin_top = 397.0
+margin_right = 526.0
+margin_bottom = 597.0
+custom_fonts/font = SubResource( 3 )
+max_columns = 4
+same_column_width = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Order" type="Node2D" parent="."]
+
+[node name="Moves" type="Node2D" parent="."]
+script = ExtResource( 5 )
+
+[node name="StatusManager" type="Node2D" parent="."]
+script = ExtResource( 6 )
+
+[node name="Items" type="Node2D" parent="."]
+script = ExtResource( 7 )
+
+[node name="Magic" type="Node2D" parent="."]
+script = ExtResource( 9 )
+
+[node name="Equipment" type="Node2D" parent="."]
+script = ExtResource( 10 )
+
+[node name="Enemies" type="Node2D" parent="."]
+script = ExtResource( 12 )
+[connection signal="item_activated" from="BattleUI/CommandList" to="BattleUI" method="_on_CommandList_item_activated"]
+[connection signal="item_activated" from="BattleUI/Submenu" to="BattleUI" method="_on_Submenu_item_activated"]
