@@ -1,7 +1,7 @@
 extends "res://src/Units/Unit.gd"
 
 var equipment = {"Weapon": "", "Armor": "", "Accessory": ""}
-var items = {"Rock": 3, "Herb": 1, "Toxic Salve": 1}
+var items = {"Rock": 2, "Herb": 1, "Toxic Salve": 1}
 var spells = ["Lightning Bolt"]
 var charges = [10, 1, 1]
 
