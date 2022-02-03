@@ -22,7 +22,7 @@ var moveTarget
 var info
 var hits
 
-var opponents = ["Bat", "Bat"]
+var opponents = ["Bat"]
 
 var targetsVisible = false
 

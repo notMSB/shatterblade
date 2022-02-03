@@ -108,5 +108,6 @@ script = ExtResource( 10 )
 
 [node name="Enemies" type="Node2D" parent="."]
 script = ExtResource( 12 )
+
 [connection signal="item_activated" from="BattleUI/CommandList" to="BattleUI" method="_on_CommandList_item_activated"]
 [connection signal="item_activated" from="BattleUI/Submenu" to="BattleUI" method="_on_Submenu_item_activated"]
