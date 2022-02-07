@@ -1,16 +1,29 @@
 extends Node2D
 
 export (PackedScene) var UnitUI
-const POINTERSTART = 50
-const INCREMENT = 170
+export (PackedScene) var UnitOrder
+
+const UNITXSTART = 100
+const UNITYSTART = 50
+const POINTERSTART = 10
+
+const XINCREMENT = 200
+const YINCREMENT = 105
+
+const ORDERYSTART = 10
+const ORDERXSTART = 350
+const ORDERXINCREMENT = 50
 
 onready var Battle = get_parent()
 onready var Moves = get_node("../Moves")
 
 var targetsVisible = false
 
+var playerCount = 0
+var enemyCount = 0
+
 func move_pointer(index):
-	$Pointer.margin_left = POINTERSTART + INCREMENT * index
+	$Pointer.margin_left = POINTERSTART + ORDERXSTART + ORDERXINCREMENT * index
 	
 func setup_display(unit, index):
 	var display = UnitUI.instance()
@@ -19,9 +32,28 @@ func setup_display(unit, index):
 	if unit.shield > 0:
 		display.get_node("HP").text += "[" + String(unit.shield) + "]"
 	display.get_node("Stats").text = String(unit.strength) + "/" + String(unit.defense) + "/" + String(unit.speed)
-	display.position.x = POINTERSTART + INCREMENT * index
+	
+	if unit.isPlayer:
+		display.position.x = UNITXSTART + 4 * XINCREMENT
+		display.position.y = UNITYSTART + YINCREMENT * playerCount
+		playerCount += 1
+	else:
+		if enemyCount % 2 == 0:
+			display.position.x = UNITXSTART
+		else:
+			display.position.x = UNITXSTART + XINCREMENT
+		display.position.y = UNITYSTART + YINCREMENT * enemyCount
+		enemyCount += 1
+	
 	$ColorRect.add_child(display)
 	unit.ui = display
+	
+	
+	var orderDisplay = UnitOrder.instance()
+	orderDisplay.get_node("Name").text = unit.name
+	$Order.add_child(orderDisplay)
+	orderDisplay.position.x = ORDERXSTART + index * ORDERXINCREMENT
+	orderDisplay.position.y = ORDERYSTART
 
 func open_commands():
 	$CommandList.add_item("Attack")

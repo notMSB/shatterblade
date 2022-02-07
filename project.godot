@@ -10,17 +10,18 @@ config_version=4
 
 _global_script_classes=[  ]
 _global_script_class_icons={
+
 }
 
 [application]
 
 config/name="rpgtest"
-run/main_scene="res://src/Battle.tscn"
+run/main_scene="res://src/Project/Battle.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
-global="*res://src/global.gd"
+global="*res://src/Project/global.gd"
 
 [rendering]
 

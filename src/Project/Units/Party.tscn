@@ -1,10 +1,15 @@
 [gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://src/Party.gd" type="Script" id=1]
-[ext_resource path="res://src/Moves.gd" type="Script" id=3]
-[ext_resource path="res://src/Equipment.gd" type="Script" id=4]
-[ext_resource path="res://src/ChoiceUI.tscn" type="PackedScene" id=5]
-[ext_resource path="res://src/Units/Player.tscn" type="PackedScene" id=6]
+[ext_resource path="res://src/Project/Units/Party.gd" type="Script" id=1]
+[ext_resource path="res://src/Project/Lists/Moves.gd" type="Script" id=3]
+[ext_resource path="res://src/Project/Lists/Equipment.gd" type="Script" id=4]
+[ext_resource path="res://src/Project/UI/ChoiceUI.tscn" type="PackedScene" id=5]
+[ext_resource path="res://src/Project/Units/Player.tscn" type="PackedScene" id=6]
+
+
+
+
+
 
 [node name="Party" type="Node2D"]
 script = ExtResource( 1 )

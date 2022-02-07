@@ -3,8 +3,8 @@ extends Node2D
 export (PackedScene) var Player
 export (PackedScene) var Enemy
 
-const partyNum = 3
-const enemyNum = 3
+const partyNum = 4
+const enemyNum = 4
 const apIncrement = 20
 const STUNCODE = -1
 
@@ -22,7 +22,7 @@ var moveTarget
 var info
 var hits
 
-var opponents = ["Bat"]
+var opponents = ["Bat", "Bat"]
 
 var targetsVisible = false
 
@@ -35,7 +35,7 @@ func _ready(): #Generate units and add to turn order
 		if i < partyNum: #player
 			createdUnit = Player.instance()
 			if global.storedParty.size() <= i:
-				createdUnit.make_stats(1, 5, 5, 6)
+				createdUnit.make_stats(40, 5, 5, 6)
 			else:
 				createdUnit = global.storedParty[i]
 			createdUnit.name = str("P", String(i))
@@ -49,8 +49,8 @@ func _ready(): #Generate units and add to turn order
 				createdUnit.callv("make_stats", [400, 10, 5, 5])
 				createdUnit.name = str("E", String(i))
 		$StatusManager.initialize_statuses(createdUnit)
-		$Order.add_child(createdUnit)
-	var units = $Order.get_children()
+		$Units.add_child(createdUnit)
+	var units = $Units.get_children()
 	units.sort_custom(self, 'sort_battlers')
 	var i = 0
 	for unit in units:
@@ -63,8 +63,8 @@ func _ready(): #Generate units and add to turn order
 	play_turn()
 
 func play_turn():
-	if !chosenMove or !chosenMove.has("quick"): turnIndex = (turnIndex + 1) % $Order.get_child_count() #Advance to next unit if a non-quick action is used
-	currentUnit = $Order.get_child(turnIndex)
+	if !chosenMove or !chosenMove.has("quick"): turnIndex = (turnIndex + 1) % $Units.get_child_count() #Advance to next unit if a non-quick action is used
+	currentUnit = $Units.get_child(turnIndex)
 	
 	if !chosenMove or !chosenMove.has("quick"): 
 		info = $StatusManager.evaluate_statuses(currentUnit, $StatusManager.statusActivations.beforeTurn)
@@ -100,7 +100,7 @@ func set_intent(unit, target = false):
 
 func get_team(gettingPlayers, onlyAlive = false):
 	var team = []
-	for unit in $Order.get_children():
+	for unit in $Units.get_children():
 		if (unit.isPlayer and gettingPlayers) or (!unit.isPlayer and !gettingPlayers):
 			if (onlyAlive and unit.currentHealth > 0) or !onlyAlive:
 				team.append(unit)
@@ -140,7 +140,7 @@ func evaluate_targets(move, user):
 	
 
 func target_chosen(index):
-	moveTarget = $Order.get_child(index)
+	moveTarget = $Units.get_child(index)
 	execute_move()
 	
 	
