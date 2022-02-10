@@ -44,7 +44,8 @@ func _ready(): #Generate units and add to turn order
 			if opponents.size() > i - partyNum:
 				var enemy = $Enemies.enemyList[opponents[i - partyNum]]
 				createdUnit.callv("make_stats", enemy["stats"])
-				createdUnit.name = str(opponents[i - partyNum], String(i))
+				createdUnit.identity = str(opponents[i - partyNum])
+				createdUnit.name = str(createdUnit.identity, String(i))
 			else:
 				createdUnit.callv("make_stats", [400, 10, 5, 5])
 				createdUnit.name = str("E", String(i))

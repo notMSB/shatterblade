@@ -7,7 +7,7 @@ const UNITXSTART = 100
 const UNITYSTART = 50
 const POINTERSTART = 10
 
-const XINCREMENT = 200
+const XINCREMENT = 250
 const YINCREMENT = 105
 
 const ORDERYSTART = 10
@@ -33,8 +33,15 @@ func setup_display(unit, index):
 		display.get_node("HP").text += "[" + String(unit.shield) + "]"
 	display.get_node("Stats").text = String(unit.strength) + "/" + String(unit.defense) + "/" + String(unit.speed)
 	
+	if !unit.isPlayer:
+		display.get_node("Sprite").visible = true
+		var spritePath = str("res://src/Assets/", unit.identity, ".png")
+		var tempFile = File.new()
+		if(tempFile.file_exists(spritePath)):
+			display.get_node("Sprite").texture = load(spritePath)
+	
 	if unit.isPlayer:
-		display.position.x = UNITXSTART + 4 * XINCREMENT
+		display.position.x = UNITXSTART + 3 * XINCREMENT
 		display.position.y = UNITYSTART + YINCREMENT * playerCount
 		playerCount += 1
 	else:
