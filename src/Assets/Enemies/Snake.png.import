@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Bat.png-e96b44b028a1b15d2bd5dad54a067cf8.stex"
+path="res://.import/Snake.png-15016484cdffaabaa9bb41dde5e0bd5b.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://src/Assets/Bat.png"
-dest_files=[ "res://.import/Bat.png-e96b44b028a1b15d2bd5dad54a067cf8.stex" ]
+source_file="res://src/Assets/Enemies/Snake.png"
+dest_files=[ "res://.import/Snake.png-15016484cdffaabaa9bb41dde5e0bd5b.stex" ]
 
 [params]
 

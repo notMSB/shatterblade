@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/test.png-676ac46af049a07914f9f1d80e3c5d18.stex"
+path="res://.import/Scorpion.png-f9f6e96734d083843a94ef9c355987f8.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://src/Assets/test.png"
-dest_files=[ "res://.import/test.png-676ac46af049a07914f9f1d80e3c5d18.stex" ]
+source_file="res://src/Assets/Enemies/Scorpion.png"
+dest_files=[ "res://.import/Scorpion.png-f9f6e96734d083843a94ef9c355987f8.stex" ]
 
 [params]
 

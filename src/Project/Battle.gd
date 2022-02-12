@@ -22,7 +22,7 @@ var moveTarget
 var info
 var hits
 
-var opponents = ["Bat", "Bat"]
+var opponents = ["Bat", "Snake"]
 
 var targetsVisible = false
 
@@ -35,7 +35,7 @@ func _ready(): #Generate units and add to turn order
 		if i < partyNum: #player
 			createdUnit = Player.instance()
 			if global.storedParty.size() <= i:
-				createdUnit.make_stats(40, 5, 5, 6)
+				createdUnit.make_stats(40, 5, 5, 99)
 			else:
 				createdUnit = global.storedParty[i]
 			createdUnit.name = str("P", String(i))
@@ -46,6 +46,7 @@ func _ready(): #Generate units and add to turn order
 				createdUnit.callv("make_stats", enemy["stats"])
 				createdUnit.identity = str(opponents[i - partyNum])
 				createdUnit.name = str(createdUnit.identity, String(i))
+				if enemy.has("passives"): createdUnit.passives = enemy["passives"]
 			else:
 				createdUnit.callv("make_stats", [400, 10, 5, 5])
 				createdUnit.name = str("E", String(i))
@@ -61,6 +62,9 @@ func _ready(): #Generate units and add to turn order
 			set_intent(unit)
 		if unit.isPlayer: process_equipment(unit) #Gotta do this after the UI is set
 		i += 1
+		if unit.passives.size() > 0:
+			for passive in unit.passives:
+				$StatusManager.add_status(unit, passive, unit.passives[passive])
 	play_turn()
 
 func play_turn():
@@ -193,11 +197,14 @@ func execute_move():
 	var i = 0
 	while i < hits: #repeat for every hit, while loop enables it to be modified on the fly by move effects from outside this file
 		for target in targets: #repeat for every target
-			if chosenMove.has("damage"): #Get base damage, evaluate target status to final damage, deal said damage, update UI	
+			if chosenMove.has("damage"): #Get base damage, evaluate target status to final damage, deal said damage, update UI
 				var damageCalc =  chosenMove["damage"] + moveUser.strength - moveTarget.defense
+				var tempDamage
 				#One status check for the user's attack modifiers and another for the target's defense modifiers
-				damageCalc = $StatusManager.evaluate_statuses(moveUser, $StatusManager.statusActivations.usingAttack, [damageCalc]) 
-				damageCalc = $StatusManager.evaluate_statuses(moveTarget, $StatusManager.statusActivations.gettingHit, [damageCalc]) 
+				tempDamage = $StatusManager.evaluate_statuses(moveUser, $StatusManager.statusActivations.usingAttack, [damageCalc])
+				if tempDamage != null: damageCalc = tempDamage #Sometimes the status doesn't return anything
+				tempDamage = $StatusManager.evaluate_statuses(moveTarget, $StatusManager.statusActivations.gettingHit, [damageCalc]) 
+				if tempDamage != null: damageCalc = tempDamage
 				target.take_damage(damageCalc)
 			
 			if chosenMove.has("healing"): #Get base damage, evaluate target status to final damage, deal said damage, update UI	

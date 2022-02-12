@@ -14,6 +14,7 @@ var shield = 0
 var ui #set in battle function
 
 var statuses = []
+var passives = []
 
 var specials = ["Turtle Up"]
 

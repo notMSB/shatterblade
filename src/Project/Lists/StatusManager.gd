@@ -14,14 +14,16 @@ var statusList = {
 	"Regen": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "regenerate"), "args": ["unit", 1]},
 	
 	"Poison": {"activation": statusActivations.beforeTurn, "system": true, "effect": funcref(self, "percentage_damage"), "args": ["unit", "value", 0.001]},
-	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": [0.002, "value"]},
-	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": [-0.002, "value"]},
+	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.002, "value"]},
+	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -0.002, "value"]},
 	"Stun": {"activation": statusActivations.beforeTurn, "system": true, "effect": funcref(self, "stunned")},
 	"Provoke": {"activation": statusActivations.passive, "system": true},
 	
-	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "adjust_damage"), "args": [2]},
-	"Blocking": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "adjust_damage"), "args": [0.5]}
+	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 2]},
+	"Blocking": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.5]},
 	
+	"Venomous": {"activation": statusActivations.usingAttack, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 75]},
+	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "adjust_damage"), "args": ["damage", 1]},
 }
 
 func initialize_statuses(unit):
@@ -63,20 +65,28 @@ func find_status(unit, status):
 func evaluate_statuses(unit, type, args = []):
 	var info = 0 if args.empty() else args[0] #has to return a number even if check for on hit activation comes up empty
 	if !unit.statuses[type].empty():
-		for cond in unit.statuses[type]:
+		var list = unit.statuses[type]
+		for cond in list:
 			var statusInfo = statusList[cond["name"]]
 			if statusInfo.has("effect"):
 				if statusInfo.has("system") and statusInfo["system"]: #If using points system
 					if cond["value"] < THRESHOLD: #Points system statuses do not take effect if points value is below the threshold
 						#print("skipping")
 						continue
-				var newArgs = args
+				var newArgs = []
 				if statusInfo.has("args"):
 					for argument in statusInfo["args"]:
-						if String(argument) == "unit": newArgs.append(unit)
+						if String(argument) == "damage": newArgs.append(info)
+						elif String(argument) == "unit": newArgs.append(unit)
+						elif String(argument) == "target": newArgs.append(Battle.moveTarget)
 						elif String(argument) == "value": newArgs.append(cond["value"])
 						else: newArgs.append(argument)
 				info = statusInfo["effect"].call_funcv(newArgs)
+				if !statusInfo.has("system") and cond.has("value"): #If there is no system for subtracting turns automatically, subtract one manually after proc
+					cond["value"] -= 1
+					if cond["value"] <= 0:
+						list.erase(cond)
+		unit.update_status_ui()
 	return info
 
 
@@ -89,6 +99,7 @@ func percentage_damage(unit, value, damage):
 	unit.take_damage(unit.maxHealth * value * damage)
 	return unit.maxHealth * damage
 	
+
 func regenerate(unit, healing):
 	unit.heal(healing)
 	return unit.currentHealth

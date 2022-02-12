@@ -35,7 +35,7 @@ func setup_display(unit, index):
 	
 	if !unit.isPlayer:
 		display.get_node("Sprite").visible = true
-		var spritePath = str("res://src/Assets/", unit.identity, ".png")
+		var spritePath = str("res://src/Assets/Enemies/", unit.identity, ".png")
 		var tempFile = File.new()
 		if(tempFile.file_exists(spritePath)):
 			display.get_node("Sprite").texture = load(spritePath)
