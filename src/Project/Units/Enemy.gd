@@ -1,8 +1,7 @@
 extends "res://src/Project/Units/Unit.gd"
 
-var storedAction
-var storedTarget
 var identity
+var targetlock = false
 
 func _ready():
 	isPlayer = false

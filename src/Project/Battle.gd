@@ -3,7 +3,7 @@ extends Node2D
 export (PackedScene) var Player
 export (PackedScene) var Enemy
 
-const partyNum = 4
+const partyNum = 2
 const enemyNum = 4
 const apIncrement = 20
 const STUNCODE = -1
@@ -19,10 +19,11 @@ var chosenMove
 var moveName
 var moveUser
 var moveTarget
+var damageCalc
 var info
 var hits
 
-var opponents = ["Bat", "Snake"]
+var opponents = ["Bat", "Skeleton", "Flower", "Wolf"]
 
 var targetsVisible = false
 
@@ -35,7 +36,7 @@ func _ready(): #Generate units and add to turn order
 		if i < partyNum: #player
 			createdUnit = Player.instance()
 			if global.storedParty.size() <= i:
-				createdUnit.make_stats(40, 5, 5, 99)
+				createdUnit.make_stats(40, 5, 5, 18)
 			else:
 				createdUnit = global.storedParty[i]
 			createdUnit.name = str("P", String(i))
@@ -47,6 +48,7 @@ func _ready(): #Generate units and add to turn order
 				createdUnit.identity = str(opponents[i - partyNum])
 				createdUnit.name = str(createdUnit.identity, String(i))
 				if enemy.has("passives"): createdUnit.passives = enemy["passives"]
+				if enemy.has("specials"): createdUnit.specials = enemy["specials"]
 			else:
 				createdUnit.callv("make_stats", [400, 10, 5, 5])
 				createdUnit.name = str("E", String(i))
@@ -65,6 +67,9 @@ func _ready(): #Generate units and add to turn order
 		if unit.passives.size() > 0:
 			for passive in unit.passives:
 				$StatusManager.add_status(unit, passive, unit.passives[passive])
+	
+	generate_rewards()
+	
 	play_turn()
 
 func play_turn():
@@ -96,7 +101,9 @@ func play_turn():
 		play_turn()
 
 func set_intent(unit, target = false):
-	if !target: #Random target
+	if unit.targetlock: #Don't set a new one
+		pass
+	elif !target: #Random target
 		var targets = get_team(true, true)
 		unit.storedTarget = targets[randi() % targets.size()]
 	else:
@@ -152,7 +159,8 @@ func target_chosen(index):
 func execute_move():
 	if $BattleUI.targetsVisible:
 		$BattleUI.toggle_buttons(false)
-	$BattleUI.clear_menus()
+		$BattleUI.clear_menus()
+		moveUser.storedTarget = moveTarget
 	
 	if chosenMove.has("cost") and moveUser.isPlayer: #Subtract AP
 		if moveUser.ap < chosenMove["cost"]:
@@ -196,16 +204,18 @@ func execute_move():
 	else: hits = chosenMove["hits"]
 	var i = 0
 	while i < hits: #repeat for every hit, while loop enables it to be modified on the fly by move effects from outside this file
-		for target in targets: #repeat for every target
+		for target in targets: #repeat for every target			
+			if chosenMove.has("timing") and chosenMove["timing"] == $Moves.timings.before: #Some moves activate effects before the damage
+				activate_effect()
 			if chosenMove.has("damage"): #Get base damage, evaluate target status to final damage, deal said damage, update UI
-				var damageCalc =  chosenMove["damage"] + moveUser.strength - moveTarget.defense
+				damageCalc = chosenMove["damage"] + moveUser.strength - moveTarget.defense
 				var tempDamage
 				#One status check for the user's attack modifiers and another for the target's defense modifiers
 				tempDamage = $StatusManager.evaluate_statuses(moveUser, $StatusManager.statusActivations.usingAttack, [damageCalc])
 				if tempDamage != null: damageCalc = tempDamage #Sometimes the status doesn't return anything
 				tempDamage = $StatusManager.evaluate_statuses(moveTarget, $StatusManager.statusActivations.gettingHit, [damageCalc]) 
 				if tempDamage != null: damageCalc = tempDamage
-				target.take_damage(damageCalc)
+				damageCalc = target.take_damage(damageCalc) #Returns the amount of damage dealt (for recoil reasons). Multihit moves recalculate damage.
 			
 			if chosenMove.has("healing"): #Get base damage, evaluate target status to final damage, deal said damage, update UI	
 				target.heal(chosenMove["healing"])
@@ -219,20 +229,37 @@ func execute_move():
 					for cond in target.statuses[$StatusManager.statusActivations.passive]:
 						if cond["name"] == "Provoke" and cond["value"] >= $StatusManager.THRESHOLD:
 							set_intent(target, moveUser) #just taunt for now
-							
-			if chosenMove.has("effect") and chosenMove.has("args"):
-				var newArgs = []
-				for argument in chosenMove["args"]:
-					if typeof(argument) == TYPE_OBJECT:
-						newArgs.append(argument.call_func(newArgs[0]))
-					elif typeof(argument) == TYPE_STRING: 
-						if get_indexed(argument):
-							newArgs.append(get_indexed(argument))
-						else:
-							newArgs.append(argument)
-					else:
-						newArgs.append(argument)
-				chosenMove["effect"].call_funcv(newArgs)
+			if !chosenMove.has("timing") or chosenMove["timing"] == $Moves.timings.after: #Default timing is after damage
+				activate_effect()
 			i+=1
 		yield(get_tree().create_timer(0.5), "timeout")
 	emit_signal("turn_taken")
+
+func activate_effect():
+	if chosenMove.has("effect") and chosenMove.has("args"):
+		var newArgs = []
+		for argument in chosenMove["args"]:
+			if typeof(argument) == TYPE_OBJECT:
+				newArgs.append(argument.call_func(newArgs[0]))
+			elif typeof(argument) == TYPE_STRING: 
+				if get_indexed(argument) != null:
+					newArgs.append(get_indexed(argument))
+				else:
+					newArgs.append(argument)
+			else:
+				newArgs.append(argument)
+		chosenMove["effect"].call_funcv(newArgs)
+
+func generate_rewards():
+	var rewards = $Enemies.enemyList[opponents[randi() % opponents.size()]]["rewards"] #Random enemy from the opponents list gives rewards
+	var totalWeight = 0
+	for reward in rewards: #Need a loop for total weight
+		totalWeight += reward["weight"]
+	var rewardValue = randi() % totalWeight #Randomly pick a reward using the weight
+	for reward in rewards:
+		rewardValue -= reward["weight"]
+		if rewardValue <= 0:
+			return reward
+	
+	
+	

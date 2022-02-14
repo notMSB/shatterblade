@@ -6,17 +6,21 @@ var strength
 var defense
 var speed
 
+var storedAction
+var storedTarget
+
 var currentHealth
 var ap = 0
 var maxap = 100
-var shield = 0
+var shield = 5
 
 var ui #set in battle function
 
 var statuses = []
-var passives = []
+var hittables = [] #Keeps track of statuses that count down on hit
+var passives = {}
 
-var specials = ["Turtle Up"]
+var specials = ["Crusher Claw", "Sucker Punch"]
 
 func make_stats(hp, atk, def, spd):
 	maxHealth = hp
@@ -38,6 +42,8 @@ func take_damage(damageVal):
 	update_hp()
 	if currentHealth <= 0:
 		ui.visible = false
+		damageVal += currentHealth #Returns amount of damage actually dealt for recoil reasons
+	return damageVal
 
 func heal(healVal):
 	currentHealth = min(maxHealth, currentHealth + healVal)
