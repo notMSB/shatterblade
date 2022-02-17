@@ -4,7 +4,9 @@ export (PackedScene) var Player
 export (PackedScene) var Enemy
 
 const partyNum = 2
-const enemyNum = 4
+var enemyNum = 4
+var deadEnemies = 0
+
 const apIncrement = 20
 const STUNCODE = -1
 
@@ -23,7 +25,7 @@ var damageCalc
 var info
 var hits
 
-var opponents = ["Bat", "Skeleton", "Flower", "Wolf"]
+var opponents = []
 
 var targetsVisible = false
 
@@ -31,6 +33,9 @@ enum targetType {enemy, enemies, enemyTargets, ally, allies, user}
 
 func _ready(): #Generate units and add to turn order
 	randomize() #funny rng
+	if opponents.size() == 0: #Random formation
+		opponents = $Formations.formationList[randi() %$Formations.formationList.size()]
+		enemyNum = opponents.size()
 	for i in partyNum + enemyNum:
 		var createdUnit
 		if i < partyNum: #player
@@ -48,7 +53,9 @@ func _ready(): #Generate units and add to turn order
 				createdUnit.identity = str(opponents[i - partyNum])
 				createdUnit.name = str(createdUnit.identity, String(i))
 				if enemy.has("passives"): createdUnit.passives = enemy["passives"]
-				if enemy.has("specials"): createdUnit.specials = enemy["specials"]
+				if enemy.has("specials"): 
+					createdUnit.specials = enemy["specials"]
+					createdUnit.allMoves.append_array(createdUnit.specials)
 			else:
 				createdUnit.callv("make_stats", [400, 10, 5, 5])
 				createdUnit.name = str("E", String(i))
@@ -93,22 +100,45 @@ func play_turn():
 	else: #Enemy turn
 		moveUser = currentUnit
 		moveTarget = currentUnit.storedTarget
-		chosenMove = $Moves.moveList["Attack"]
+		chosenMove = $Moves.moveList[currentUnit.storedAction]
 		yield(execute_move(), "completed")
 		set_intent(currentUnit)
 		#currentUnit.update_info(currentUnit.storedTarget.name)
 		$StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
 
+func set_action(unit):
+	unit.storedAction = unit.allMoves[randi() % unit.allMoves.size()]
+
 func set_intent(unit, target = false):
-	if unit.targetlock: #Don't set a new one
-		pass
-	elif !target: #Random target
-		var targets = get_team(true, true)
-		unit.storedTarget = targets[randi() % targets.size()]
+	set_action(unit)
+	
+	#Target
+	var actionInfo = $Moves.moveList[unit.storedAction]
+	if actionInfo["target"] == targetType.ally:
+		$BattleUI.toggle_buttons(true, get_team(true))
+	elif actionInfo["target"] == targetType.allies:
+		unit.storedTarget = "Allies"
+	elif actionInfo["target"] == targetType.user: #Self target
+		unit.storedTarget = unit
+	elif actionInfo["target"] == targetType.enemies:
+		unit.storedTarget = "Party"
 	else:
-		unit.storedTarget = target
-	unit.update_info(unit.storedTarget.name)
+		if unit.targetlock: #Don't set a new one
+			pass
+		elif !target: #Random target
+			var targets
+			if actionInfo["target"] == targetType.enemy:
+				targets = get_team(true, true)
+			else: #Ally
+				targets = get_team(false, true)
+			unit.storedTarget = targets[randi() % targets.size()]
+		else:
+			unit.storedTarget = target
+	var targetText = unit.storedTarget
+	if typeof(targetText) != TYPE_STRING:
+		targetText = targetText.name
+	unit.update_info(str(unit.storedAction, " -> ", targetText))
 
 func get_team(gettingPlayers, onlyAlive = false):
 	var team = []
@@ -184,14 +214,14 @@ func execute_move():
 	#Set up for multi target moves
 	var targets = []
 	if chosenMove["target"] == targetType.enemies:
-		targets = get_team(false, true)
+		targets = get_team(!moveUser.isPlayer, true)
 	elif chosenMove["target"] == targetType.enemyTargets:
-		var tempTargets = get_team(false, true)
+		var tempTargets = get_team(!moveUser.isPlayer, true)
 		for unit in tempTargets:
 			if unit.storedTarget == moveTarget.storedTarget:
 				targets.append(unit)
 	elif chosenMove["target"] == targetType.allies:
-		targets = get_team(true, true)
+		targets = get_team(moveUser.isPlayer, true)
 	else: #single target
 		targets = [moveTarget] 
 	
@@ -252,14 +282,30 @@ func activate_effect():
 
 func generate_rewards():
 	var rewards = $Enemies.enemyList[opponents[randi() % opponents.size()]]["rewards"] #Random enemy from the opponents list gives rewards
-	var totalWeight = 0
-	for reward in rewards: #Need a loop for total weight
-		totalWeight += reward["weight"]
-	var rewardValue = randi() % totalWeight #Randomly pick a reward using the weight
-	for reward in rewards:
-		rewardValue -= reward["weight"]
-		if rewardValue <= 0:
-			return reward
+	var categories = [[0],[0]] #0 loot 1 learn
+	var finalRewards = []
+	
+	for reward in rewards: #Need a loop for total weight and to set up one reward for each category
+		if reward.has("loot"):
+			categories[0].append(reward)
+			categories[0][0] += reward["weight"]
+		else:
+			categories[1].append(reward)
+			categories[1][0] += reward["weight"]
+			
+	for category in categories:
+		var rewardValue = randi() % category[0]
+		if category.size() == 2: #it works
+			finalRewards.append(category[1])
+		else:
+			category.remove(0) #just having a good time out here really
+			for reward in category:
+				rewardValue -= reward["weight"]
+				if rewardValue <= 0:
+					finalRewards.append(reward)
+					break
+					
+	print(finalRewards)
 	
 	
 	

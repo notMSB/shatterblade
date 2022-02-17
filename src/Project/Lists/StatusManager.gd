@@ -127,7 +127,6 @@ func percentage_damage(unit, value, damage):
 
 func counter_attack(user, target, value):
 	target.take_damage(user.strength - target.defense + value)
-	
 
 func regenerate(unit, healing):
 	unit.heal(healing)

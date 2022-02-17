@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://src/Project/Lists/Equipment.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/Units/Enemies.gd" type="Script" id=2]
@@ -13,6 +13,7 @@
 [ext_resource path="res://src/Project/UI/UnitOrder.tscn" type="PackedScene" id=11]
 [ext_resource path="res://src/Project/UI/BattleUI.gd" type="Script" id=12]
 [ext_resource path="res://src/Project/Battle.gd" type="Script" id=13]
+[ext_resource path="res://src/Project/Lists/Formations.gd" type="Script" id=14]
 
 [sub_resource type="DynamicFont" id=1]
 size = 20
@@ -68,6 +69,7 @@ __meta__ = {
 }
 
 [node name="CommandList" type="ItemList" parent="BattleUI"]
+visible = false
 margin_left = 781.631
 margin_top = 472.78
 margin_right = 1029.63
@@ -112,6 +114,9 @@ script = ExtResource( 1 )
 
 [node name="Enemies" type="Node2D" parent="."]
 script = ExtResource( 2 )
+
+[node name="Formations" type="Node2D" parent="."]
+script = ExtResource( 14 )
 
 [connection signal="item_activated" from="BattleUI/CommandList" to="BattleUI" method="_on_CommandList_item_activated"]
 [connection signal="item_activated" from="BattleUI/Submenu" to="BattleUI" method="_on_Submenu_item_activated"]

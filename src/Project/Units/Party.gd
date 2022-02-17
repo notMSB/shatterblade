@@ -5,8 +5,11 @@ export (PackedScene) var ChoiceUI
 
 const HPMultiplier = 4
 const options = 3
-const partySize = 3
+const partySize = 2
 const INCREMENT = 400
+const POINTS_AVAILABLE = 15
+const BASE_STAT = 5
+const MOVES_AVAILABLE = 2
 
 enum targetType {enemy, enemies, enemyTargets, ally, allies, user}
 
@@ -17,9 +20,9 @@ func _ready():
 func create_options(number):
 	for i in number:
 		var createdUnit = Player.instance()
-		rando_stats(createdUnit, 20, 5)
+		rando_stats(createdUnit, POINTS_AVAILABLE, BASE_STAT)
 		rando_weapon(createdUnit)
-		rando_moves(createdUnit, 2)
+		rando_moves(createdUnit, MOVES_AVAILABLE)
 		
 		$TempParty.add_child(createdUnit)
 		make_info(createdUnit, i)
@@ -45,7 +48,7 @@ func choose(index):
 		create_options(options)
 	else:
 		print(global.storedParty)
-		return get_tree().change_scene("res://src/Battle.tscn")
+		return get_tree().change_scene("res://src/Project/Battle.tscn")
 
 func random_item(list):
 	return list[randi() % list.size()]
