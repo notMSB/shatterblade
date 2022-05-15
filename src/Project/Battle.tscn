@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=21 format=2]
 
 [ext_resource path="res://src/Project/Lists/Equipment.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/Units/Enemies.gd" type="Script" id=2]
@@ -10,21 +10,23 @@
 [ext_resource path="res://src/Project/UI/UnitUI.tscn" type="PackedScene" id=8]
 [ext_resource path="res://src/Project/Units/Enemy.tscn" type="PackedScene" id=9]
 [ext_resource path="res://src/Project/Units/Player.tscn" type="PackedScene" id=10]
-[ext_resource path="res://src/Project/UI/UnitOrder.tscn" type="PackedScene" id=11]
+[ext_resource path="res://src/Project/UI/PlayerMove.tscn" type="PackedScene" id=11]
 [ext_resource path="res://src/Project/UI/BattleUI.gd" type="Script" id=12]
 [ext_resource path="res://src/Project/Battle.gd" type="Script" id=13]
 [ext_resource path="res://src/Project/Lists/Formations.gd" type="Script" id=14]
+[ext_resource path="res://src/Assets/Enemies/test.png" type="Texture" id=15]
+[ext_resource path="res://src/Project/UI/PlayerProfile.tscn" type="PackedScene" id=16]
+[ext_resource path="res://src/Project/UI/ResourceTracker.tscn" type="PackedScene" id=17]
 
 [sub_resource type="DynamicFont" id=1]
 size = 20
 font_data = ExtResource( 4 )
 
 [sub_resource type="DynamicFont" id=2]
-size = 25
+size = 20
 font_data = ExtResource( 4 )
 
-[sub_resource type="DynamicFont" id=3]
-size = 30
+[sub_resource type="DynamicFont" id=4]
 font_data = ExtResource( 4 )
 
 [node name="Battle" type="Node2D"]
@@ -32,22 +34,49 @@ script = ExtResource( 13 )
 Player = ExtResource( 10 )
 Enemy = ExtResource( 9 )
 
-[node name="BattleUI" type="Node2D" parent="."]
-script = ExtResource( 12 )
-UnitUI = ExtResource( 8 )
-UnitOrder = ExtResource( 11 )
-
-[node name="ColorRect" type="ColorRect" parent="BattleUI"]
-margin_left = 1.12247
-margin_top = -3.77977
-margin_right = 1033.12
-margin_bottom = 599.22
+[node name="FullBG" type="ColorRect" parent="."]
+margin_left = 1.0
+margin_top = -5.0
+margin_right = 1284.0
+margin_bottom = 727.0
 color = Color( 0.168627, 0.141176, 0.141176, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="BattleBG" type="ColorRect" parent="."]
+modulate = Color( 0.733333, 1, 0, 1 )
+margin_left = 1.0
+margin_top = 72.0
+margin_right = 1280.0
+margin_bottom = 560.0
+color = Color( 0.168627, 0.141176, 0.141176, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="GoButton" type="Button" parent="."]
+modulate = Color( 0.415686, 0, 0, 1 )
+margin_left = 587.376
+margin_top = 484.149
+margin_right = 695.376
+margin_bottom = 552.149
+text = "GO"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BattleUI" type="Node2D" parent="."]
+script = ExtResource( 12 )
+UnitUI = ExtResource( 8 )
+PlayerProfile = ExtResource( 16 )
+PlayerMove = ExtResource( 11 )
+ResourceTracker = ExtResource( 17 )
+
+[node name="DisplayHolder" type="Node2D" parent="BattleUI"]
+
 [node name="Pointer" type="Label" parent="BattleUI"]
+visible = false
 margin_left = 2.51984
 margin_top = 35.744
 margin_right = 44.5198
@@ -59,41 +88,58 @@ __meta__ = {
 }
 
 [node name="Description" type="Label" parent="BattleUI"]
-margin_top = 476.0
-margin_right = 493.0
-margin_bottom = 599.0
+margin_left = 948.0
+margin_top = 427.0
+margin_right = 1277.0
+margin_bottom = 560.0
 custom_fonts/font = SubResource( 2 )
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CommandList" type="ItemList" parent="BattleUI"]
-visible = false
-margin_left = 781.631
-margin_top = 472.78
-margin_right = 1029.63
-margin_bottom = 600.78
-custom_fonts/font = SubResource( 3 )
-max_columns = 4
-same_column_width = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Submenu" type="ItemList" parent="BattleUI"]
-margin_left = 518.74
-margin_top = 473.0
-margin_right = 782.74
-margin_bottom = 600.0
-custom_fonts/font = SubResource( 3 )
-max_columns = 4
-same_column_width = true
+[node name="ColorRect" type="ColorRect" parent="BattleUI/Description"]
+modulate = Color( 0, 0, 0, 1 )
+show_behind_parent = true
+margin_right = 335.355
+margin_bottom = 132.485
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Order" type="Node2D" parent="BattleUI"]
+
+[node name="TargetProfile" type="Node2D" parent="BattleUI"]
+visible = false
+position = Vector2( 913.046, 606.523 )
+
+[node name="Sprite" type="Sprite" parent="BattleUI/TargetProfile"]
+position = Vector2( 48.0833, 48.0833 )
+texture = ExtResource( 15 )
+
+[node name="Name" type="Label" parent="BattleUI/TargetProfile"]
+margin_left = -0.00012207
+margin_top = -16.6527
+margin_right = 94.9999
+margin_bottom = 3.34729
+custom_fonts/font = SubResource( 4 )
+text = "Name"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Stats" type="Label" parent="BattleUI/TargetProfile"]
+margin_left = -60.5005
+margin_top = 99.4008
+margin_right = 167.5
+margin_bottom = 119.401
+custom_fonts/font = SubResource( 4 )
+text = "MHP: X   P: X   S: X"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Units" type="Node2D" parent="."]
 
@@ -118,5 +164,4 @@ script = ExtResource( 2 )
 [node name="Formations" type="Node2D" parent="."]
 script = ExtResource( 14 )
 
-[connection signal="item_activated" from="BattleUI/CommandList" to="BattleUI" method="_on_CommandList_item_activated"]
-[connection signal="item_activated" from="BattleUI/Submenu" to="BattleUI" method="_on_Submenu_item_activated"]
+[connection signal="pressed" from="GoButton" to="." method="go_button_press"]

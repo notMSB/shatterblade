@@ -5,8 +5,9 @@ onready var Battle = get_node("../../")
 var isPlayer
 var maxHealth
 var strength
-var defense
 var speed
+
+var defense = 0
 
 var storedAction
 var storedTarget
@@ -22,13 +23,12 @@ var statuses = []
 var hittables = [] #Keeps track of statuses that count down on hit
 var passives = {}
 
-var specials = []
+var specials = ["Poison Strike", "Turtle Up", "Special Boy"]
 
-func make_stats(hp, atk, def, spd):
+func make_stats(hp, atk, spd):
 	maxHealth = hp
 	currentHealth = maxHealth
 	strength = atk
-	defense = def
 	speed = spd
 
 func take_damage(damageVal):
@@ -57,25 +57,34 @@ func heal(healVal):
 	update_hp()
 
 func update_hp():
-	ui.get_node("HP").text = String(currentHealth)
-	if shield > 0:
-		ui.get_node("HP").text += "[" + String(shield) + "]"
+	if ui != null:
+		ui.get_node("HPBar").value = currentHealth
+		ui.get_node("HPBar/Text").text = str(currentHealth, "/", maxHealth)
+		if shield > 0:
+			ui.get_node("HP").text += "[" + String(shield) + "]"
 
 func update_ap(change):
 	ap = min(ap + change, maxap)
-	ui.get_node("Info").text = String(ap)
+	if ui.get_node_or_null("ResourceTracker") != null:
+		var bar = ui.get_node("ResourceTracker/ResourceBar")
+		bar.value = ap
+		bar.get_child(0).text = str(ap, "/", 100)
 
 func update_info(text):
-	ui.get_node("Info").text = String(text)
+	if ui.get_node_or_null("Info") != null:
+		ui.get_node("Info").text = String(text)
 
 func update_status_ui():
 	var text = ""
 	for category in statuses:
+		var i = 0
 		for status in category:
 			#print(status["name"][0])
+			if i > 0: text += ", "
 			text += status["name"][0] + status["name"][1]
 			if status.has("value"):
 				text += "[" + String(status["value"]) + "]"
-			text += "\n"
+			i+=1
 	if text == "": text = "[]"
-	ui.get_node("Statuses").text = text
+	if ui.get_node_or_null("Statuses") != null:
+		ui.get_node("Statuses").text = text

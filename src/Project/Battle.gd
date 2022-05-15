@@ -3,7 +3,7 @@ extends Node2D
 export (PackedScene) var Player
 export (PackedScene) var Enemy
 
-const partyNum = 2
+const partyNum = 4
 var enemyNum = 4
 var deadEnemies = 0
 
@@ -20,16 +20,19 @@ var menuNode
 var chosenMove
 var moveName
 var moveUser
+var usedMoveBox
 var moveTarget
 var damageCalc
 var info
 var hits
+var executionOrder = [] #box, move, user, target
 
 var opponents = []
 
 var targetsVisible = false
 
 enum targetType {enemy, enemies, enemyTargets, ally, allies, user}
+enum moveType {basic, special, magic, item}
 
 func _ready(): #Generate units and add to turn order
 	randomize() #funny rng
@@ -41,7 +44,7 @@ func _ready(): #Generate units and add to turn order
 		if i < partyNum: #player
 			createdUnit = Player.instance()
 			if global.storedParty.size() <= i:
-				createdUnit.make_stats(40, 5, 5, 18)
+				createdUnit.make_stats(40, 5, 18)
 			else:
 				createdUnit = global.storedParty[i]
 			createdUnit.name = str("P", String(i))
@@ -57,15 +60,12 @@ func _ready(): #Generate units and add to turn order
 					createdUnit.specials = enemy["specials"]
 					createdUnit.allMoves.append_array(createdUnit.specials)
 			else:
-				createdUnit.callv("make_stats", [400, 10, 5, 5])
+				createdUnit.callv("make_stats", [400, 10, 5])
 				createdUnit.name = str("E", String(i))
 		$StatusManager.initialize_statuses(createdUnit)
 		$Units.add_child(createdUnit)
-	var units = $Units.get_children()
-	units.sort_custom(self, 'sort_battlers')
 	var i = 0
-	for unit in units:
-		unit.raise()
+	for unit in $Units.get_children():
 		$BattleUI.setup_display(unit, i)
 		if !unit.isPlayer: #Set enemy intents
 			set_intent(unit)
@@ -80,31 +80,31 @@ func _ready(): #Generate units and add to turn order
 	play_turn()
 
 func play_turn():
-	if !chosenMove or !chosenMove.has("quick"): turnIndex = (turnIndex + 1) % $Units.get_child_count() #Advance to next unit if a non-quick action is used
+	turnIndex = (turnIndex + 1) % $Units.get_child_count() #Advance to next unit
 	currentUnit = $Units.get_child(turnIndex)
 	
-	if !chosenMove or !chosenMove.has("quick"): 
-		info = $StatusManager.evaluate_statuses(currentUnit, $StatusManager.statusActivations.beforeTurn)
-		$StatusManager.countdown_turns(currentUnit, true)
-	
-	$BattleUI.move_pointer(turnIndex)
-	if currentUnit.currentHealth <= 0 or info == STUNCODE: #Dead or stunned
-		$StatusManager.countdown_turns(currentUnit, false)
-		play_turn()
-	elif currentUnit.isPlayer: #Player turn
-		if !chosenMove or !chosenMove.has("quick"): currentUnit.update_ap(apIncrement)
-		$BattleUI.open_commands()
+	if turnIndex == 0: #Start of turn, take player actions
+		for unit in $Units.get_children():
+			$StatusManager.countdown_turns(unit, true)
+			if unit.isPlayer:
+				unit.update_ap(apIncrement)
+				for display in $BattleUI/DisplayHolder.get_children():
+					if display.get_node_or_null("MoveBoxes"):
+						$BattleUI.toggle_moveboxes(display.get_node("MoveBoxes"), true)
 		yield(self, "turn_taken")
+	if currentUnit.isPlayer: #skip along
 		$StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
 	else: #Enemy turn
-		moveUser = currentUnit
-		moveTarget = currentUnit.storedTarget
-		chosenMove = $Moves.moveList[currentUnit.storedAction]
-		yield(execute_move(), "completed")
-		set_intent(currentUnit)
-		#currentUnit.update_info(currentUnit.storedTarget.name)
-		$StatusManager.countdown_turns(currentUnit, false)
+		if currentUnit.currentHealth > 0: #if you're dead stop doing moves
+			moveUser = currentUnit
+			moveTarget = currentUnit.storedTarget
+			moveName = currentUnit.storedAction
+			chosenMove = $Moves.moveList[currentUnit.storedAction]
+			yield(execute_move(), "completed")
+			set_intent(currentUnit)
+			#currentUnit.update_info(currentUnit.storedTarget.name)
+			$StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
 
 func set_action(unit):
@@ -115,6 +115,11 @@ func set_intent(unit, target = false):
 	
 	#Target
 	var actionInfo = $Moves.moveList[unit.storedAction]
+	var actionDamage
+	if actionInfo.has("damage"):
+		actionDamage = actionInfo["damage"] + unit.strength
+		if actionInfo.has("hits"):
+			actionDamage = str(actionDamage, "x", actionInfo["hits"])
 	if actionInfo["target"] == targetType.ally:
 		$BattleUI.toggle_buttons(true, get_team(true))
 	elif actionInfo["target"] == targetType.allies:
@@ -138,6 +143,7 @@ func set_intent(unit, target = false):
 	var targetText = unit.storedTarget
 	if typeof(targetText) != TYPE_STRING:
 		targetText = targetText.name
+	if actionDamage: targetText = str(targetText, " (", actionDamage, ")")
 	unit.update_info(str(unit.storedAction, " -> ", targetText))
 
 func get_team(gettingPlayers, onlyAlive = false):
@@ -161,6 +167,8 @@ func process_equipment(unit):
 				unit.speed += equip["speed"]
 			if equip.has("defense"):
 				unit.defense += equip["defense"]
+			if equip.has("shield"):
+				unit.shield += equip["shield"]
 			if equip.has("special"):
 				unit.specials.append(equip["special"])
 			if equip.has("spell"):
@@ -168,8 +176,9 @@ func process_equipment(unit):
 			if equip.has("status"):
 				$StatusManager.add_status(unit, equip["status"])
 
-func evaluate_targets(move, user):
-	chosenMove = menuNode.moveList[move]
+func evaluate_targets(move, user, box):
+	usedMoveBox = box
+	chosenMove = $Moves.moveList[move]
 	moveName = move
 	$BattleUI.set_description(move, chosenMove)
 	moveUser = user
@@ -183,33 +192,56 @@ func evaluate_targets(move, user):
 
 func target_chosen(index):
 	moveTarget = $Units.get_child(index)
-	execute_move()
+	executionOrder.append([usedMoveBox, chosenMove, moveUser, moveTarget])
+	usedMoveBox.usageOrder = executionOrder.size()
+	if !chosenMove.has("quick"):
+		$BattleUI.toggle_moveboxes(usedMoveBox.get_parent(), false, true)
+	$BattleUI.choose_movebox(usedMoveBox, moveUser, moveTarget)
+	#print(usedMoveBox.usageOrder)
+	$BattleUI.toggle_buttons(false)
+	$GoButton.visible = true
+	#$BattleUI.clear_menus()
+
+func go_button_press():
+	#print(executionOrder)
+	$BattleUI.clear_menus()
+	$GoButton.visible = false
+	for moveData in executionOrder: #box, move, user, target
+		chosenMove = moveData[1]
+		moveUser = moveData[2]
+		moveTarget = moveData[3]
+		yield(execute_move(), "completed")
+	executionOrder.clear()
+	emit_signal("turn_taken")
+
+func cut_from_order(box):
+	var userCommitted = false
+	var foundAction
+	for action in executionOrder: #box, move, user, target
+		if foundAction:
+			action[0].usageOrder -= 1 #Update the order that happens after the cut action
+			action[0].updateInfo()
+		elif action[0] == box:
+			foundAction = action
+		if action[2] == box.user and !action[1].has("quick"): #If a non-quick is committed and a quick is cut, this bool has the quick turn off completely
+			userCommitted = true
+	executionOrder.erase(foundAction) #Erased from order
 	
-	
+	if foundAction[1].has("cost"): #Refund resources spent from that action
+		foundAction[2].update_ap(foundAction[1]["cost"])
+	#Restoring UI involving quick actions: If a quick is cut, toggle only that. For non-quick, toggle everything on except for committed quicks
+	if !foundAction[1].has("quick"): #non-quick case, cutting a committed action while retaining any chosen quicks
+		box.buttonMode = true #Needed to properly reset it in the toggle 
+		$BattleUI.toggle_moveboxes(foundAction[0].get_parent(), true, true)
+	else: #quick case
+		$BattleUI.toggle_single(box, !userCommitted)  #If the user is already committed (non-quick), disable the box. Otherwise enable it.
+		if userCommitted: box.buttonMode = true #Needed or else the cut box stays disabled for the turn 
+		$BattleUI.toggle_moveboxes(foundAction[0].get_parent(), !userCommitted, true) #Checks to re-enable other actions due to earlier refund
+		
+
 func execute_move():
-	if $BattleUI.targetsVisible:
-		$BattleUI.toggle_buttons(false)
-		$BattleUI.clear_menus()
+	if moveUser.isPlayer:
 		moveUser.storedTarget = moveTarget
-	
-	if chosenMove.has("cost") and moveUser.isPlayer: #Subtract AP
-		if moveUser.ap < chosenMove["cost"]:
-			emit_signal("turn_taken")
-			return
-		else:
-			moveUser.update_ap(chosenMove["cost"] * -1)
-	
-	if chosenMove.has("level") and moveUser.isPlayer: #Subtract spell charge
-		if moveUser.charges[chosenMove["level"]] <= 0:
-			emit_signal("turn_taken")
-			return
-		else:
-			moveUser.charges[chosenMove["level"]] -= 1
-	
-	if menuNode == $Items: #Subtract item and erase if 0
-		moveUser.items[moveName] -= 1
-		if moveUser.items[moveName] <= 0:
-			moveUser.items.erase(moveName)
 	
 	#Set up for multi target moves
 	var targets = []
@@ -234,7 +266,7 @@ func execute_move():
 	else: hits = chosenMove["hits"]
 	var i = 0
 	while i < hits: #repeat for every hit, while loop enables it to be modified on the fly by move effects from outside this file
-		for target in targets: #repeat for every target			
+		for target in targets: #repeat for every target	
 			if chosenMove.has("timing") and chosenMove["timing"] == $Moves.timings.before: #Some moves activate effects before the damage
 				activate_effect()
 			if chosenMove.has("damage"): #Get base damage, evaluate target status to final damage, deal said damage, update UI
@@ -261,9 +293,8 @@ func execute_move():
 							set_intent(target, moveUser) #just taunt for now
 			if !chosenMove.has("timing") or chosenMove["timing"] == $Moves.timings.after: #Default timing is after damage
 				activate_effect()
-			i+=1
-		yield(get_tree().create_timer(0.5), "timeout")
-	emit_signal("turn_taken")
+		yield(get_tree().create_timer(.5), "timeout")
+		i+=1
 
 func activate_effect():
 	if chosenMove.has("effect") and chosenMove.has("args"):
@@ -305,7 +336,7 @@ func generate_rewards():
 					finalRewards.append(reward)
 					break
 					
-	print(finalRewards)
+	#print(finalRewards)
 	
 	
 	

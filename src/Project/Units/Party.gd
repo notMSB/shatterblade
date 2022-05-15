@@ -5,7 +5,7 @@ export (PackedScene) var ChoiceUI
 
 const HPMultiplier = 4
 const options = 3
-const partySize = 2
+const partySize = 4
 const INCREMENT = 400
 const POINTS_AVAILABLE = 15
 const BASE_STAT = 5
@@ -47,7 +47,7 @@ func choose(index):
 	if global.storedParty.size() < partySize:
 		create_options(options)
 	else:
-		print(global.storedParty)
+		print(str("Party: ", global.storedParty))
 		return get_tree().change_scene("res://src/Project/Battle.tscn")
 
 func random_item(list):

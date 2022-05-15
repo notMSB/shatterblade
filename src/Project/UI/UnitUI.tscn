@@ -1,11 +1,14 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://src/Project/UI/UnitUI.gd" type="Script" id=2]
 [ext_resource path="res://src/Assets/Enemies/test.png" type="Texture" id=3]
 
-
 [sub_resource type="DynamicFont" id=1]
+size = 20
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=2]
 size = 20
 font_data = ExtResource( 1 )
 
@@ -14,21 +17,20 @@ script = ExtResource( 2 )
 
 [node name="Button" type="Button" parent="."]
 visible = false
-margin_left = -36.0
+margin_left = 1.0
 margin_top = -1.0
-margin_right = 212.0
-margin_bottom = 105.0
+margin_right = 98.0
+margin_bottom = 94.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Sprite" type="Sprite" parent="."]
-visible = false
-position = Vector2( 113, 0 )
+position = Vector2( 47.8972, 47.1434 )
 texture = ExtResource( 3 )
-centered = false
 
 [node name="Name" type="Label" parent="."]
+visible = false
 margin_right = 40.0
 margin_bottom = 14.0
 custom_fonts/font = SubResource( 1 )
@@ -38,6 +40,7 @@ __meta__ = {
 }
 
 [node name="HP" type="Label" parent="."]
+visible = false
 margin_top = 21.0
 margin_right = 95.0
 margin_bottom = 80.0
@@ -48,6 +51,7 @@ __meta__ = {
 }
 
 [node name="Stats" type="Label" parent="."]
+visible = false
 margin_left = 8.32445
 margin_top = 36.6482
 margin_right = 103.324
@@ -59,25 +63,45 @@ __meta__ = {
 }
 
 [node name="Info" type="Label" parent="."]
-margin_left = 8.32445
-margin_top = 56.5679
-margin_right = 103.324
-margin_bottom = 115.568
+margin_left = -59.0
+margin_top = -45.0
+margin_right = 146.0
+margin_bottom = 14.0
 custom_fonts/font = SubResource( 1 )
 text = "0"
+align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Statuses" type="Label" parent="."]
-margin_left = -46.7029
-margin_top = 75.9184
-margin_right = 78.2971
-margin_bottom = 276.918
+margin_left = -15.2739
+margin_top = 98.3677
+margin_right = 109.726
+margin_bottom = 299.367
 custom_fonts/font = SubResource( 1 )
 text = "[]"
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="HPBar" type="ProgressBar" parent="."]
+margin_left = -49.4905
+margin_top = 123.878
+margin_right = 147.51
+margin_bottom = 161.878
+percent_visible = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Text" type="Label" parent="HPBar"]
+margin_right = 196.0
+margin_bottom = 36.0
+custom_fonts/font = SubResource( 2 )
+text = "1/1"
+align = 1
+valign = 1
+
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]

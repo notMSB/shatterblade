@@ -2,6 +2,5 @@
 
 [ext_resource path="res://src/Project/Units/Unit.gd" type="Script" id=1]
 
-
 [node name="Unit" type="Node2D"]
 script = ExtResource( 1 )
