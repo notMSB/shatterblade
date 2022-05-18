@@ -8,8 +8,8 @@ enum timings {before, after}
 func _ready():
 	targets = Battle.targetType
 	moveList = {
-	"Attack": {"target": targets.enemy, "damage": 5, "effect": funcref(self, "restore_ap"), "args": ["moveUser", 10]},
-	"Defend": {"target": targets.user, "status": "Blocking", "value": 1, "effect": funcref(self, "restore_ap"), "args": ["moveUser", 10]},
+	"Attack": {"target": targets.enemy, "damage": 5, "args": ["moveUser", 10]},
+	"Defend": {"target": targets.user, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5], "description": "Adds 5 shield"},
 	
 	"Double Slash": {"target": targets.enemy, "damage": 4, "cost": 20, "hits": 2},
 	"Pierce": {"target": targets.enemyTargets, "damage": 4, "cost": 25},
@@ -43,14 +43,20 @@ func _ready():
 	"Taunt": {"target": targets.enemy, "status": "Provoke", "value": 100, "cost": 20, "quick": true, "weight": 2},
 	"Protect": {"target": targets.ally, "effect": funcref(self, "switch_intents"), "args": ["moveTarget", "moveUser"], "weight": 2},
 	"Hide": {"target": targets.ally, "effect": funcref(self, "switch_intents"), "args": ["moveUser", "moveTarget"], "weight": 2},
+	
+	"Bonemerang": {"target": targets.enemy, "damage": 3, "cost": 15, "quick": true},
+	"Venoshock": {"target": targets.enemy, "description": "Inflict 100 poison on an enemy. Shield 1 for every 20 poison that enemy has."},
+	"Restore": {"target": targets.ally, "description": "Remove 100 from all statuses of target ally."},
+	"Eye Rake": {"target": targets.enemy, "description": "Inflict 100 stun if enemy is targeting the user."}
 }
 
 #Effects
 func get_enemy_targeters(unit):
 	var targeters = []
 	for enemy in Battle.get_team(false):
-		if enemy.storedTarget == unit:
-			targeters.append(enemy)
+		if typeof(enemy.storedTarget) != TYPE_STRING:
+			if enemy.storedTarget == unit:
+				targeters.append(enemy)
 	return targeters
 
 func switch_intents(oldTarget, newTarget):
@@ -59,7 +65,7 @@ func switch_intents(oldTarget, newTarget):
 		Battle.set_intent(enemy, newTarget)
 
 func restore_ap(unit, gain):
-	if unit.isPlayer: unit.update_ap(gain)
+	if unit.isPlayer: unit.update_resource(gain, Battle.moveType.special, true)
 
 func give_status(unit, status, value = 0, stack = null): #for when a status goes on someone besides the target
 	var StatusManager = get_node("../StatusManager")

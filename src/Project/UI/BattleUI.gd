@@ -5,15 +5,13 @@ export (PackedScene) var PlayerProfile
 export (PackedScene) var PlayerMove
 export (PackedScene) var ResourceTracker
 
-const UNITXSTART = 100
-const UNITYSTART = 100
+const UNITYSTART = 200
 
 const PLAYERXSTART = 600
 const PLAYERYSTART = 600
 const PLAYERINCREMENT = 80
 
-const XINCREMENT = 250
-const YINCREMENT = 265
+const XINCREMENT = 300
 
 onready var Battle = get_parent()
 onready var Moves = get_node("../Moves")
@@ -27,7 +25,7 @@ var enemyCount = 0
 
 var isSubmenu = false
 
-func setup_display(unit, _index):
+func setup_display(unit, totalEnemies):
 	var display
 	if unit.isPlayer:
 		display = PlayerProfile.instance()
@@ -56,7 +54,7 @@ func setup_display(unit, _index):
 				moveBox.move = unit.specials[i - DefaultMoves]
 				moveBox.moveType = Battle.moveType.special
 				if Moves.moveList[moveBox.move].has("cost"):
-					moveBox.cost = Moves.moveList[moveBox.move]["cost"]
+					moveBox.resValue = Moves.moveList[moveBox.move]["cost"]
 				moveBox.position.x = xPos - PLAYERINCREMENT*i if playerCount % 2 == 0 else xPos + PLAYERINCREMENT*i
 			moveBox.get_node("Name").text = moveBox.move
 			var button = moveBox.get_node("Button")
@@ -85,11 +83,8 @@ func setup_display(unit, _index):
 		#print(str(unit.name, sprPos))
 		
 		#position enemy
-		display.position.x = UNITXSTART + ((enemyCount % 2 + 2.5) * XINCREMENT)
-		if enemyCount > 1:
-			display.position.y = UNITYSTART + YINCREMENT
-		else:
-			display.position.y = UNITYSTART
+		display.position.x = (XINCREMENT*2.5 - XINCREMENT*0.5 * totalEnemies) + (enemyCount * XINCREMENT)
+		display.position.y = UNITYSTART
 		enemyCount += 1
 	$DisplayHolder.add_child(display)
 	unit.ui = display
@@ -104,24 +99,23 @@ func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false): #keepMove
 
 func toggle_single(box, toggle): #true for purple false for black
 	if toggle:
-		if box.get_node("../../ResourceTracker/ResourceBar").value < box.cost: #expensive box
+		if box.get_node("../../ResourceTracker/ResourceBar").value < box.resValue: #Check the resources before enabling a box
 			box.get_node("ColorRect").color = Color(.53,.3,.3,1)
 			toggle = false #needed to disable the button
-		else: 
+		else: #box can be enabled
 			box.get_node("ColorRect").color = Color(.5,.1,.5,1)
 			box.buttonMode = true
-	else:
+	else: #completely disable a box
 		box.get_node("ColorRect").color = Color(0,0,0,1)
 	box.get_node("Button").visible = toggle
 	box.get_node("Info").text = ""
 
-func choose_movebox(box, user = null, target = null): #orange
+func choose_movebox(box, user = null, target = null): #happens when move and target are selected, turns movebox orange
 	box.get_node("ColorRect").color = Color(1,.6,.2,1)
 	box.buttonMode = false
 	box.get_node("Button").visible = true
-	if user and box.cost > 0: 
-		user.update_ap(-1*box.cost)
-		toggle_moveboxes(box.get_parent(), true, true)
+	if user and box.resValue > 0:
+		user.update_resource(box.resValue, Battle.moveType.special, false) #Subtract the resource
 	if target: box.updateInfo(target.name)
 
 func set_trackers(display, boxes):

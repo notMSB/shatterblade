@@ -4,7 +4,7 @@ onready var Battle = $"../../../../../"
 var user
 var move = "test"
 var moveType
-var cost = 0
+var resValue = 0
 var usageOrder
 var buttonMode = true
 var savedTargetName = ""

@@ -27,7 +27,7 @@ var info
 var hits
 var executionOrder = [] #box, move, user, target
 
-var opponents = []
+var opponents = ["Rat", "Rat", "Rat", "Rat"]
 
 var targetsVisible = false
 
@@ -64,13 +64,11 @@ func _ready(): #Generate units and add to turn order
 				createdUnit.name = str("E", String(i))
 		$StatusManager.initialize_statuses(createdUnit)
 		$Units.add_child(createdUnit)
-	var i = 0
 	for unit in $Units.get_children():
-		$BattleUI.setup_display(unit, i)
+		$BattleUI.setup_display(unit, opponents.size())
 		if !unit.isPlayer: #Set enemy intents
 			set_intent(unit)
 		if unit.isPlayer: process_equipment(unit) #Gotta do this after the UI is set
-		i += 1
 		if unit.passives.size() > 0:
 			for passive in unit.passives:
 				$StatusManager.add_status(unit, passive, unit.passives[passive])
@@ -87,7 +85,7 @@ func play_turn():
 		for unit in $Units.get_children():
 			$StatusManager.countdown_turns(unit, true)
 			if unit.isPlayer:
-				unit.update_ap(apIncrement)
+				unit.update_resource(apIncrement, moveType.special, true)
 				for display in $BattleUI/DisplayHolder.get_children():
 					if display.get_node_or_null("MoveBoxes"):
 						$BattleUI.toggle_moveboxes(display.get_node("MoveBoxes"), true)
@@ -194,13 +192,10 @@ func target_chosen(index):
 	moveTarget = $Units.get_child(index)
 	executionOrder.append([usedMoveBox, chosenMove, moveUser, moveTarget])
 	usedMoveBox.usageOrder = executionOrder.size()
-	if !chosenMove.has("quick"):
-		$BattleUI.toggle_moveboxes(usedMoveBox.get_parent(), false, true)
-	$BattleUI.choose_movebox(usedMoveBox, moveUser, moveTarget)
-	#print(usedMoveBox.usageOrder)
+	$BattleUI.choose_movebox(usedMoveBox, moveUser, moveTarget) #Choosing a box subtracts a resource, run a toggle afterwards
+	$BattleUI.toggle_moveboxes(usedMoveBox.get_parent(), chosenMove.has("quick"), true) #If quick, check the resources. Otherwise, turn off boxes as appropriate
 	$BattleUI.toggle_buttons(false)
 	$GoButton.visible = true
-	#$BattleUI.clear_menus()
 
 func go_button_press():
 	#print(executionOrder)
@@ -228,7 +223,7 @@ func cut_from_order(box):
 	executionOrder.erase(foundAction) #Erased from order
 	
 	if foundAction[1].has("cost"): #Refund resources spent from that action
-		foundAction[2].update_ap(foundAction[1]["cost"])
+		foundAction[2].update_resource(foundAction[1]["cost"], moveType.special, true)
 	#Restoring UI involving quick actions: If a quick is cut, toggle only that. For non-quick, toggle everything on except for committed quicks
 	if !foundAction[1].has("quick"): #non-quick case, cutting a committed action while retaining any chosen quicks
 		box.buttonMode = true #Needed to properly reset it in the toggle 
@@ -300,16 +295,16 @@ func activate_effect():
 	if chosenMove.has("effect") and chosenMove.has("args"):
 		var newArgs = []
 		for argument in chosenMove["args"]:
-			if typeof(argument) == TYPE_OBJECT:
-				newArgs.append(argument.call_func(newArgs[0]))
+			if typeof(argument) == TYPE_OBJECT: #Functions are objects
+				newArgs.append(argument.call_func(newArgs[0])) #Run the function on a previous arg, then append result as an arg
 			elif typeof(argument) == TYPE_STRING: 
-				if get_indexed(argument) != null:
+				if get_indexed(argument) != null: #Getting a variable from the Battle scene
 					newArgs.append(get_indexed(argument))
-				else:
+				else: #The arg is just a string
 					newArgs.append(argument)
-			else:
+			else: #an int
 				newArgs.append(argument)
-		chosenMove["effect"].call_funcv(newArgs)
+		chosenMove["effect"].call_funcv(newArgs) #Run the effect function on these arguments
 
 func generate_rewards():
 	var rewards = $Enemies.enemyList[opponents[randi() % opponents.size()]]["rewards"] #Random enemy from the opponents list gives rewards

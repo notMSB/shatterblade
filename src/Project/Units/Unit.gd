@@ -60,15 +60,12 @@ func update_hp():
 	if ui != null:
 		ui.get_node("HPBar").value = currentHealth
 		ui.get_node("HPBar/Text").text = str(currentHealth, "/", maxHealth)
-		if shield > 0:
+		if isPlayer:
+			ui.get_node("Shield").text = "[" + String(shield) + "]"
+		else:
 			ui.get_node("HP").text += "[" + String(shield) + "]"
 
-func update_ap(change):
-	ap = min(ap + change, maxap)
-	if ui.get_node_or_null("ResourceTracker") != null:
-		var bar = ui.get_node("ResourceTracker/ResourceBar")
-		bar.value = ap
-		bar.get_child(0).text = str(ap, "/", 100)
+
 
 func update_info(text):
 	if ui.get_node_or_null("Info") != null:

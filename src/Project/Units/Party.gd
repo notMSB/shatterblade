@@ -14,6 +14,7 @@ const MOVES_AVAILABLE = 2
 enum targetType {enemy, enemies, enemyTargets, ally, allies, user}
 
 func _ready():
+	$Crafting.test()
 	randomize()
 	create_options(options)
 

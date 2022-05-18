@@ -86,6 +86,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Shield" type="Label" parent="."]
+margin_left = -36.2505
+margin_top = 0.188301
+margin_right = 3.74953
+margin_bottom = 24.1883
+custom_fonts/font = SubResource( 1 )
+text = "Test"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Statuses" type="Label" parent="."]
 margin_left = -61.5232
 margin_top = -21.0396
