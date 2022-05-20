@@ -23,7 +23,7 @@ var statuses = []
 var hittables = [] #Keeps track of statuses that count down on hit
 var passives = {}
 
-var specials = ["Poison Strike", "Turtle Up", "Special Boy"]
+var moves = ["Channel Power", "Poison Strike", "Turtle Up", "Venoshock", "Plague", "Taunt"]
 
 func make_stats(hp, atk, spd):
 	maxHealth = hp
@@ -65,7 +65,10 @@ func update_hp():
 		else:
 			ui.get_node("HP").text += "[" + String(shield) + "]"
 
-
+func update_strength():
+	if ui != null:
+		if isPlayer:
+			ui.get_node("Strength").text = "+" + String(strength)
 
 func update_info(text):
 	if ui.get_node_or_null("Info") != null:

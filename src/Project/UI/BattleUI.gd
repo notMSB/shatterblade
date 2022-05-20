@@ -23,11 +23,14 @@ var targetsVisible = false
 var playerCount = 0
 var enemyCount = 0
 
+var currentPlayer
+
 var isSubmenu = false
 
 func setup_display(unit, totalEnemies):
 	var display
 	if unit.isPlayer:
+		currentPlayer = unit
 		display = PlayerProfile.instance()
 		display.get_node("Name").text = unit.name
 		display.position.x = PLAYERXSTART + (playerCount % 2 * PLAYERINCREMENT)
@@ -35,31 +38,39 @@ func setup_display(unit, totalEnemies):
 		
 		var moveBox
 		var xPos
-		for i in DefaultMoves + unit.specials.size():
+		var move
+		unit.moves.sort_custom(self, "sort_order")
+		for i in DefaultMoves + unit.moves.size():
 			moveBox = PlayerMove.instance()
 			moveBox.user = unit
-			display.get_node("MoveBoxes").add_child(moveBox)
+			unit.boxHolder = display.get_node("MoveBoxes")
+			unit.boxHolder.add_child(moveBox)
 			xPos = moveBox.position.x
 			if i < DefaultMoves:
 				moveBox.position.x = xPos - PLAYERINCREMENT if playerCount % 2 == 0 else xPos + PLAYERINCREMENT
 				moveBox.get_node("ColorRect").rect_size.y = 40
 				if i == 0:
-					moveBox.move = "Attack"
+					move = "Attack"
 					moveBox.position.y -= PLAYERINCREMENT*.25
 				else:
-					moveBox.move = "Defend"
+					move = "Defend"
 					moveBox.position.y += PLAYERINCREMENT*.25
-				moveBox.moveType = Battle.moveType.basic
+				moveBox.moveType = Moves.moveType.basic
 			else:
-				moveBox.move = unit.specials[i - DefaultMoves]
-				moveBox.moveType = Battle.moveType.special
-				if Moves.moveList[moveBox.move].has("cost"):
-					moveBox.resValue = Moves.moveList[moveBox.move]["cost"]
+				move = unit.moves[i - DefaultMoves]
+				moveBox.moveType = Moves.moveList[move]["type"]
+				if Moves.moveList[move].has("resVal"):
+					moveBox.resValue = Moves.moveList[move]["resVal"]
 				moveBox.position.x = xPos - PLAYERINCREMENT*i if playerCount % 2 == 0 else xPos + PLAYERINCREMENT*i
-			moveBox.get_node("Name").text = moveBox.move
+			moveBox.moves.append(move)
+			if moveBox.moveType == Moves.moveType.trick: #Tricks are multiple moves, for now they all reload
+				moveBox.moves.append("Reload")
+			moveBox.get_node("Name").text = move
 			var button = moveBox.get_node("Button")
 			button.rect_size = moveBox.get_node("ColorRect").rect_size
 			#button.rect_position = Vector2(-40,-20)
+		#print(str("1  ", display.get_node("MoveBoxes").get_children()))
+		#print(str("2  ", display.get_node("MoveBoxes").get_children()))
 		set_trackers(display, display.get_node("MoveBoxes")) #moveboxes toggled on at round start
 		playerCount += 1
 	else:
@@ -92,14 +103,31 @@ func setup_display(unit, totalEnemies):
 	bar.set_max(unit.maxHealth)
 	unit.update_hp()
 
-func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false): #keepMoves as true means only boxes that aren't already committed are enabled
+func prepare_box(box):
+	var move = box.moves[box.moveIndex]
+	if Moves.moveList[move].has("resVal"):
+		box.resValue = Moves.moveList[move]["resVal"]
+	box.get_node("Name").text = move
+
+func advance_box_move(box): #For boxes with multiple moves
+	box.moveIndex = (box.moveIndex + 1) % box.moves.size()
+	prepare_box(box)
+	if box.moveIndex > 0:
+		box.get_node("Info").text = box.moves[box.moveIndex -1]
+
+func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false, disableChannels: bool = false): #keepMoves as true means only boxes that aren't already committed are enabled
+	var move
 	for box in boxes.get_children():
 		if !keepMoves or (keepMoves and box.buttonMode):
-			toggle_single(box, toggle)
+			move = box.moves[box.moveIndex]
+			if toggle and !(disableChannels and Moves.moveList[move].has("channel")): #Channels are disabled if the unit already has an action in the queue
+				toggle_single(box, true)
+			else:
+				toggle_single(box, false)
 
 func toggle_single(box, toggle): #true for purple false for black
 	if toggle:
-		if box.get_node("../../ResourceTracker/ResourceBar").value < box.resValue: #Check the resources before enabling a box
+		if box.trackerBar and box.trackerBar.value < box.resValue: #Check the resources before enabling a box
 			box.get_node("ColorRect").color = Color(.53,.3,.3,1)
 			toggle = false #needed to disable the button
 		else: #box can be enabled
@@ -108,46 +136,75 @@ func toggle_single(box, toggle): #true for purple false for black
 	else: #completely disable a box
 		box.get_node("ColorRect").color = Color(0,0,0,1)
 	box.get_node("Button").visible = toggle
-	box.get_node("Info").text = ""
+	if box.moveIndex == 0: box.get_node("Info").text = "" #Prevents reloading from wiping text
 
-func choose_movebox(box, user = null, target = null): #happens when move and target are selected, turns movebox orange
+func choose_movebox(box, target = null): #happens when move and target are selected, turns movebox orange
 	box.get_node("ColorRect").color = Color(1,.6,.2,1)
 	box.buttonMode = false
 	box.get_node("Button").visible = true
-	if user and box.resValue > 0:
-		user.update_resource(box.resValue, Battle.moveType.special, false) #Subtract the resource
 	if target: box.updateInfo(target.name)
+
+func toggle_channels(boxes):
+	var move
+	for box in boxes:
+		move = box.moves[box.moveIndex]
+		if Moves.moveList[move].has("channel"):
+			toggle_single(box, false)
+
+func sort_order(a, b):
+	if Moves.moveList[a]["resVal"] > Moves.moveList[b]["resVal"]:
+		return false
+	return true
+
 
 func set_trackers(display, boxes):
 	var firstMargin
 	var lastMargin
-	var boxCount = 0
+	var boxCount = []
+	var prevBox = boxes.get_children()[0]
+	
 	for box in boxes.get_children():
-		if box.moveType == Battle.moveType.special: #positioning the bar for specials, all should be next to each other by now
-			boxCount+=1
-			if firstMargin:
-				lastMargin = box.position.x
-			else:
-				firstMargin = box.position.x
-				lastMargin = box.position.x
-	if boxCount > 0:
+		if box.moveType == Moves.moveType.basic: continue
+		if box.moveType != prevBox.moveType or (box.moveType == Moves.moveType.magic and box.resValue != prevBox.resValue):
+			check_box_count(boxCount, display, firstMargin, lastMargin, prevBox.moveType)
+			boxCount = []
+			firstMargin = null
+			lastMargin = null
+		boxCount.append(box)
+		if firstMargin:
+			lastMargin = box.position.x
+		else:
+			firstMargin = box.position.x
+			lastMargin = box.position.x
+		prevBox = box
+	check_box_count(boxCount, display, firstMargin, lastMargin, prevBox.moveType)
+
+func check_box_count(count, display, firstMargin, lastMargin, barType):
+	if count.size() > 0:
 		var tracker = ResourceTracker.instance()
 		display.add_child(tracker)
-		link_boxes(tracker, boxCount, firstMargin, lastMargin)
+		link_boxes(tracker, count, firstMargin, lastMargin, barType)
 
-func link_boxes(tracker, boxCount, firstMargin, lastMargin):
+func link_boxes(tracker, boxCount, firstMargin, lastMargin, barType):
 	var bar = tracker.get_node("ResourceBar")
 	var barText = bar.get_node("Text")
 	bar.margin_left = min(firstMargin, lastMargin) - PLAYERINCREMENT*.5
 	bar.margin_right = max(firstMargin, lastMargin) + PLAYERINCREMENT*.5
 	bar.rect_position.y -= PLAYERINCREMENT*.5
-	if firstMargin > lastMargin: #Mirroring a progress bar gets a little weird
-		bar.rect_pivot_offset.x = PLAYERINCREMENT*.5*boxCount
+	if firstMargin <= 0: #Mirroring a progress bar gets a little weird
+		bar.rect_pivot_offset.x = PLAYERINCREMENT*.5*boxCount.size()
 		bar.rect_scale = Vector2(-1,-1)
 		barText.rect_scale = Vector2(-1,-1)
 		barText.rect_pivot_offset = Vector2(PLAYERINCREMENT*.5,PLAYERINCREMENT*.125)
-	bar.set_max(100)
-	barText.rect_position.x += PLAYERINCREMENT*.5*(boxCount - 1)
+	for box in boxCount:
+		box.trackerBar = bar
+	if barType == Moves.moveType.special:
+		bar.set_max(currentPlayer.maxAP)
+	elif barType == Moves.moveType.trick:
+		bar.set_max(currentPlayer.maxEnergy)
+	else:
+		bar.set_max(currentPlayer.maxCharges[boxCount[0].resValue])
+	barText.rect_position.x += PLAYERINCREMENT*.5*(boxCount.size() - 1) #center the text
 
 func clear_menus():
 	$Description.text = ""
@@ -172,7 +229,7 @@ func set_description(moveName, move):
 	elif move["target"] == Battle.targetType.allies: desc += "\n" + "All Allies"
 	elif move["target"] == Battle.targetType.user: desc += "\n" + "Self"
 	if move.has("quick"): desc += "\n Quick Action "
-	if move.has("cost"): desc += "\n Cost: " + String(move["cost"])
+	if move.has("resVal"): desc += "\n Cost: " + String(move["resVal"])
 	if move.has("damage"): desc += "\n Base Damage: " + String(move["damage"]) + " + " + String(Battle.currentUnit.strength)
 	if move.has("healing"): desc += "\n Healing: " + String(move["healing"])
 	if move.has("hits"): desc += "\n Repeats: " + String(move["hits"])

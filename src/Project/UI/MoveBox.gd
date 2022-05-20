@@ -2,10 +2,12 @@ extends Node2D
 
 onready var Battle = $"../../../../../"
 var user
-var move = "test"
+var moves = []
+var moveIndex = 0
 var moveType
 var resValue = 0
 var usageOrder
+var trackerBar
 var buttonMode = true
 var savedTargetName = ""
 
@@ -16,6 +18,6 @@ func updateInfo(targetName = null):
 
 func _on_Button_pressed():
 	if buttonMode:
-		Battle.evaluate_targets(move, user, self)
+		Battle.evaluate_targets(moves[moveIndex], user, self)
 	else:
 		Battle.cut_from_order(self)

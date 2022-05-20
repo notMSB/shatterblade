@@ -3,8 +3,8 @@ extends Node2D
 export (PackedScene) var Player
 export (PackedScene) var Enemy
 
-const partyNum = 4
-var enemyNum = 4
+const partyNum = 2
+var enemyNum = 1
 var deadEnemies = 0
 
 const apIncrement = 20
@@ -25,14 +25,14 @@ var moveTarget
 var damageCalc
 var info
 var hits
-var executionOrder = [] #box, move, user, target
 
-var opponents = ["Rat", "Rat", "Rat", "Rat"]
+var opponents = ["Rat"]
 
 var targetsVisible = false
 
-enum targetType {enemy, enemies, enemyTargets, ally, allies, user}
-enum moveType {basic, special, magic, item}
+var executionOrder = [] #box, move, user, target
+enum e {box, move, user, target}
+enum targetType {enemy, enemies, enemyTargets, ally, allies, user, none}
 
 func _ready(): #Generate units and add to turn order
 	randomize() #funny rng
@@ -57,8 +57,8 @@ func _ready(): #Generate units and add to turn order
 				createdUnit.name = str(createdUnit.identity, String(i))
 				if enemy.has("passives"): createdUnit.passives = enemy["passives"]
 				if enemy.has("specials"): 
-					createdUnit.specials = enemy["specials"]
-					createdUnit.allMoves.append_array(createdUnit.specials)
+					createdUnit.moves = enemy["specials"]
+					createdUnit.allMoves.append_array(createdUnit.moves)
 			else:
 				createdUnit.callv("make_stats", [400, 10, 5])
 				createdUnit.name = str("E", String(i))
@@ -68,7 +68,9 @@ func _ready(): #Generate units and add to turn order
 		$BattleUI.setup_display(unit, opponents.size())
 		if !unit.isPlayer: #Set enemy intents
 			set_intent(unit)
-		if unit.isPlayer: process_equipment(unit) #Gotta do this after the UI is set
+		if unit.isPlayer: 
+			process_equipment(unit) #Gotta do this after the UI is set
+			unit.update_strength()
 		if unit.passives.size() > 0:
 			for passive in unit.passives:
 				$StatusManager.add_status(unit, passive, unit.passives[passive])
@@ -85,7 +87,8 @@ func play_turn():
 		for unit in $Units.get_children():
 			$StatusManager.countdown_turns(unit, true)
 			if unit.isPlayer:
-				unit.update_resource(apIncrement, moveType.special, true)
+				unit.update_resource(apIncrement, $Moves.moveType.special, true)
+				unit.update_resource(unit.maxEnergy, $Moves.moveType.trick, true)
 				for display in $BattleUI/DisplayHolder.get_children():
 					if display.get_node_or_null("MoveBoxes"):
 						$BattleUI.toggle_moveboxes(display.get_node("MoveBoxes"), true)
@@ -168,7 +171,7 @@ func process_equipment(unit):
 			if equip.has("shield"):
 				unit.shield += equip["shield"]
 			if equip.has("special"):
-				unit.specials.append(equip["special"])
+				unit.moves.append(equip["special"])
 			if equip.has("spell"):
 				unit.spells.append(equip["spell"])
 			if equip.has("status"):
@@ -186,14 +189,18 @@ func evaluate_targets(move, user, box):
 		$BattleUI.toggle_buttons(true, get_team(true))
 	elif chosenMove["target"] == targetType.user: #Self target
 		$BattleUI.toggle_buttons(true, [moveUser])
+	elif chosenMove["target"] == targetType.none: #No target, instant confirm (coded as self)
+		target_chosen(user.get_index())
 	
 
 func target_chosen(index):
 	moveTarget = $Units.get_child(index)
 	executionOrder.append([usedMoveBox, chosenMove, moveUser, moveTarget])
 	usedMoveBox.usageOrder = executionOrder.size()
-	$BattleUI.choose_movebox(usedMoveBox, moveUser, moveTarget) #Choosing a box subtracts a resource, run a toggle afterwards
-	$BattleUI.toggle_moveboxes(usedMoveBox.get_parent(), chosenMove.has("quick"), true) #If quick, check the resources. Otherwise, turn off boxes as appropriate
+	if chosenMove["target"] != targetType.none: $BattleUI.choose_movebox(usedMoveBox, moveTarget) #
+	else: $BattleUI.choose_movebox(usedMoveBox) #Choosing a box subtracts a resource, run a toggle afterwards
+	moveUser.update_resource(chosenMove["resVal"], chosenMove["type"], false)
+	$BattleUI.toggle_moveboxes(usedMoveBox.get_parent(), chosenMove.has("quick"), true, true) #If quick, check the resources. Otherwise, turn off boxes as appropriate
 	$BattleUI.toggle_buttons(false)
 	$GoButton.visible = true
 
@@ -202,6 +209,7 @@ func go_button_press():
 	$BattleUI.clear_menus()
 	$GoButton.visible = false
 	for moveData in executionOrder: #box, move, user, target
+		usedMoveBox = moveData[0]
 		chosenMove = moveData[1]
 		moveUser = moveData[2]
 		moveTarget = moveData[3]
@@ -214,29 +222,37 @@ func cut_from_order(box):
 	var foundAction
 	for action in executionOrder: #box, move, user, target
 		if foundAction:
-			action[0].usageOrder -= 1 #Update the order that happens after the cut action
-			action[0].updateInfo()
-		elif action[0] == box:
+			action[e.box].usageOrder -= 1 #Update the order that happens after the cut action
+			action[e.box].updateInfo()
+		elif action[e.box] == box:
 			foundAction = action
-		if action[2] == box.user and !action[1].has("quick"): #If a non-quick is committed and a quick is cut, this bool has the quick turn off completely
+		if action[e.user] == box.user and !action[1].has("quick"): #If a non-quick is committed and a quick is cut, this bool has the quick turn off completely
 			userCommitted = true
 	executionOrder.erase(foundAction) #Erased from order
 	
-	if foundAction[1].has("cost"): #Refund resources spent from that action
-		foundAction[2].update_resource(foundAction[1]["cost"], moveType.special, true)
+	if foundAction[e.move].has("resVal"): #Refund resources spent from that action
+		foundAction[e.user].update_resource(foundAction[e.move]["resVal"], foundAction[e.move]["type"], true)
 	#Restoring UI involving quick actions: If a quick is cut, toggle only that. For non-quick, toggle everything on except for committed quicks
-	if !foundAction[1].has("quick"): #non-quick case, cutting a committed action while retaining any chosen quicks
+	if !foundAction[e.move].has("quick"): #non-quick case, cutting a committed action while retaining any chosen quicks
 		box.buttonMode = true #Needed to properly reset it in the toggle 
-		$BattleUI.toggle_moveboxes(foundAction[0].get_parent(), true, true)
+		$BattleUI.toggle_moveboxes(foundAction[e.box].get_parent(), true, true, checkChannel(foundAction[2]))
 	else: #quick case
 		$BattleUI.toggle_single(box, !userCommitted)  #If the user is already committed (non-quick), disable the box. Otherwise enable it.
 		if userCommitted: box.buttonMode = true #Needed or else the cut box stays disabled for the turn 
-		$BattleUI.toggle_moveboxes(foundAction[0].get_parent(), !userCommitted, true) #Checks to re-enable other actions due to earlier refund
+		$BattleUI.toggle_moveboxes(foundAction[0].get_parent(), !userCommitted, true, checkChannel(foundAction[2])) #Checks to re-enable other actions due to earlier refund
 		
+
+func checkChannel(unit): #Channels can only be used as the first action of a turn. This checks if the unit has an action in the queue already.
+	for action in executionOrder:
+		if action[2] == unit:
+			return true
+	return false
 
 func execute_move():
 	if moveUser.isPlayer:
 		moveUser.storedTarget = moveTarget
+		if chosenMove["type"] == $Moves.moveType.trick:
+			$BattleUI.advance_box_move(usedMoveBox)
 	
 	#Set up for multi target moves
 	var targets = []
