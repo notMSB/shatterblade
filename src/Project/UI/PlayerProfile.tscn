@@ -4,11 +4,11 @@
 [ext_resource path="res://src/Project/UI/UnitUI.gd" type="Script" id=2]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=3]
 
-[sub_resource type="DynamicFont" id=2]
+[sub_resource type="DynamicFont" id=1]
 size = 20
 font_data = ExtResource( 3 )
 
-[sub_resource type="DynamicFont" id=1]
+[sub_resource type="DynamicFont" id=2]
 size = 20
 font_data = ExtResource( 3 )
 
@@ -67,7 +67,7 @@ __meta__ = {
 [node name="Text" type="Label" parent="HPBar"]
 margin_right = 80.0
 margin_bottom = 24.0
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 1 )
 text = "1/1"
 align = 1
 valign = 1
@@ -80,7 +80,7 @@ margin_left = -39.2505
 margin_top = -41.8117
 margin_right = 0.749527
 margin_bottom = -17.8117
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = SubResource( 2 )
 text = "Test"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -91,7 +91,7 @@ margin_left = -36.2505
 margin_top = 0.188301
 margin_right = 3.74953
 margin_bottom = 24.1883
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = SubResource( 2 )
 text = "Test"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -102,7 +102,7 @@ margin_left = 2.7495
 margin_top = 0.188301
 margin_right = 42.7495
 margin_bottom = 24.1883
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = SubResource( 2 )
 text = "+55"
 __meta__ = {
 "_edit_use_anchors_": false

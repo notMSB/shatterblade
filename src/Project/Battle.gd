@@ -3,7 +3,7 @@ extends Node2D
 export (PackedScene) var Player
 export (PackedScene) var Enemy
 
-const partyNum = 2
+const partyNum = 1
 var enemyNum = 1
 var deadEnemies = 0
 
@@ -32,9 +32,10 @@ var targetsVisible = false
 
 var executionOrder = [] #box, move, user, target
 enum e {box, move, user, target}
-enum targetType {enemy, enemies, enemyTargets, ally, allies, user, none}
+var targetType
 
 func _ready(): #Generate units and add to turn order
+	targetType = $Moves.targetType
 	randomize() #funny rng
 	if opponents.size() == 0: #Random formation
 		opponents = $Formations.formationList[randi() %$Formations.formationList.size()]

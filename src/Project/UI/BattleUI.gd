@@ -1,17 +1,8 @@
 extends Node2D
 
-export (PackedScene) var UnitUI
-export (PackedScene) var PlayerProfile
-export (PackedScene) var PlayerMove
 export (PackedScene) var ResourceTracker
 
-const UNITYSTART = 200
-
-const PLAYERXSTART = 600
-const PLAYERYSTART = 600
 const PLAYERINCREMENT = 80
-
-const XINCREMENT = 300
 
 onready var Battle = get_parent()
 onready var Moves = get_node("../Moves")
@@ -25,79 +16,17 @@ var enemyCount = 0
 
 var currentPlayer
 
-var isSubmenu = false
-
 func setup_display(unit, totalEnemies):
 	var display
 	if unit.isPlayer:
 		currentPlayer = unit
-		display = PlayerProfile.instance()
-		display.get_node("Name").text = unit.name
-		display.position.x = PLAYERXSTART + (playerCount % 2 * PLAYERINCREMENT)
-		display.position.y = PLAYERYSTART + PLAYERINCREMENT if playerCount > 1 else PLAYERYSTART
-		
-		var moveBox
-		var xPos
-		var move
-		unit.moves.sort_custom(self, "sort_order")
-		for i in DefaultMoves + unit.moves.size():
-			moveBox = PlayerMove.instance()
-			moveBox.user = unit
-			unit.boxHolder = display.get_node("MoveBoxes")
-			unit.boxHolder.add_child(moveBox)
-			xPos = moveBox.position.x
-			if i < DefaultMoves:
-				moveBox.position.x = xPos - PLAYERINCREMENT if playerCount % 2 == 0 else xPos + PLAYERINCREMENT
-				moveBox.get_node("ColorRect").rect_size.y = 40
-				if i == 0:
-					move = "Attack"
-					moveBox.position.y -= PLAYERINCREMENT*.25
-				else:
-					move = "Defend"
-					moveBox.position.y += PLAYERINCREMENT*.25
-				moveBox.moveType = Moves.moveType.basic
-			else:
-				move = unit.moves[i - DefaultMoves]
-				moveBox.moveType = Moves.moveList[move]["type"]
-				if Moves.moveList[move].has("resVal"):
-					moveBox.resValue = Moves.moveList[move]["resVal"]
-				moveBox.position.x = xPos - PLAYERINCREMENT*i if playerCount % 2 == 0 else xPos + PLAYERINCREMENT*i
-			moveBox.moves.append(move)
-			if moveBox.moveType == Moves.moveType.trick: #Tricks are multiple moves, for now they all reload
-				moveBox.moves.append("Reload")
-			moveBox.get_node("Name").text = move
-			var button = moveBox.get_node("Button")
-			button.rect_size = moveBox.get_node("ColorRect").rect_size
-			#button.rect_position = Vector2(-40,-20)
-		#print(str("1  ", display.get_node("MoveBoxes").get_children()))
-		#print(str("2  ", display.get_node("MoveBoxes").get_children()))
+		unit.moves.sort_custom(self, "sort_order") #Movebox resource bars appreciate sorted movelist
+		display = $DisplayHolder.setup_player(unit, playerCount)
 		set_trackers(display, display.get_node("MoveBoxes")) #moveboxes toggled on at round start
 		playerCount += 1
-	else:
-		display = UnitUI.instance()
-		#display.get_node("Name").text = unit.name
-		display.get_node("HP").text = String(unit.currentHealth)
-		if unit.shield > 0:
-			display.get_node("HP").text += "[" + String(unit.shield) + "]"
-		#display.get_node("Stats").text = String(unit.strength) + "/" + String(unit.speed)
-		var sprite = display.get_node("Sprite")
-		var button = display.get_node("Button")
-		sprite.visible = true
-		var spritePath = str("res://src/Assets/Enemies/", unit.identity, ".png")
-		var tempFile = File.new()
-		if(tempFile.file_exists(spritePath)):
-			sprite.texture = load(spritePath)
-			sprite.flip_h = true
-		button.rect_size = sprite.get_rect().size #match the button size with the sprite
-		var sprPos = sprite.get_rect().position
-		button.rect_position = Vector2(sprPos.x + 48, sprPos.y + 48)
-		#print(str(unit.name, sprPos))
-		
-		#position enemy
-		display.position.x = (XINCREMENT*2.5 - XINCREMENT*0.5 * totalEnemies) + (enemyCount * XINCREMENT)
-		display.position.y = UNITYSTART
+	else: #Enemy
+		display = $DisplayHolder.setup_enemy(unit, enemyCount, totalEnemies)
 		enemyCount += 1
-	$DisplayHolder.add_child(display)
 	unit.ui = display
 	var bar = display.get_node("HPBar")
 	bar.set_max(unit.maxHealth)
@@ -155,7 +84,6 @@ func sort_order(a, b):
 	if Moves.moveList[a]["resVal"] > Moves.moveList[b]["resVal"]:
 		return false
 	return true
-
 
 func set_trackers(display, boxes):
 	var firstMargin
@@ -221,7 +149,6 @@ func toggle_buttons(toggle, units = []):
 func set_description(moveName, move):
 	$Description.visible = true
 	var desc = moveName
-	if Battle.menuNode == get_node("../Items"): desc += " x" + String(Battle.currentUnit.items[moveName])
 	if move["target"] == Battle.targetType.enemy: desc += "\n" + "Single Enemy"
 	elif move["target"] == Battle.targetType.enemies: desc += "\n" + "All Enemies"
 	elif move["target"] == Battle.targetType.enemyTargets: desc += "\n" + "Same Target Enemies"

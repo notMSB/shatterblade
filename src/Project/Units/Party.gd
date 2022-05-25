@@ -11,8 +11,6 @@ const POINTS_AVAILABLE = 15
 const BASE_STAT = 5
 const MOVES_AVAILABLE = 2
 
-enum targetType {enemy, enemies, enemyTargets, ally, allies, user}
-
 func _ready():
 	$Crafting.test()
 	randomize()

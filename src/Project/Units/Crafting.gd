@@ -12,10 +12,10 @@ var products = {
 			c.fur: "Cleave", c.blade: "Power Attack", c.bone: "Frostfang", c.wood:"X"},
 	
 	c.talon: {c.talon: "X", c.sap: "Eye Poke", c.venom: "Taunt", c.fur: "Quick Attack",
-			c.blade: "Crusher Claw", c.bone: "Turtle Up"},
+			c.blade: "Crusher Claw", c.bone: "Turtle Up", c.wood:"X"},
 	
 	c.sap: {c.sap: "X", c.venom: "Growth", c.fur: "Protect", c.blade: "Pierce",
-			c.bone: "Bonemerang"},
+			c.bone: "Bonemerang", c.wood:"X"},
 	
 	c.venom: {c.venom: "X", c.fur: "Restore", c.blade: "Piercing Sting", c.bone: "Plague",
 			c.wood: "X"},
@@ -34,10 +34,10 @@ func test():
 
 func sort_then_combine(one, two):
 	if one <= two:
-		combine(one, two)
+		return combine(one, two)
 	else:
-		combine(two, one)
+		return combine(two, one)
 
 func combine(one, two):
-	print(products[one][two])
+	return products[one][two]
 	

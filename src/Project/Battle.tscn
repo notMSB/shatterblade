@@ -1,12 +1,11 @@
-[gd_scene load_steps=21 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://src/Project/Lists/Equipment.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/Units/Enemies.gd" type="Script" id=2]
-[ext_resource path="res://src/Project/Lists/Magic.gd" type="Script" id=3]
+[ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=3]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=4]
 [ext_resource path="res://src/Project/Lists/Moves.gd" type="Script" id=5]
 [ext_resource path="res://src/Project/Lists/StatusManager.gd" type="Script" id=6]
-[ext_resource path="res://src/Project/Lists/Items.gd" type="Script" id=7]
 [ext_resource path="res://src/Project/UI/UnitUI.tscn" type="PackedScene" id=8]
 [ext_resource path="res://src/Project/Units/Enemy.tscn" type="PackedScene" id=9]
 [ext_resource path="res://src/Project/Units/Player.tscn" type="PackedScene" id=10]
@@ -26,7 +25,7 @@ font_data = ExtResource( 4 )
 size = 20
 font_data = ExtResource( 4 )
 
-[sub_resource type="DynamicFont" id=4]
+[sub_resource type="DynamicFont" id=3]
 font_data = ExtResource( 4 )
 
 [node name="Battle" type="Node2D"]
@@ -68,12 +67,13 @@ __meta__ = {
 
 [node name="BattleUI" type="Node2D" parent="."]
 script = ExtResource( 12 )
-UnitUI = ExtResource( 8 )
-PlayerProfile = ExtResource( 16 )
-PlayerMove = ExtResource( 11 )
 ResourceTracker = ExtResource( 17 )
 
 [node name="DisplayHolder" type="Node2D" parent="BattleUI"]
+script = ExtResource( 3 )
+UnitUI = ExtResource( 8 )
+PlayerProfile = ExtResource( 16 )
+PlayerMove = ExtResource( 11 )
 
 [node name="Pointer" type="Label" parent="BattleUI"]
 visible = false
@@ -122,7 +122,7 @@ margin_left = -0.00012207
 margin_top = -16.6527
 margin_right = 94.9999
 margin_bottom = 3.34729
-custom_fonts/font = SubResource( 4 )
+custom_fonts/font = SubResource( 3 )
 text = "Name"
 align = 1
 __meta__ = {
@@ -134,7 +134,7 @@ margin_left = -60.5005
 margin_top = 99.4008
 margin_right = 167.5
 margin_bottom = 119.401
-custom_fonts/font = SubResource( 4 )
+custom_fonts/font = SubResource( 3 )
 text = "MHP: X   P: X   S: X"
 align = 1
 __meta__ = {
@@ -148,12 +148,6 @@ script = ExtResource( 5 )
 
 [node name="StatusManager" type="Node2D" parent="."]
 script = ExtResource( 6 )
-
-[node name="Items" type="Node2D" parent="."]
-script = ExtResource( 7 )
-
-[node name="Magic" type="Node2D" parent="."]
-script = ExtResource( 3 )
 
 [node name="Equipment" type="Node2D" parent="."]
 script = ExtResource( 1 )

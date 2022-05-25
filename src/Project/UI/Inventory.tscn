@@ -1,0 +1,57 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://src/Project/UI/Inventory.gd" type="Script" id=1]
+[ext_resource path="res://src/Project/UI/ItemBox.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/Project/Units/Crafting.gd" type="Script" id=3]
+[ext_resource path="res://src/Project/UI/BoxHolder.gd" type="Script" id=4]
+[ext_resource path="res://src/Project/Lists/Moves.gd" type="Script" id=5]
+[ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=6]
+[ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=7]
+[ext_resource path="res://src/Project/UI/PlayerProfile.tscn" type="PackedScene" id=8]
+[ext_resource path="res://src/Project/UI/PlayerMove.tscn" type="PackedScene" id=9]
+
+[sub_resource type="DynamicFont" id=1]
+size = 34
+font_data = ExtResource( 6 )
+
+[node name="Inventory" type="Node2D"]
+script = ExtResource( 1 )
+ItemBox = ExtResource( 2 )
+
+[node name="Crafting" type="Node2D" parent="."]
+script = ExtResource( 3 )
+
+[node name="Moves" type="Node2D" parent="."]
+script = ExtResource( 5 )
+
+[node name="CraftButton" type="Button" parent="."]
+visible = false
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 587.376
+margin_top = 204.149
+margin_right = 695.376
+margin_bottom = 272.149
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+text = "Craft"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HolderHolder" type="Node2D" parent="."]
+
+[node name="InventoryHolder" type="Node2D" parent="HolderHolder"]
+script = ExtResource( 4 )
+
+[node name="CraftboxHolder" type="Node2D" parent="HolderHolder"]
+script = ExtResource( 4 )
+
+[node name="DisplayHolder" type="Node2D" parent="HolderHolder"]
+script = ExtResource( 7 )
+PlayerProfile = ExtResource( 8 )
+PlayerMove = ExtResource( 9 )
+
+[connection signal="pressed" from="CraftButton" to="." method="confirm_craft"]

@@ -9,6 +9,7 @@ var maxCharges = [10, 5, 2]
 var energy = 10
 var maxEnergy = 10
 var boxHolder
+var allowedType
 
 func _ready():
 	isPlayer = true
