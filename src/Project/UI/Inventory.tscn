@@ -27,16 +27,32 @@ script = ExtResource( 5 )
 [node name="CraftButton" type="Button" parent="."]
 visible = false
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
-margin_left = 587.376
-margin_top = 204.149
-margin_right = 695.376
-margin_bottom = 272.149
+margin_left = 595.0
+margin_top = 475.0
+margin_right = 703.0
+margin_bottom = 543.0
 custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
 text = "Craft"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ExitButton" type="Button" parent="."]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 595.0
+margin_top = 67.0
+margin_right = 703.0
+margin_bottom = 135.0
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+text = "Exit"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -55,3 +71,4 @@ PlayerProfile = ExtResource( 8 )
 PlayerMove = ExtResource( 9 )
 
 [connection signal="pressed" from="CraftButton" to="." method="confirm_craft"]
+[connection signal="pressed" from="ExitButton" to="." method="exit"]

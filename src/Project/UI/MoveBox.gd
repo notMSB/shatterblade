@@ -1,6 +1,6 @@
 extends Node2D
 
-onready var Battle = $"../../../../../"
+onready var CurrentScene = $"../../../../../" #Battle or Inventory are both equally ancient grandpas
 var user
 var moves = []
 var moveIndex = 0
@@ -17,7 +17,10 @@ func updateInfo(targetName = null):
 	$Info.text = str(usageOrder, ": ", savedTargetName)
 
 func _on_Button_pressed():
-	if buttonMode:
-		Battle.evaluate_targets(moves[moveIndex], user, self)
-	else:
-		Battle.cut_from_order(self)
+	if CurrentScene.name == "Battle":
+		if buttonMode:
+			CurrentScene.evaluate_targets(moves[moveIndex], user, self)
+		else:
+			CurrentScene.cut_from_order(self)
+	else: #inventory
+		CurrentScene.select_box(self)

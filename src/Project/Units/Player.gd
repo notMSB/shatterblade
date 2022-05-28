@@ -1,8 +1,5 @@
 extends "res://src/Project/Units/Unit.gd"
 
-var equipment = {"Weapon": "", "Armor": "", "Accessory": ""}
-var items = {"Rock": 2, "Herb": 1, "Toxic Salve": 1}
-var spells = ["Lightning Bolt"]
 var maxAP = 100
 var charges = [10, 5, 2]
 var maxCharges = [10, 5, 2]
@@ -10,12 +7,13 @@ var energy = 10
 var maxEnergy = 10
 var boxHolder
 var allowedType
+var types
 
 func _ready():
 	isPlayer = true
+	types = Battle.get_node("Moves").moveType
 
 func update_resource(resValue, type, isGain: bool):
-	var types = Battle.get_node("Moves").moveType
 	if type == types.special:
 		if isGain: ap = min(ap + resValue, maxap)
 		else: ap -= resValue
@@ -28,7 +26,6 @@ func update_resource(resValue, type, isGain: bool):
 	update_box_bars()
 
 func update_box_bars():
-	var types = Battle.get_node("Moves").moveType
 	var prevBox = boxHolder.get_children()[0]
 	for box in boxHolder.get_children():
 		if box.moveType != prevBox.moveType or (box.moveType == types.magic and box.resValue != prevBox.resValue):

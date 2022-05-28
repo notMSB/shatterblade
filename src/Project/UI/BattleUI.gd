@@ -28,7 +28,8 @@ func setup_display(unit, totalEnemies):
 		display = $DisplayHolder.setup_enemy(unit, enemyCount, totalEnemies)
 		enemyCount += 1
 	unit.ui = display
-	var bar = display.get_node("HPBar")
+	display.get_node("BattleElements").visible = true
+	var bar = display.get_node("BattleElements/HPBar")
 	bar.set_max(unit.maxHealth)
 	unit.update_hp()
 

@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/Assets/Enemies/test.png" type="Texture" id=1]
 [ext_resource path="res://src/Project/UI/UnitUI.gd" type="Script" id=2]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=3]
+[ext_resource path="res://src/Project/UI/BoxHolder.gd" type="Script" id=4]
 
 [sub_resource type="DynamicFont" id=1]
 size = 20
@@ -54,7 +55,24 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HPBar" type="ProgressBar" parent="."]
+[node name="Name" type="Label" parent="."]
+margin_left = -39.2505
+margin_top = -41.8117
+margin_right = 0.749527
+margin_bottom = -17.8117
+custom_fonts/font = SubResource( 1 )
+text = "Test"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MoveBoxes" type="Node2D" parent="."]
+script = ExtResource( 4 )
+
+[node name="BattleElements" type="Node2D" parent="."]
+visible = false
+
+[node name="HPBar" type="ProgressBar" parent="BattleElements"]
 margin_left = -40.0
 margin_top = 20.0
 margin_right = 40.0
@@ -64,10 +82,10 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Text" type="Label" parent="HPBar"]
+[node name="Text" type="Label" parent="BattleElements/HPBar"]
 margin_right = 80.0
 margin_bottom = 24.0
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = SubResource( 2 )
 text = "1/1"
 align = 1
 valign = 1
@@ -75,40 +93,29 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Name" type="Label" parent="."]
-margin_left = -39.2505
-margin_top = -41.8117
-margin_right = 0.749527
-margin_bottom = -17.8117
-custom_fonts/font = SubResource( 2 )
-text = "Test"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Shield" type="Label" parent="."]
+[node name="Shield" type="Label" parent="BattleElements"]
 margin_left = -36.2505
 margin_top = 0.188301
 margin_right = 3.74953
 margin_bottom = 24.1883
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 1 )
 text = "Test"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Strength" type="Label" parent="."]
+[node name="Strength" type="Label" parent="BattleElements"]
 margin_left = 2.7495
 margin_top = 0.188301
 margin_right = 42.7495
 margin_bottom = 24.1883
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 1 )
 text = "+55"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Statuses" type="Label" parent="."]
+[node name="Statuses" type="Label" parent="BattleElements"]
 margin_left = -61.5232
 margin_top = -21.0396
 margin_right = 63.4767
@@ -119,7 +126,5 @@ align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="MoveBoxes" type="Node2D" parent="."]
 
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]

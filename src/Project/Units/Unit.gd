@@ -4,9 +4,9 @@ onready var Battle = get_node("../../")
 
 var isPlayer
 var maxHealth
-var strength
-var speed
 
+var strength = 0
+var speed = 0
 var defense = 0
 
 var storedAction
@@ -23,13 +23,11 @@ var statuses = []
 var hittables = [] #Keeps track of statuses that count down on hit
 var passives = {}
 
-var moves = ["Channel Power", "Poison Strike", "Turtle Up", "Venoshock", "Plague", "Taunt"]
+var moves = []
 
-func make_stats(hp, atk, spd):
+func make_stats(hp):
 	maxHealth = hp
 	currentHealth = maxHealth
-	strength = atk
-	speed = spd
 
 func take_damage(damageVal):
 	if currentHealth > 0: #Can't be hitting someone that's dead
@@ -58,17 +56,17 @@ func heal(healVal):
 
 func update_hp():
 	if ui != null:
-		ui.get_node("HPBar").value = currentHealth
-		ui.get_node("HPBar/Text").text = str(currentHealth, "/", maxHealth)
+		ui.get_node("BattleElements/HPBar").value = currentHealth
+		ui.get_node("BattleElements/HPBar/Text").text = str(currentHealth, "/", maxHealth)
 		if isPlayer:
-			ui.get_node("Shield").text = "[" + String(shield) + "]"
+			ui.get_node("BattleElements/Shield").text = "[" + String(shield) + "]"
 		else:
-			ui.get_node("HP").text += "[" + String(shield) + "]"
+			ui.get_node("BattleElements/HP").text += "[" + String(shield) + "]"
 
 func update_strength():
 	if ui != null:
 		if isPlayer:
-			ui.get_node("Strength").text = "+" + String(strength)
+			ui.get_node("BattleElements/Strength").text = "+" + String(strength)
 
 func update_info(text):
 	if ui.get_node_or_null("Info") != null:
@@ -86,5 +84,5 @@ func update_status_ui():
 				text += "[" + String(status["value"]) + "]"
 			i+=1
 	if text == "": text = "[]"
-	if ui.get_node_or_null("Statuses") != null:
-		ui.get_node("Statuses").text = text
+	if ui.get_node_or_null("BattleElements/Statuses") != null:
+		ui.get_node("BattleElements/Statuses").text = text

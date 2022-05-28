@@ -3,7 +3,7 @@ extends Node2D
 export (PackedScene) var Player
 export (PackedScene) var Enemy
 
-const partyNum = 1
+var partyNum = 1
 var enemyNum = 1
 var deadEnemies = 0
 
@@ -40,12 +40,13 @@ func _ready(): #Generate units and add to turn order
 	if opponents.size() == 0: #Random formation
 		opponents = $Formations.formationList[randi() %$Formations.formationList.size()]
 		enemyNum = opponents.size()
+	if global.storedParty.size() > 0: partyNum = global.storedParty.size()
 	for i in partyNum + enemyNum:
 		var createdUnit
 		if i < partyNum: #player
 			createdUnit = Player.instance()
 			if global.storedParty.size() <= i:
-				createdUnit.make_stats(40, 5, 18)
+				createdUnit.make_stats(40)
 			else:
 				createdUnit = global.storedParty[i]
 			createdUnit.name = str("P", String(i))
@@ -61,7 +62,7 @@ func _ready(): #Generate units and add to turn order
 					createdUnit.moves = enemy["specials"]
 					createdUnit.allMoves.append_array(createdUnit.moves)
 			else:
-				createdUnit.callv("make_stats", [400, 10, 5])
+				createdUnit.callv("make_stats", [400])
 				createdUnit.name = str("E", String(i))
 		$StatusManager.initialize_statuses(createdUnit)
 		$Units.add_child(createdUnit)
@@ -70,7 +71,6 @@ func _ready(): #Generate units and add to turn order
 		if !unit.isPlayer: #Set enemy intents
 			set_intent(unit)
 		if unit.isPlayer: 
-			process_equipment(unit) #Gotta do this after the UI is set
 			unit.update_strength()
 		if unit.passives.size() > 0:
 			for passive in unit.passives:
@@ -159,25 +159,6 @@ func get_team(gettingPlayers, onlyAlive = false):
 static func sort_battlers(a, b) -> bool:
 	return a.speed > b.speed
 
-func process_equipment(unit):
-	for item in unit.equipment:
-		if unit.equipment[item]: #if there is an item equipped in that slot
-			var equip = $Equipment.equipmentList[unit.equipment[item]]
-			if equip.has("strength"):
-				unit.strength += equip["strength"]
-			if equip.has("speed"):
-				unit.speed += equip["speed"]
-			if equip.has("defense"):
-				unit.defense += equip["defense"]
-			if equip.has("shield"):
-				unit.shield += equip["shield"]
-			if equip.has("special"):
-				unit.moves.append(equip["special"])
-			if equip.has("spell"):
-				unit.spells.append(equip["spell"])
-			if equip.has("status"):
-				$StatusManager.add_status(unit, equip["status"])
-
 func evaluate_targets(move, user, box):
 	usedMoveBox = box
 	chosenMove = $Moves.moveList[move]
@@ -252,7 +233,7 @@ func checkChannel(unit): #Channels can only be used as the first action of a tur
 func execute_move():
 	if moveUser.isPlayer:
 		moveUser.storedTarget = moveTarget
-		if chosenMove["type"] == $Moves.moveType.trick:
+		if chosenMove["type"] == $Moves.moveType.trick or chosenMove.has("cycle"):
 			$BattleUI.advance_box_move(usedMoveBox)
 	
 	#Set up for multi target moves

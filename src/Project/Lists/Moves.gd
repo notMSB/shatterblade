@@ -3,7 +3,7 @@ extends Node2D
 onready var Battle = get_parent()
 var moveList
 enum timings {before, after}
-enum moveType {basic, special, magic, trick, item}
+enum moveType {none, basic, special, magic, trick, item}
 enum targetType {enemy, enemies, enemyTargets, ally, allies, user, none}
 
 func _ready():
@@ -27,7 +27,7 @@ func _ready():
 	"Vampire": {"target": targetType.enemy, "damage": 5, "resVal": 30, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", -.2], "description": "User heals 10% of damage dealt", "type": moveType.special},
 	
 	"Flex": {"target": targetType.user, "resVal": 25, "status": "Double Damage", "value": 1, "quick": true, "type": moveType.special},
-	"Protect": {"target": targetType.ally, "effect": funcref(self, "switch_intents"), "args": ["moveTarget", "moveUser"], "type": moveType.special},
+	"Protect": {"target": targetType.ally, "resVal": 10, "effect": funcref(self, "switch_intents"), "args": ["moveTarget", "moveUser"], "quick": true, "type": moveType.special},
 	"Turtle Up": {"target": targetType.user, "resVal": 20, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5, funcref(self, "get_enemy_targeters")], "description": "Shields more for each enemy targeting the user", "type": moveType.special},
 	
 	
@@ -53,13 +53,18 @@ func _ready():
 	
 	"Taunt": {"target": targetType.enemy, "status": "Provoke", "value": 100, "resVal": 2, "quick": true, "type": moveType.trick},
 	
-	"Reload": {"target": targetType.none, "resVal": 2, "quick": true, "type": moveType.trick},
+	"Reload": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "type": moveType.basic},
 	
 	
 	"Double Slash": {"target": targetType.enemy, "damage": 4, "resVal": 1, "type": moveType.item},
 	
-	"X": {"type": moveType.basic} #temp
+	"X": {"type": moveType.none} #temp
 }
+
+func get_classname(type):
+	if type == moveType.special: return "Fighter"
+	elif type == moveType.magic: return "Mage"
+	elif type == moveType.trick: return "Rogue"
 
 #Effects
 func get_enemy_targeters(unit):

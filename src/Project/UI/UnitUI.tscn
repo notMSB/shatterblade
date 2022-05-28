@@ -39,17 +39,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HP" type="Label" parent="."]
-visible = false
-margin_top = 21.0
-margin_right = 95.0
-margin_bottom = 80.0
-custom_fonts/font = SubResource( 1 )
-text = "555"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="Stats" type="Label" parent="."]
 visible = false
 margin_left = 8.32445
@@ -74,7 +63,20 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Statuses" type="Label" parent="."]
+[node name="BattleElements" type="Node2D" parent="."]
+
+[node name="HP" type="Label" parent="BattleElements"]
+visible = false
+margin_top = 21.0
+margin_right = 95.0
+margin_bottom = 80.0
+custom_fonts/font = SubResource( 1 )
+text = "555"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Statuses" type="Label" parent="BattleElements"]
 margin_left = -15.2739
 margin_top = 98.3677
 margin_right = 109.726
@@ -86,7 +88,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HPBar" type="ProgressBar" parent="."]
+[node name="HPBar" type="ProgressBar" parent="BattleElements"]
 margin_left = -49.4905
 margin_top = 123.878
 margin_right = 147.51
@@ -96,7 +98,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Text" type="Label" parent="HPBar"]
+[node name="Text" type="Label" parent="BattleElements/HPBar"]
 margin_right = 196.0
 margin_bottom = 36.0
 custom_fonts/font = SubResource( 2 )

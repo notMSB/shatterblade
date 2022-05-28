@@ -3,34 +3,35 @@ extends Node2D
 export (PackedScene) var Player
 export (PackedScene) var ChoiceUI
 
-const HPMultiplier = 4
-const options = 3
-const partySize = 4
+const BASEHP = 40
+const OPTIONS = 3
+const PARTYSIZE = 4
 const INCREMENT = 400
-const POINTS_AVAILABLE = 15
-const BASE_STAT = 5
 const MOVES_AVAILABLE = 2
 
 func _ready():
-	$Crafting.test()
 	randomize()
-	create_options(options)
+	if global.storedParty.size() > 0: global.storedParty.clear()
+	create_options(OPTIONS)
 
 func create_options(number):
 	for i in number:
 		var createdUnit = Player.instance()
-		rando_stats(createdUnit, POINTS_AVAILABLE, BASE_STAT)
-		rando_weapon(createdUnit)
+		createdUnit.allowedType = random_moveType()
+		set_stats(createdUnit, BASEHP)
 		rando_moves(createdUnit, MOVES_AVAILABLE)
-		
 		$TempParty.add_child(createdUnit)
 		make_info(createdUnit, i)
 
+func random_moveType():
+	var typeList = [$Moves.moveType.special, $Moves.moveType.magic, $Moves.moveType.trick]
+	return random_item(typeList)
+
 func make_info(unit, index):
 	var info = ""
-	info += String(unit.maxHealth) + " " + String(unit.strength) + " " + String(unit.defense) + " " + String(unit.speed) + "\n" + unit.equipment["weapon"] + "\n"
-	for special in unit.specials:
-		info += "[" + special + "] "
+	info += str(unit.maxHealth, "\n", $Moves.moveType.keys()[unit.allowedType], "\n")
+	for move in unit.moves:
+		info += "[" + move + "] "
 	var choice = ChoiceUI.instance()
 	choice.get_node("Info").text = info
 	#choice.position.x = INCREMENT * index
@@ -43,50 +44,27 @@ func choose(index):
 		$Choices.remove_child(n)
 	for n in $TempParty.get_children():
 		$TempParty.remove_child(n)
-	if global.storedParty.size() < partySize:
-		create_options(options)
+	if global.storedParty.size() < PARTYSIZE:
+		create_options(OPTIONS)
 	else:
-		print(str("Party: ", global.storedParty))
-		return get_tree().change_scene("res://src/Project/Battle.tscn")
+		return get_tree().change_scene("res://src/Project/Debug.tscn")
 
 func random_item(list):
 	return list[randi() % list.size()]
 
-func rando_stats(unit, points, base):
-	unit.strength = base
-	unit.speed = base
-	unit.defense = base
-	unit.maxHealth = base * HPMultiplier
-
-	var rando
-	for point in points:
-		rando = randi() % 4
-		if rando == 0: unit.strength += 1
-		elif rando == 1: unit.speed += 1
-		elif rando == 2: unit.defense += 1
-		elif rando == 3: unit.maxHealth += HPMultiplier
+func set_stats(unit, hp):
+	unit.maxHealth = hp
 	unit.currentHealth = unit.maxHealth
-
-func rando_weapon(unit):
-	var list = $Equipment.equipmentList
-	var rando = []
-	for weapon in list:
-		if list[weapon]["type"] == "weapon" and list[weapon].has("weight"):
-			for weight in list[weapon]["weight"]:
-				rando.append(weapon)
-	unit.equipment["weapon"] = random_item(rando)
-	#print(unit.equipment["weapon"])
 	
 func rando_moves(unit, number):
 	var list = $Moves.moveList
 	var rando = []
-	for move in list:
-		if list[move].has("weight"): 
-			for weight in list[move]["weight"]:
+	for move in list: #populate rando with viable moves
+		if list[move].has("type"): 
+			if list[move]["type"] == unit.allowedType:
 				rando.append(move)
 	var randomMove
-	for i in number:
+	for i in number: #add number of moves from rando to unit's move list
 		randomMove = random_item(rando)
-		unit.specials.append(randomMove)
-		for j in list[randomMove]["weight"]:
-			rando.erase(randomMove)
+		unit.moves.append(randomMove)
+		rando.erase(randomMove)
