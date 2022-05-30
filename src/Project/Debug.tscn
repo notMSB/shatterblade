@@ -23,9 +23,9 @@ __meta__ = {
 [node name="Party" type="Button" parent="."]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 900.0
-margin_top = 204.149
+margin_top = 68.149
 margin_right = 1008.0
-margin_bottom = 272.149
+margin_bottom = 136.149
 custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
@@ -39,9 +39,9 @@ __meta__ = {
 [node name="Inventory" type="Button" parent="."]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 600.0
-margin_top = 200.0
+margin_top = 64.0
 margin_right = 708.0
-margin_bottom = 268.0
+margin_bottom = 132.0
 custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
@@ -52,12 +52,28 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Map" type="Button" parent="."]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 600.0
+margin_top = 192.0
+margin_right = 708.0
+margin_bottom = 260.0
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+text = "Map"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Battle" type="Button" parent="."]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 300.0
-margin_top = 200.0
+margin_top = 64.0
 margin_right = 408.0
-margin_bottom = 268.0
+margin_bottom = 132.0
 custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
@@ -70,4 +86,5 @@ __meta__ = {
 
 [connection signal="pressed" from="Party" to="." method="_on_Party_pressed"]
 [connection signal="pressed" from="Inventory" to="." method="_on_Inventory_pressed"]
+[connection signal="pressed" from="Map" to="." method="_on_Map_pressed"]
 [connection signal="pressed" from="Battle" to="." method="_on_Battle_pressed"]

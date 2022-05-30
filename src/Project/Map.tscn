@@ -1,0 +1,41 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://src/Project/Map.gd" type="Script" id=1]
+[ext_resource path="res://src/Project/Lists/Moves.gd" type="Script" id=2]
+[ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=3]
+[ext_resource path="res://src/Project/UI/UnitUI.tscn" type="PackedScene" id=4]
+[ext_resource path="res://src/Project/UI/PlayerProfile.tscn" type="PackedScene" id=5]
+[ext_resource path="res://src/Project/UI/PlayerMove.tscn" type="PackedScene" id=6]
+[ext_resource path="res://src/Project/Point.tscn" type="PackedScene" id=7]
+[ext_resource path="res://src/Project/Line.tscn" type="PackedScene" id=8]
+
+[node name="Map" type="Node2D"]
+script = ExtResource( 1 )
+Point = ExtResource( 7 )
+Line = ExtResource( 8 )
+
+[node name="Moves" type="Node2D" parent="."]
+script = ExtResource( 2 )
+
+[node name="ReferenceRect" type="ReferenceRect" parent="."]
+margin_left = 1.0
+margin_top = 1.0
+margin_right = 1280.0
+margin_bottom = 540.0
+border_color = Color( 1, 1, 1, 1 )
+editor_only = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HolderHolder" type="Node2D" parent="."]
+
+[node name="DisplayHolder" type="Node2D" parent="HolderHolder"]
+script = ExtResource( 3 )
+UnitUI = ExtResource( 4 )
+PlayerProfile = ExtResource( 5 )
+PlayerMove = ExtResource( 6 )
+
+[node name="PointHolder" type="Node2D" parent="HolderHolder"]
+
+[node name="LineHolder" type="Node2D" parent="HolderHolder"]

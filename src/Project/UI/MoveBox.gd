@@ -22,5 +22,7 @@ func _on_Button_pressed():
 			CurrentScene.evaluate_targets(moves[moveIndex], user, self)
 		else:
 			CurrentScene.cut_from_order(self)
-	else: #inventory
+	elif CurrentScene.name == "Inventory": #inventory
 		CurrentScene.select_box(self)
+	else: #map scene
+		pass
