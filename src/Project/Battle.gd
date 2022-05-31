@@ -26,6 +26,8 @@ var damageCalc
 var info
 var hits
 
+var battleDone = false
+
 var opponents = ["Rat"]
 
 var targetsVisible = false
@@ -78,6 +80,47 @@ func _ready(): #Generate units and add to turn order
 	
 	generate_rewards()
 	
+	play_turn()
+
+func create_enemies():
+	var createdUnit = Enemy.instance()
+	var enemy
+	var i = 0
+	for opponent in opponents:
+		enemy = $Enemies.enemyList[opponent]
+		createdUnit.callv("make_stats", enemy["stats"])
+		createdUnit.identity = opponent
+		createdUnit.name = str(createdUnit.identity, String(i))
+		if enemy.has("passives"): createdUnit.passives = enemy["passives"]
+		if enemy.has("specials"): 
+			createdUnit.moves = enemy["specials"]
+			createdUnit.allMoves.append_array(createdUnit.moves)
+		$StatusManager.initialize_statuses(createdUnit)
+		$Units.add_child(createdUnit)
+		$BattleUI.setup_display(createdUnit, opponents.size())
+		set_intent(createdUnit)
+		if createdUnit.passives.size() > 0:
+			for passive in createdUnit.passives:
+				$StatusManager.add_status(createdUnit, passive, createdUnit.passives[passive])
+		i+=1
+
+func welcome_back(): #reusing an existing battle scene for a new battle
+	$BattleUI.enemyCount = 0
+	battleDone = false
+	for unit in $Units.get_children():
+		if !unit.isPlayer:
+			unit.cease_to_exist()
+		else:
+			unit.strength = 0
+			unit.ap = 0
+			unit.energy = unit.maxEnergy
+			unit.statuses.clear()
+			$StatusManager.initialize_statuses(unit)
+			unit.update_box_bars()
+			unit.update_status_ui()
+			unit.update_strength()
+	turnIndex = -1
+	create_enemies()
 	play_turn()
 
 func play_turn():
@@ -196,6 +239,7 @@ func go_button_press():
 		moveUser = moveData[2]
 		moveTarget = moveData[3]
 		yield(execute_move(), "completed")
+		if battleDone: done()
 	executionOrder.clear()
 	emit_signal("turn_taken")
 
@@ -303,6 +347,12 @@ func activate_effect():
 			else: #an int
 				newArgs.append(argument)
 		chosenMove["effect"].call_funcv(newArgs) #Run the effect function on these arguments
+
+func done():
+	if get_parent().name == "root":
+		return get_tree().change_scene("res://src/Project/Map.tscn")
+	else:
+		visible = false
 
 func generate_rewards():
 	var rewards = $Enemies.enemyList[opponents[randi() % opponents.size()]]["rewards"] #Random enemy from the opponents list gives rewards

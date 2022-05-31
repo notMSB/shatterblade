@@ -2,14 +2,21 @@ extends Node2D
 
 var lines = []
 var isActive = false
+var pointType
 
 onready var Map = get_node("../../../")
 
 func toggle_activation(active):
-	toggle_lines(active)
+	if active: 
+		Map.activeNode = self
+		if !($Sprite.visible): Map.activate_point(self.pointType)
+		$Sprite.visible = true
+		$Sprite.modulate = Color(1,1,1,1)
+	else: 
+		$Sprite.modulate = Color(.5,.1,.5,1) #special color for deactivating a previously active node
+		Map.activeNode = null
 	isActive = active
-	$Sprite.visible = active
-	if active: Map.activeNode = self
+	toggle_lines(active)
 
 func toggle_lines(toggle):
 	for line in lines:
@@ -21,17 +28,19 @@ func toggle_lines(toggle):
 
 func check_neighbor(line): #checks if a line is connected to the active node
 	if Map.activeNode:
-		print(line.points)
 		for pointPos in line.points:
 			if pointPos == Map.activeNode.position:
-				return true
+				return line
 	return false
 
 func _on_Button_pressed():
+	var movementLine
 	for line in lines:
-		if check_neighbor(line): #the nodes are adjacent
+		movementLine = check_neighbor(line)
+		if movementLine: #the nodes are adjacent
 			Map.activeNode.toggle_activation(false) #toggle off map's active node
 			toggle_activation(true) #this is now the map's active node
+			Map.subtract_time(movementLine.points)
 			return #done
 
 func _on_Button_mouse_entered():

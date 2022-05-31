@@ -47,7 +47,7 @@ func take_damage(damageVal):
 			if !isPlayer: 
 				Battle.deadEnemies += 1
 				if Battle.deadEnemies >= Battle.enemyNum:
-					print("done")
+					Battle.battleDone = true
 		return damageVal
 
 func heal(healVal):
@@ -71,6 +71,10 @@ func update_strength():
 func update_info(text):
 	if ui.get_node_or_null("Info") != null:
 		ui.get_node("Info").text = String(text)
+
+func cease_to_exist():
+	ui.queue_free()
+	queue_free()
 
 func update_status_ui():
 	var text = ""

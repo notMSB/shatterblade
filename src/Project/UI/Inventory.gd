@@ -13,7 +13,7 @@ const YMAX = 4
 const CRAFTBOXES = 3
 const DEFAULTCOLOR = Color(.53,.3,.3,1)
 const MOVEHOLDER = "moves"
-const MOVESPACES = 6
+const MOVESPACES = 5
 
 onready var iHolder = $HolderHolder/InventoryHolder
 onready var cHolder = $HolderHolder/CraftboxHolder
