@@ -34,14 +34,15 @@ func check_neighbor(line): #checks if a line is connected to the active node
 	return false
 
 func _on_Button_pressed():
-	var movementLine
-	for line in lines:
-		movementLine = check_neighbor(line)
-		if movementLine: #the nodes are adjacent
-			Map.activeNode.toggle_activation(false) #toggle off map's active node
-			toggle_activation(true) #this is now the map's active node
-			Map.subtract_time(movementLine.points)
-			return #done
+	if !Map.get_node("Events").visible:
+		var movementLine
+		for line in lines:
+			movementLine = check_neighbor(line)
+			if movementLine: #the nodes are adjacent
+				Map.activeNode.toggle_activation(false) #toggle off map's active node
+				toggle_activation(true) #this is now the map's active node
+				Map.subtract_time(ceil(movementLine.points[0].distance_to(movementLine.points[1]) * Map.DISTANCE_TIME_MULT))
+				return #done
 
 func _on_Button_mouse_entered():
 	if !isActive: #the lines are already on if it's active

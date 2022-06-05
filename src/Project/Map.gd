@@ -19,6 +19,7 @@ var startIndex
 var endIndex
 var activeNode
 
+var calledEvent
 var timeNode
 var time = 150
 var isDay = true
@@ -30,12 +31,11 @@ func _ready():
 	randomize()
 	timeNode = Time.instance()
 	add_child(timeNode)
-	if global.mapHolder:
-		print(global.mapHolder)
-	elif global.storedParty.size() > 0: 
+	if global.storedParty.size() > 0: 
 		for i in global.storedParty.size():
 			print(global.storedParty[i])
-			$HolderHolder/DisplayHolder.setup_player(global.storedParty[i], i)
+			global.storedParty[i].ui = $HolderHolder/DisplayHolder.setup_player(global.storedParty[i], i)
+			global.storedParty[i].update_hp()
 		for display in $HolderHolder/DisplayHolder.get_children():
 			display.get_node("Name").text = $Moves.get_classname(global.storedParty[display.get_index()].allowedType)
 	bottomRight = Vector2($ReferenceRect.margin_right, $ReferenceRect.margin_bottom)
@@ -66,7 +66,28 @@ func activate_point(type):
 		run_event(pool[randi() % pool.size()])
 
 func run_event(eventName):
-	print($Events.eventList[eventName]["description"])
+	calledEvent = eventName
+	$Events.visible = true
+	$Events/EventDescription.text = $Events.eventList[eventName]["description"]
+	var choice
+	var yIncrement = $Events/EventDescription.rect_size.y
+	var event
+	for i in $Events.eventList[eventName]["choices"].size():
+		event = $Events.eventList[eventName]
+		if event.has("conditions") and typeof(event["conditions"][i]) == TYPE_ARRAY: #assess the condition
+			var cond = event["conditions"][i]
+			var function = event["conditions"][i][0] #first element is the function, rest is the args
+			if !function.call_funcv(cond.slice(1, cond.size()-1)): continue #skip using it as an option if the condition is false
+		choice = ChoiceUI.instance()
+		$Events/Choices.add_child(choice)
+		choice.position.y = yIncrement
+		yIncrement += choice.get_node("Button").rect_size.y
+		choice.get_node("Info").text = event["choices"][i]
+
+func finish_event():
+	for option in $Events/Choices.get_children():
+		option.queue_free()
+	$Events.visible = false
 
 func make_points(nextPos):
 	var currentPoint = Point.instance()
@@ -140,8 +161,8 @@ func analyze_points(one, two):
 			one.lines.append(pointLine) #add line to points
 			two.lines.append(pointLine)
 
-func subtract_time(linePoints):
-	time -= ceil(linePoints[0].distance_to(linePoints[1]) * DISTANCE_TIME_MULT)
+func subtract_time(diff):
+	time -= diff
 	if time <= 0:
 		time = 150 + time
 		isDay = true
@@ -150,7 +171,6 @@ func subtract_time(linePoints):
 		isDay = false
 		timeNode.get_node("State").text = "Night"
 	timeNode.get_node("Hour").text = String(time)
-	
 
 func get_point(i, diff):
 	return $HolderHolder/PointHolder.get_child(i - diff)

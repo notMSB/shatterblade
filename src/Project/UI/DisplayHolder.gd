@@ -22,6 +22,7 @@ func setup_player(unit, playerCount):
 	var display = PlayerProfile.instance()
 	add_child(display)
 	display.get_node("Name").text = unit.name
+	unit.isPlayer = true
 	display.position.x = PLAYERXSTART + (playerCount % 2 * PLAYERINCREMENT)
 	display.position.y = PLAYERYSTART + PLAYERINCREMENT if playerCount > 1 else PLAYERYSTART
 	

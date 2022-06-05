@@ -9,6 +9,8 @@ const PARTYSIZE = 4
 const INCREMENT = 400
 const MOVES_AVAILABLE = 2
 
+var tempParty = []
+
 func _ready():
 	randomize()
 	if global.storedParty.size() > 0: global.storedParty.clear()
@@ -18,9 +20,10 @@ func create_options(number):
 	for i in number:
 		var createdUnit = Player.instance()
 		createdUnit.allowedType = random_moveType()
+		createdUnit.title = $Moves.get_classname(createdUnit.allowedType)
 		set_stats(createdUnit, BASEHP)
 		rando_moves(createdUnit, MOVES_AVAILABLE)
-		$TempParty.add_child(createdUnit)
+		tempParty.append(createdUnit)
 		make_info(createdUnit, i)
 
 func random_moveType():
@@ -39,11 +42,10 @@ func make_info(unit, index):
 	$Choices.add_child(choice)
 
 func choose(index):
-	global.storedParty.append($TempParty.get_child(index))
+	global.storedParty.append(tempParty[index])
 	for n in $Choices.get_children():
-		$Choices.remove_child(n)
-	for n in $TempParty.get_children():
-		$TempParty.remove_child(n)
+		n.queue_free()
+	tempParty.clear()
 	if global.storedParty.size() < PARTYSIZE:
 		create_options(OPTIONS)
 	else:

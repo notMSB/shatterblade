@@ -39,7 +39,7 @@ func take_damage(damageVal):
 				damageVal -= shield
 				shield = 0
 		if shield <= 0:
-			currentHealth -= floor(max(1, damageVal))
+			currentHealth -= floor(max(0, damageVal))
 		update_hp()
 		if currentHealth <= 0:
 			ui.visible = false
