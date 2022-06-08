@@ -37,8 +37,8 @@ func make_info(unit, index):
 		info += "[" + move + "] "
 	var choice = ChoiceUI.instance()
 	choice.get_node("Info").text = info
-	#choice.position.x = INCREMENT * index
-	choice.position.y = INCREMENT * index / 2
+	choice.position.x = INCREMENT
+	choice.position.y = INCREMENT * index *.5 + INCREMENT*.25
 	$Choices.add_child(choice)
 
 func choose(index):

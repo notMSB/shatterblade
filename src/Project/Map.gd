@@ -17,7 +17,7 @@ var bottomRight
 var columnNum
 var startIndex
 var endIndex
-var activeNode
+var activePoint
 
 var calledEvent
 var timeNode
@@ -25,7 +25,11 @@ var time = 150
 var isDay = true
 
 var battleWindow
-enum pointTypes {start, battle, event}
+enum pointTypes {start, battle, event, quest, visited}
+
+var canEnd = false
+var checkedLines = []
+var nextCheck = []
 
 func _ready():
 	randomize()
@@ -105,22 +109,116 @@ func make_points(nextPos):
 			organize_lines()
 			startIndex.pointType = pointTypes.start
 			startIndex.toggle_activation(true)
-			return #done
+			startIndex.set_name("Start")
+			determine_distances(startIndex)
+			return clean_up()
 		nextPos.x = INCREMENT
 	make_points(nextPos)
+
+func categorize_points():
+	var townList = []
+	var fourList = []
+	var dungeonList = []
+	var threeList = []
+	#var dungeonList = []
+	for point in $HolderHolder/PointHolder.get_children():
+		if point.visible and point.clicksFromStart:
+			if point.clicksFromStart >= 3 and point.clicksFromStart < endIndex.clicksFromStart:
+				if point.lines.size() >= 5:
+					townList.append(point)
+				elif point.lines.size() == 4:
+					fourList.append(point)
+				elif point.lines.size() == 3:
+					threeList.append(point)
+				elif point.lines.size() == 2:
+					dungeonList.append(point)
+	if townList.size() < 3: 
+		townList.append_array(fourList)
+		print("appending backup towns")
+	var towns = place_landmarks(townList, "Town")
+	if dungeonList.size() < 3:
+		dungeonList.append_array(threeList)
+		print("appending backup dungeons")
+	var dungeons = place_landmarks(dungeonList, "Dungeon")
+	if towns and dungeons: finalize_dungeons(towns, dungeons)
+
+func place_landmarks(list, landmark):
+	if list.size() <= 1: 
+		print("not enough")
+		return
+	var closest = list[0]
+	var furthest = list[0]
+	list.remove(0)
+	for point in list:
+		if point.clicksFromStart > furthest.clicksFromStart:
+			furthest = point
+		if point.clicksFromStart < closest.clicksFromStart:
+			closest = point
+	set_label(closest, str("Closest ", landmark), true)
+	set_label(furthest, str("Furthest ", landmark), true)
+	return [closest, furthest]
+
+func finalize_dungeons(towns, dungeons):
+	var connection
+	var connections = []
+	for dungeon in dungeons:
+		for line in dungeon.lines:
+			for point in line.linePoints:
+				if !(towns.has(point) or dungeons.has(point) or connections.has(point) or endIndex == point):
+					connection = point
+		if connection:
+			set_label(connection, "Connection", true)
+			connections.append(connection)
+			connection = null
+					
+
+func clean_up():
+	for point in $HolderHolder/PointHolder.get_children():
+		point.set_name(point.clicksFromStart)
+	set_label(endIndex, "End", true)
+	if !canEnd: 
+		print("disaster")
+	else: categorize_points()
+
+func set_label(point, label, distance = false):
+	if distance: point.set_name(str(label, " ", point.clicksFromStart))
+	else: point.set_name(label)
 
 func organize_lines():
 	for point in $HolderHolder/PointHolder.get_children():
 		if point.lines.empty() and point.visible: point.visible = false #remove orphaned points
 		if !point.visible: #kill lines involving invisible points
 			for line in point.lines:
-				line.queue_free()
+				line.free()
 		else: #set start and end index among visible points, give points events
 			if !startIndex: startIndex = point
 			elif point.position.x < startIndex.position.x: startIndex = point
 			if !endIndex: endIndex = point
 			elif point.position.x >= endIndex.position.x: endIndex = point
 			point.pointType = pointTypes.event
+
+func determine_distances(checkPoint): #gives every node a distance from start and returns if the end node is accessible
+	if checkPoint == startIndex: checkPoint.clicksFromStart = 0
+	#print(str("Evaluating Point at: ", checkPoint.clicksFromStart))
+	var killLines = []
+	for line in checkPoint.lines:
+		if is_instance_valid(line):
+			for point in line.linePoints:
+				if !point.visible: continue
+				if point.clicksFromStart == null:
+					point.clicksFromStart = checkPoint.clicksFromStart+1
+					nextCheck.append(point)
+					#print(str("Appending point.", " Total lines: ", checkPoint.lines.size()))
+				if point == endIndex: 
+					canEnd = true
+		else: #kill deleted lines
+			killLines.append(line)
+	for line in killLines:
+		checkPoint.lines.erase(line)
+	if !nextCheck.empty():
+		var nextPoint = nextCheck[0]
+		nextCheck.remove(0)
+		determine_distances(nextPoint)
 
 func determine_neighbors(currentPoint):
 	var left = true #sometimes you just need a buncha booleans
@@ -154,6 +252,8 @@ func analyze_points(one, two):
 			$HolderHolder/LineHolder.add_child(pointLine)
 			pointLine.add_point(one.position) #add points to line
 			pointLine.add_point(two.position)
+			pointLine.linePoints.append(one)
+			pointLine.linePoints.append(two)
 			var xPos = (one.position.x + two.position.x)*.5
 			var yPos = (one.position.y + two.position.y)*.5
 			pointLine.get_node("Text").rect_position = Vector2(xPos, yPos) #set up travel time text
