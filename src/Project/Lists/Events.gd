@@ -2,10 +2,13 @@ extends Node2D
 
 onready var Map = get_parent()
 var eventList
-enum timings {day, overworld, night, dungeon}
+enum timings {day, overworld, night, dungeon, special}
 
 func _ready():
 	eventList = {
+	"Dungeon": {"time": timings.special, "description": "Enter dungeon?",
+		"choices": ["Yes", "No"],
+		"outcomes": [[funcref(self, "enter_dungeon")], [funcref(self, "advance")]]},
 	"Test": {"time": timings.night, "description": "hello 1",
 		"choices": ["-4", "+4"],
 		"outcomes": [[funcref(self, "adjust_time"), -4], [funcref(self, "adjust_time"), 4]]},
@@ -66,6 +69,13 @@ func place_quest():
 		var chosenPoint = validPoints[randi() % validPoints.size()]
 		chosenPoint.pointType = Map.pointTypes.quest
 		Map.set_label(chosenPoint, "Quest", true)
+
+func enter_dungeon():
+	var index = Map.activePoint.info["dungeonIndex"]
+	var dungeons = Map.get_node("HolderHolder/DungeonHolder")
+	Map.savedPoint = Map.activePoint
+	dungeons.get_child(index).enter()
+	Map.currentDungeon = dungeons.get_child(index)
 
 func advance():
 	pass

@@ -5,6 +5,7 @@ export (PackedScene) var Line
 export (PackedScene) var Time
 export (PackedScene) var Battle
 export (PackedScene) var ChoiceUI
+export (PackedScene) var Dungeon
 
 const INCREMENT = 150
 const KILLDISTANCE = 140
@@ -18,14 +19,16 @@ var columnNum
 var startIndex
 var endIndex
 var activePoint
+var savedPoint
 
 var calledEvent
 var timeNode
 var time = 150
 var isDay = true
+var currentDungeon = false
 
 var battleWindow
-enum pointTypes {start, battle, event, quest, visited}
+enum pointTypes {none, start, battle, event, quest, visited, town, dungeon} #Points to the left of "visited" turn off after being activated
 
 var canEnd = false
 var checkedLines = []
@@ -58,6 +61,8 @@ func activate_point(type):
 		else:
 			battleWindow.visible = true
 			battleWindow.welcome_back()
+	elif type == pointTypes.dungeon:
+		run_event("Dungeon")
 	elif type == pointTypes.event:
 		var list = $Events.eventList
 		var pool = []
@@ -160,17 +165,38 @@ func place_landmarks(list, landmark):
 
 func finalize_dungeons(towns, dungeons):
 	var connection
+	var cLine
 	var connections = []
-	for dungeon in dungeons:
-		for line in dungeon.lines:
+	for i in dungeons.size():
+		dungeons[i].pointType = pointTypes.dungeon
+		dungeons[i].info["dungeonIndex"] = i
+		for line in dungeons[i].lines:
 			for point in line.linePoints:
 				if !(towns.has(point) or dungeons.has(point) or connections.has(point) or endIndex == point):
 					connection = point
-		if connection:
+					cLine = line
+		if connection: #Set up the dungeon and link the two points together
+			cLine.dungeonize()
+			var newDungeon = Dungeon.instance()
+			$HolderHolder/DungeonHolder.add_child(newDungeon)
+			newDungeon.setup(cLine)
+			if dungeons[i].position.x < connection.position.x: #0 is left 1 is right
+				dungeons[i].info["direction"] = 0
+				connection.info["direction"] = 1
+				newDungeon.originLocation = dungeons[i]
+				newDungeon.exitLocation = connection
+			else:
+				dungeons[i].info["direction"] = 1
+				connection.info["direction"] = 0
+				newDungeon.originLocation = connection
+				newDungeon.exitLocation = dungeons[i]
 			set_label(connection, "Connection", true)
+			connection.pointType = pointTypes.dungeon
 			connections.append(connection)
+			connection.info["dungeonIndex"] = i
+			newDungeon.originLocation = dungeons[i]
+			newDungeon.exitLocation = connection
 			connection = null
-					
 
 func clean_up():
 	for point in $HolderHolder/PointHolder.get_children():
@@ -178,7 +204,8 @@ func clean_up():
 	set_label(endIndex, "End", true)
 	if !canEnd: 
 		print("disaster")
-	else: categorize_points()
+	else: 
+		categorize_points()
 
 func set_label(point, label, distance = false):
 	if distance: point.set_name(str(label, " ", point.clicksFromStart))
