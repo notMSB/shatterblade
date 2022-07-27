@@ -30,7 +30,7 @@ var products = {
 }
 
 func test():
-	sort_then_combine(c.blade, c.fur)
+	break_down("Quick Attack")
 
 func sort_then_combine(one, two):
 	if one <= two:
@@ -40,4 +40,11 @@ func sort_then_combine(one, two):
 
 func combine(one, two):
 	return products[one][two]
-	
+
+func break_down(moveName):
+	for i in products.size():
+		for j in products[i].size():
+			if products[i][i+j] == moveName:
+				print(str(c.keys()[i]), "  ", c.keys()[i+j])
+				return [c.keys()[i], c.keys()[i+j]]
+	return "X"

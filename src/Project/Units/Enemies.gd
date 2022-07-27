@@ -1,48 +1,20 @@
 extends Node
 
 var enemyList = {
-	"Bat": {"stats": [15], "passives": {"Dodgy": 1}, "specials": ["Vampire"], "rewards": [
-		{"name": "Vampire", "type": "specials", "weight": 50},
-		{"name": "Dodge", "type": "specials", "weight": 50}, 
-		{"name": "Dodgy", "type": "passives", "weight": 5},
-		{"name": "Money", "loot": true, "amount": 5, "weight": 50}
-	]},
-	"Bird": {"stats": [20], "specials": ["Dive Bomb", "Triple Hit"], "rewards": [
-		{"name": "Dive Bomb", "type": "specials", "weight": 50}, 
-		{"name": "Triple Hit", "type": "specials", "weight": 50},
-		{"name": "Money", "loot": true, "amount": 5, "weight": 50}
-	]},
-	"Flower": {"stats": [15], "passives": {"Counter": 1}, "specials": ["Growth"], "rewards": [
-		{"name": "Growth", "type": "specials", "weight": 50},
-		{"name": "Sucker Punch", "type": "specials", "weight": 50}, 
-		{"name": "Counter", "type": "passives", "weight": 5},
-		{"name": "Money", "loot": true, "amount": 5, "weight": 50}
-	]},
-	"Rat": {"stats": [10], "passives": {"Dodgy": 1}, "specials": ["Plague"], "rewards": [
-		{"name": "Plague", "type": "specials", "weight": 50},
-		{"name": "Hide", "type": "specials", "weight": 50}, 
-		{"name": "Dodgy", "type": "passives", "weight": 5},
-		{"name": "Money", "loot": true, "amount": 5, "weight": 50}
-	]},
-	"Scorpion": {"stats": [25], "specials": ["Piercing Sting", "Crusher Claw"], "rewards": [
-		{"name": "Piercing Sting", "type": "specials", "weight": 50}, 
-		{"name": "Crusher Claw", "type": "specials", "weight": 50},
-		{"name": "Money", "loot": true, "amount": 5, "weight": 50}
-	]},
-	"Skeleton": {"stats": [30], "specials": ["Power Attack", "Coldsteel"], "rewards": [
-		{"name": "Power Attack", "type": "specials", "weight": 50}, 
-		{"name": "Coldsteel", "type": "specials", "weight": 50},
-		{"name": "Money", "loot": true, "amount": 5, "weight": 50}
-	]},
-	"Snake": {"stats": [15], "passives": {"Venomous": 0}, "specials": ["Constrict"], "rewards": [
-		{"name": "Constrict", "type": "specials", "weight": 50},
-		{"name": "Poison Strike", "type": "specials", "weight": 50}, 
-		{"name": "Venomous", "type": "passives", "weight": 5},
-		{"name": "Money", "loot": true, "amount": 5, "weight": 50}
-	]},
-	"Wolf": {"stats": [25], "specials": ["Take Down", "Frostfang"], "rewards": [
-		{"name": "Take Down", "type": "specials", "weight": 50}, 
-		{"name": "Frostfang", "type": "specials", "weight": 50},
-		{"name": "Money", "loot": true, "amount": 5, "weight": 50}
-	]},
+	"Bat": {"stats": [15], "passives": {"Dodgy": 1}, "specials": ["Vampire"], 
+		"rewards": ["wing", "fang"]},
+	"Bird": {"stats": [20], "specials": ["Dive Bomb", "Triple Hit"], 
+		"rewards": ["wing", "talon"]},
+	"Flower": {"stats": [15], "passives": {"Counter": 1}, "specials": ["Growth"], 
+		"rewards": ["sap", "venom"]},
+	"Rat": {"stats": [10], "passives": {"Dodgy": 1}, "specials": ["Plague"], 
+		"rewards": ["fur", "fang"]},
+	"Scorpion": {"stats": [25], "specials": ["Piercing Sting", "Crusher Claw"], 
+		"rewards": ["blade", "venom"]},
+	"Skeleton": {"stats": [30], "specials": ["Power Attack", "Coldsteel"], 
+		"rewards": ["blade", "bone"]},
+	"Snake": {"stats": [15], "passives": {"Venomous": 0}, "specials": ["Constrict"], 
+		"rewards": ["fang", "venom"]},
+	"Wolf": {"stats": [25], "specials": ["Take Down", "Frostfang"], 
+		"rewards": ["fur", "fang"]},
 }

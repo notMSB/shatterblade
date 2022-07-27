@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://src/Project/UI/Inventory.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/UI/ItemBox.tscn" type="PackedScene" id=2]
@@ -9,9 +9,14 @@
 [ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=7]
 [ext_resource path="res://src/Project/UI/PlayerProfile.tscn" type="PackedScene" id=8]
 [ext_resource path="res://src/Project/UI/PlayerMove.tscn" type="PackedScene" id=9]
+[ext_resource path="res://src/Project/UI/Trading.gd" type="Script" id=10]
+[ext_resource path="res://src/Project/Units/Enemies.gd" type="Script" id=11]
 
 [sub_resource type="DynamicFont" id=1]
 size = 34
+font_data = ExtResource( 6 )
+
+[sub_resource type="DynamicFont" id=2]
 font_data = ExtResource( 6 )
 
 [node name="Inventory" type="Node2D"]
@@ -28,15 +33,32 @@ script = ExtResource( 5 )
 visible = false
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 595.0
-margin_top = 475.0
+margin_top = 547.0
 margin_right = 703.0
-margin_bottom = 543.0
+margin_bottom = 615.0
 custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
 text = "Craft"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ResetButton" type="Button" parent="."]
+visible = false
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 595.0
+margin_top = 547.0
+margin_right = 703.0
+margin_bottom = 615.0
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+text = "Reset"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -70,5 +92,36 @@ script = ExtResource( 7 )
 PlayerProfile = ExtResource( 8 )
 PlayerMove = ExtResource( 9 )
 
+[node name="TradeHolder" type="Node2D" parent="HolderHolder"]
+script = ExtResource( 10 )
+
+[node name="Enemies" type="Node2D" parent="HolderHolder/TradeHolder"]
+script = ExtResource( 11 )
+
+[node name="Initial" type="Label" parent="."]
+margin_left = 556.451
+margin_top = 36.0915
+margin_right = 651.451
+margin_bottom = 56.0915
+custom_fonts/font = SubResource( 2 )
+text = "0"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Current" type="Label" parent="."]
+margin_left = 644.798
+margin_top = 37.4101
+margin_right = 739.798
+margin_bottom = 57.4101
+custom_fonts/font = SubResource( 2 )
+text = "0"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="CraftButton" to="." method="confirm_craft"]
+[connection signal="pressed" from="ResetButton" to="." method="reset_trade"]
 [connection signal="pressed" from="ExitButton" to="." method="exit"]

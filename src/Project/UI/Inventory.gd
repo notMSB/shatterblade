@@ -17,17 +17,27 @@ const MOVESPACES = 5
 
 onready var iHolder = $HolderHolder/InventoryHolder
 onready var cHolder = $HolderHolder/CraftboxHolder
+onready var tHolder = $HolderHolder/TradeHolder
 
 var productBox
 var otherSelection #Used to sync a selection across all non-inventory box holders
 
 var boxesCount = Vector2(0,0)
 
+var initialTraderValue
+var currentTraderValue
+
 func _ready():
+	tHolder.assign_component_values()
 	if global.itemDict.empty():
-		global.itemDict = {"fang": 1, "wing": 2, "talon": 9, "sap": 7, "venom": 2, "fur": 3, "blade": 4, "bone": 2, "wood": 1, "moves": []}
+		global.itemDict = {"fang": 1, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 1, "bone": 2, "wood": 1, "moves": []}
 	make_grid()
-	make_craftboxes()
+	#make_actionboxes(CRAFTBOXES, true)
+	make_actionboxes(tHolder.stock.size())
+	initialTraderValue = tHolder.get_inventory_value(tHolder.stock)
+	currentTraderValue = initialTraderValue
+	$Initial.text = String(initialTraderValue)
+	$Current.text = String(currentTraderValue)
 	if global.storedParty.size() > 0: 
 		for i in global.storedParty.size():
 			while global.storedParty[i].moves.size() < MOVESPACES:
@@ -44,7 +54,8 @@ func make_grid():
 			for move in global.itemDict[MOVEHOLDER]:
 				identify_product(make_inventorybox(move))
 		else:
-			make_inventorybox(item)
+			for i in global.itemDict[item]:
+				make_inventorybox(item)
 	while YMAX > boxesCount.y: #fill out the rest of the grid
 		make_inventorybox("X")
 
@@ -54,8 +65,7 @@ func make_inventorybox(boxName):
 	box.position.x = XSTART + (boxesCount.x * XINCREMENT)
 	box.position.y = YSTART + (boxesCount.y * YINCREMENT)
 	box.get_node("Name").text = boxName
-	if global.itemDict.has(boxName): box.get_node("Info").text = String(global.itemDict[boxName])
-	else: box.get_node("Info").text = ""
+	box.get_node("Info").text = String(tHolder.get_item_value(boxName))
 	incrementBoxCount()
 	return box
 	
@@ -65,36 +75,67 @@ func incrementBoxCount():
 		boxesCount.x = 0
 		boxesCount.y +=1
 
-func make_craftboxes():
+func make_actionboxes(boxCount, isCraft = false):
 	var box
-	for i in CRAFTBOXES:
+	var usedHolder
+	if isCraft: usedHolder = cHolder
+	else: usedHolder = $HolderHolder/TradeHolder
+	for i in boxCount:
 		box = ItemBox.instance()
-		cHolder.add_child(box)
-		box.position.x = XSTART*1.25 + (i*i*XINCREMENT)
+		usedHolder.add_child(box)
+		if isCraft: box.position.x = XSTART*1.25 + (i*i*XINCREMENT) #different spacing for crafting/trading
+		else: box.position.x = XSTART*1.25 + (i * XINCREMENT)
 		box.position.y = YSTART*2.5
-		box.get_node("Info").visible = false
-		if i == CRAFTBOXES - 1:
+		if isCraft and i == boxCount - 1: #The crafting product box shouldn't be clickable
 			box.get_node("Button").visible = false
 			productBox = box
-	
+		if !isCraft:
+			box.get_node("Name").text = usedHolder.stock[i]
+			$ResetButton.visible = true
+			identify_product(box)
+
 func select_box(box = null):
 	if box.moveType != $Moves.moveType.basic:
 		var boxParent = box.get_parent()
 		deselect_box(boxParent.selectedBox)
 		box.get_parent().selectedBox = box
-		if boxParent != iHolder: otherSelection = box
 		box.get_node("ColorRect").color = Color(.5,.1,.5,1)
-		check_crafts()
+		check_swap(box)
 	
 func deselect_box(box):
 	if box: 
 		identify_product(box)
 		box.get_parent().selectedBox = null
-		if otherSelection: otherSelection = null #if the box and the otherselection are the same they should both be nulled out
-	elif otherSelection: #if the otherselection is not in the same region as the box
-		identify_product(otherSelection)
-		otherSelection.get_parent().selectedBox = null
+	else:
+		print("no box")
+
+func deselect_multi(boxes):
+	for box in boxes:
+		deselect_box(box)
+	otherSelection = null
+
+func check_swap(selectedBox):
+	if !otherSelection:
+		otherSelection = selectedBox
+	else:
+		swap_boxes(selectedBox, otherSelection)
+
+func swap_boxes(one, two):
+	var temp = one.get_node("Name").text
+	one.get_node("Name").text = two.get_node("Name").text
+	two.get_node("Name").text = temp
+	deselect_multi([one, two])
+	assess_trade_value()
 	
+func assess_trade_value():
+	var newStock = []
+	for child in tHolder.get_children():
+		if child.get_child_count() > 0: #if it has a name
+			newStock.append(child.get_node("Name").text)
+	currentTraderValue = tHolder.get_inventory_value(newStock)
+	$Current.text = String(currentTraderValue)
+	$ExitButton.visible = true if currentTraderValue >= initialTraderValue else false
+
 func check_crafts():
 	if iHolder.selectedBox and otherSelection: #if both sections have a selection
 		var iName = iHolder.selectedBox.get_node("Name").text
@@ -147,6 +188,7 @@ func identify_product(box):
 		elif productType == $Moves.moveType.magic: box.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
 		else: box.get_node("ColorRect").color = DEFAULTCOLOR
 	else: box.get_node("ColorRect").color = DEFAULTCOLOR
+	box.get_node("Info").text = String(tHolder.get_item_value(boxName))
 
 
 func confirm_craft(): #Subtract one from each ingredient from inventory and put in the new product
@@ -183,10 +225,10 @@ func confirm_craft(): #Subtract one from each ingredient from inventory and put 
 		cBox.get_node("Name").text = "X"
 	$CraftButton.visible = false
 
-func exit():
+func exit(): #Save inventory and leave
 	for i in global.storedParty.size():
 		global.storedParty[i].moves.clear()
-		for box in $HolderHolder/DisplayHolder.get_child(i).get_node("MoveBoxes").get_children(): #Just accessing the moveboxes
+		for box in $HolderHolder/DisplayHolder.get_child(i).get_node("MoveBoxes").get_children(): #Accessing the moveboxes
 			var moveName = box.get_node("Name").text
 			if $Moves.moveList[moveName]["type"] > $Moves.moveType.basic:
 				 global.storedParty[i].moves.append(moveName)
@@ -198,7 +240,5 @@ func exit():
 			global.itemDict[MOVEHOLDER].append(iName)
 	return get_tree().change_scene("res://src/Project/Debug.tscn")
 
-
-
-
-
+func reset_trade():
+	return get_tree().reload_current_scene()
