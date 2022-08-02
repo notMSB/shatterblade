@@ -9,6 +9,9 @@ func _ready():
 	"Dungeon": {"time": timings.special, "description": "Enter dungeon?",
 		"choices": ["Yes", "No"],
 		"outcomes": [[funcref(self, "enter_dungeon")], [funcref(self, "advance")]]},
+	"Store": {"time": timings.special, "description": "Enter store?",
+		"choices": ["Yes", "No"],
+		"outcomes": [[funcref(self, "activate_shop")], [funcref(self, "advance")]]},	
 	"Test": {"time": timings.night, "description": "hello 1",
 		"choices": ["-4", "+4"],
 		"outcomes": [[funcref(self, "adjust_time"), -4], [funcref(self, "adjust_time"), 4]]},
@@ -76,6 +79,9 @@ func enter_dungeon():
 	Map.savedPoint = Map.activePoint
 	dungeons.get_child(index).enter()
 	Map.currentDungeon = dungeons.get_child(index)
+
+func activate_shop():
+	pass
 
 func advance():
 	pass

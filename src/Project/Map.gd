@@ -4,6 +4,7 @@ export (PackedScene) var Point
 export (PackedScene) var Line
 export (PackedScene) var Time
 export (PackedScene) var Battle
+export (PackedScene) var Inventory
 export (PackedScene) var ChoiceUI
 export (PackedScene) var Dungeon
 
@@ -13,6 +14,8 @@ const MAXDISTANCE = 250
 const FUZZ = 35
 const CORNER_CHECK = 20
 const DISTANCE_TIME_MULT = .05
+
+const MOVESPACES = 5
 
 var bottomRight
 var columnNum
@@ -28,6 +31,7 @@ var isDay = true
 var currentDungeon = false
 
 var battleWindow
+var inventoryWindow
 enum pointTypes {none, start, battle, event, quest, visited, town, dungeon} #Points to the left of "visited" turn off after being activated
 
 var canEnd = false
@@ -40,7 +44,8 @@ func _ready():
 	add_child(timeNode)
 	if global.storedParty.size() > 0: 
 		for i in global.storedParty.size():
-			print(global.storedParty[i])
+			while global.storedParty[i].moves.size() < MOVESPACES:
+				global.storedParty[i].moves.append("X")
 			global.storedParty[i].ui = $HolderHolder/DisplayHolder.setup_player(global.storedParty[i], i)
 			global.storedParty[i].update_hp()
 		for display in $HolderHolder/DisplayHolder.get_children():
@@ -50,17 +55,32 @@ func _ready():
 	columnNum = int(ceil(bottomRight.x/INCREMENT) - 1) #ceil-1 instead of floor prevents strangeness with exact divisions
 	#print(columnNum)
 	make_points(Vector2(INCREMENT,INCREMENT*.5))
+	setup_battle()
+	for display in $HolderHolder/DisplayHolder.get_children():
+		display.set_battle()
+		for tracker in display.get_node("Trackers").get_children():
+			tracker.visible = false
+	setup_inventory()
+
+func setup_inventory():
+	inventoryWindow = Inventory.instance()
+	add_child(inventoryWindow)
+	inventoryWindow.visible = false
+
+func setup_battle():
+	battleWindow = Battle.instance()
+	add_child(battleWindow)
+	battleWindow.visible = false
+
+func activate_inventory():
+	inventoryWindow.welcome_back(inventoryWindow.iModes.default)
 
 func activate_point(type):
 	if type == pointTypes.start:
 		print("Start")
 	elif type == pointTypes.battle:
-		if !battleWindow:
-			battleWindow = Battle.instance()
-			add_child(battleWindow)
-		else:
-			battleWindow.visible = true
-			battleWindow.welcome_back()
+		battleWindow.visible = true
+		battleWindow.welcome_back()
 	elif type == pointTypes.dungeon:
 		run_event("Dungeon")
 	elif type == pointTypes.event:
@@ -222,7 +242,7 @@ func organize_lines():
 			elif point.position.x < startIndex.position.x: startIndex = point
 			if !endIndex: endIndex = point
 			elif point.position.x >= endIndex.position.x: endIndex = point
-			point.pointType = pointTypes.event
+			point.pointType = pointTypes.battle
 
 func determine_distances(checkPoint): #gives every node a distance from start and returns if the end node is accessible
 	if checkPoint == startIndex: checkPoint.clicksFromStart = 0

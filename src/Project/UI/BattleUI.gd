@@ -14,14 +14,22 @@ var targetsVisible = false
 var playerCount = 0
 var enemyCount = 0
 
+var playerHolder
+
 var currentPlayer
+
+func _ready():
+	var grandpa = get_node("../../")
+	playerHolder = $DisplayHolder if grandpa.name == "root" else grandpa.get_node("HolderHolder/DisplayHolder")
 
 func setup_display(unit, totalEnemies):
 	var display
 	if unit.isPlayer:
 		currentPlayer = unit
-		unit.moves.sort_custom(self, "sort_order") #Movebox resource bars appreciate sorted movelist
-		display = $DisplayHolder.setup_player(unit, playerCount)
+		if unit.boxHolder == null:
+			display = playerHolder.setup_player(unit, playerCount)
+		else:
+			display = unit.boxHolder.get_parent()
 		set_trackers(display, display.get_node("MoveBoxes")) #moveboxes toggled on at round start
 		playerCount += 1
 	else: #Enemy
@@ -81,11 +89,6 @@ func toggle_channels(boxes):
 		if Moves.moveList[move].has("channel"):
 			toggle_single(box, false)
 
-func sort_order(a, b):
-	if Moves.moveList[a]["resVal"] > Moves.moveList[b]["resVal"]:
-		return false
-	return true
-
 func set_trackers(display, boxes):
 	var firstMargin
 	var lastMargin
@@ -93,25 +96,31 @@ func set_trackers(display, boxes):
 	var prevBox = boxes.get_children()[0]
 	
 	for box in boxes.get_children():
-		if box.moveType == Moves.moveType.basic: continue
-		if box.moveType != prevBox.moveType or (box.moveType == Moves.moveType.magic and box.resValue != prevBox.resValue):
-			check_box_count(boxCount, display, firstMargin, lastMargin, prevBox.moveType)
-			boxCount = []
-			firstMargin = null
-			lastMargin = null
-		boxCount.append(box)
-		if firstMargin:
-			lastMargin = box.position.x
-		else:
-			firstMargin = box.position.x
-			lastMargin = box.position.x
-		prevBox = box
+		if box.visible:
+			if box.moveType == Moves.moveType.basic: continue
+			if box.moveType != prevBox.moveType or (box.moveType == Moves.moveType.magic and box.resValue != prevBox.resValue):
+				check_box_count(boxCount, display, firstMargin, lastMargin, prevBox.moveType)
+				boxCount = []
+				firstMargin = null
+				lastMargin = null
+			boxCount.append(box)
+			if firstMargin:
+				lastMargin = box.position.x
+			else:
+				firstMargin = box.position.x
+				lastMargin = box.position.x
+			prevBox = box
 	check_box_count(boxCount, display, firstMargin, lastMargin, prevBox.moveType)
+
+func toggle_trackers(toggle):
+	for display in playerHolder.get_children():
+		for tracker in display.get_node("Trackers").get_children():
+			tracker.visible = toggle
 
 func check_box_count(count, display, firstMargin, lastMargin, barType):
 	if count.size() > 0:
 		var tracker = ResourceTracker.instance()
-		display.add_child(tracker)
+		display.get_node("Trackers").add_child(tracker)
 		link_boxes(tracker, count, firstMargin, lastMargin, barType)
 
 func link_boxes(tracker, boxCount, firstMargin, lastMargin, barType):
@@ -131,8 +140,10 @@ func link_boxes(tracker, boxCount, firstMargin, lastMargin, barType):
 		bar.set_max(currentPlayer.maxAP)
 	elif barType == Moves.moveType.trick:
 		bar.set_max(currentPlayer.maxEnergy)
-	else:
+	elif barType == Moves.moveType.magic:
 		bar.set_max(currentPlayer.maxCharges[boxCount[0].resValue])
+	else:
+		pass
 	barText.rect_position.x += PLAYERINCREMENT*.5*(boxCount.size() - 1) #center the text
 
 func clear_menus():
@@ -140,12 +151,19 @@ func clear_menus():
 	$Description.visible = false
 
 func toggle_buttons(toggle, units = []):
-	for child in $DisplayHolder.get_children():
-			child.get_node("Button").visible = false
 	if toggle:
-		for unit in units:
-			$DisplayHolder.get_child(unit.get_index()).get_node("Button").visible = toggle
+		var usedHolder = playerHolder if units[0].isPlayer else $DisplayHolder
+		if units.size() == 1 and usedHolder == playerHolder:
+			usedHolder.get_child(units[0].get_index()).get_node("Button").visible = true
+		else:
+			for child in usedHolder.get_children():
+				child.get_node("Button").visible = true
 		targetsVisible = true
+	else:
+		for child in playerHolder.get_children():
+			child.get_node("Button").visible = false
+		for child in $DisplayHolder.get_children():
+			child.get_node("Button").visible = false
 
 func set_description(moveName, move):
 	$Description.visible = true

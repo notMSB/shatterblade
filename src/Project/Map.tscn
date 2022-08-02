@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://src/Project/Map.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/Lists/Moves.gd" type="Script" id=2]
@@ -14,9 +14,14 @@
 [ext_resource path="res://src/Project/UI/ChoiceUI.tscn" type="PackedScene" id=12]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=13]
 [ext_resource path="res://src/Project/Dungeon.tscn" type="PackedScene" id=14]
+[ext_resource path="res://src/Project/UI/Inventory.tscn" type="PackedScene" id=15]
 
 [sub_resource type="DynamicFont" id=2]
 size = 20
+font_data = ExtResource( 13 )
+
+[sub_resource type="DynamicFont" id=1]
+size = 34
 font_data = ExtResource( 13 )
 
 [node name="Map" type="Node2D"]
@@ -25,6 +30,7 @@ Point = ExtResource( 7 )
 Line = ExtResource( 8 )
 Time = ExtResource( 9 )
 Battle = ExtResource( 10 )
+Inventory = ExtResource( 15 )
 ChoiceUI = ExtResource( 12 )
 Dungeon = ExtResource( 14 )
 
@@ -81,3 +87,21 @@ __meta__ = {
 }
 
 [node name="Choices" type="Node2D" parent="Events"]
+
+[node name="InventoryButton" type="Button" parent="."]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 1.0
+margin_top = 470.0
+margin_right = 109.0
+margin_bottom = 538.0
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "Items"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="InventoryButton" to="." method="activate_inventory"]

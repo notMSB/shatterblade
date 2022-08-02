@@ -46,8 +46,7 @@ func take_damage(damageVal):
 			damageVal += currentHealth #Returns amount of damage actually dealt for recoil reasons
 			if !isPlayer: 
 				Battle.deadEnemies += 1
-				if Battle.deadEnemies >= Battle.enemyNum:
-					Battle.battleDone = true
+				Battle.evaluate_completion()
 		return damageVal
 
 func heal(healVal):

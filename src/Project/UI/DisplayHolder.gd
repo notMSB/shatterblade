@@ -4,7 +4,7 @@ export (PackedScene) var UnitUI
 export (PackedScene) var PlayerProfile
 export (PackedScene) var PlayerMove
 
-const DefaultMoves = 2
+const DEFAULTMOVES = 2
 const PLAYERXSTART = 600
 const PLAYERYSTART = 600
 const PLAYERINCREMENT = 80
@@ -15,10 +15,6 @@ const XINCREMENT = 300
 onready var Moves = get_node("../../Moves") #obtain uncle
 
 func setup_player(unit, playerCount):
-	var moveBox
-	var xPos
-	var move
-	
 	var display = PlayerProfile.instance()
 	add_child(display)
 	display.get_node("Name").text = unit.name
@@ -26,40 +22,69 @@ func setup_player(unit, playerCount):
 	display.position.x = PLAYERXSTART + (playerCount % 2 * PLAYERINCREMENT)
 	display.position.y = PLAYERYSTART + PLAYERINCREMENT if playerCount > 1 else PLAYERYSTART
 	
-	for i in DefaultMoves + unit.moves.size():
-		moveBox = PlayerMove.instance()
-		moveBox.user = unit
-		unit.boxHolder = display.get_node("MoveBoxes")
-		unit.boxHolder.add_child(moveBox)
-		xPos = moveBox.position.x
-		if i < DefaultMoves: #set up attack and defend defaults
-			moveBox.position.x = xPos - PLAYERINCREMENT if playerCount % 2 == 0 else xPos + PLAYERINCREMENT
-			moveBox.get_node("ColorRect").rect_size.y = 40
-			if i == 0:
-				move = "Attack"
-				moveBox.position.y -= PLAYERINCREMENT*.25
-			else:
-				move = "Defend"
-				moveBox.position.y += PLAYERINCREMENT*.25
-			moveBox.moveType = Moves.moveType.basic
-		else: #set up other moves
-			move = unit.moves[i - DefaultMoves]
-			moveBox.moveType = Moves.moveList[move]["type"]
-			if Moves.moveList[move].has("resVal"):
-				moveBox.resValue = Moves.moveList[move]["resVal"]
-			moveBox.position.x = xPos - PLAYERINCREMENT*i if playerCount % 2 == 0 else xPos + PLAYERINCREMENT*i
-		moveBox.moves.append(move)
-		if moveBox.moveType == Moves.moveType.trick: moveBox.moves.append("Reload")
-		moveBox.get_node("Name").text = move
-		var button = moveBox.get_node("Button")
-		button.rect_size = moveBox.get_node("ColorRect").rect_size
-		
+	add_moves(unit, display, playerCount)
+	
 	return display
-	
-	
+
+func add_moves(unit, display, playerCount):
+	unit.boxHolder = display.get_node("MoveBoxes")
+	for i in DEFAULTMOVES + unit.moves.size():
+		create_move(unit, playerCount, i)
+	cleanup_moves(unit)
+
+func create_move(unit, playerCount, posIndex):
+	var move
+	var moveBox = PlayerMove.instance()
+	moveBox.user = unit
+	unit.boxHolder.add_child(moveBox)
+	var xPos = moveBox.position.x
+	if posIndex < DEFAULTMOVES: #set up attack and defend defaults
+		moveBox.position.x = xPos - PLAYERINCREMENT if playerCount % 2 == 0 else xPos + PLAYERINCREMENT
+		moveBox.get_node("ColorRect").rect_size.y = 40
+		if posIndex == 0:
+			move = "Attack"
+			moveBox.position.y -= PLAYERINCREMENT*.25
+		else:
+			move = "Defend"
+			moveBox.position.y += PLAYERINCREMENT*.25
+	else: #set up other moves
+		move = unit.moves[posIndex - DEFAULTMOVES]
+		moveBox.position.x = xPos - PLAYERINCREMENT*posIndex if playerCount % 2 == 0 else xPos + PLAYERINCREMENT*posIndex
+	if Moves.moveList[move].has("resVal"):
+		moveBox.resValue = Moves.moveList[move]["resVal"]
+	box_move(moveBox, move)
+	var button = moveBox.get_node("Button")
+	button.rect_size = moveBox.get_node("ColorRect").rect_size
+
+func box_move(moveBox, move):
+	moveBox.moves.clear()
+	moveBox.moveType = Moves.moveList[move]["type"]
+	moveBox.moves.append(move)
+	if moveBox.moveType == Moves.moveType.trick: moveBox.moves.append("Reload")
+	moveBox.get_node("Name").text = move
+
+func cleanup_moves(unit, boxColor = null):
+	unit.moves.sort_custom(self, "sort_order") #Movebox resource bars appreciate sorted movelist
+	var move
+	var box
+	for i in unit.moves.size():
+		move = unit.moves[i]
+		box = unit.boxHolder.get_child(i + DEFAULTMOVES)
+		box_move(box, move)
+		if Moves.moveList[move]["type"] == Moves.moveType.none:
+			box.visible = false
+		box.get_node("Info").text = ""
+		if boxColor: box.get_node("ColorRect").color = boxColor
+
+func sort_order(a, b):
+	if Moves.moveList[a]["resVal"] > Moves.moveList[b]["resVal"]:
+		return false
+	return true
+
 func setup_enemy(unit, enemyCount, totalEnemies):
 	var display = UnitUI.instance()
 	add_child(display)
+	display.checkRoot()
 	#display.get_node("Name").text = unit.name
 	display.get_node("BattleElements/HP").text = String(unit.currentHealth)
 	if unit.shield > 0:

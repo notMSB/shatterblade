@@ -58,7 +58,8 @@ func _ready():
 	
 	"Double Slash": {"target": targetType.enemy, "damage": 4, "resVal": 1, "type": moveType.item},
 	
-	"X": {"type": moveType.none} #temp
+	
+	"X": {"type": moveType.none, "resVal": 999} #temp
 }
 
 func get_classname(type):

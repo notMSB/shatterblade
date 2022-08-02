@@ -26,9 +26,9 @@ var damageCalc
 var info
 var hits
 
-var battleDone = false
+var battleDone = true
 
-var opponents = ["Rat"]
+var opponents = ["Skeleton"]
 
 var targetsVisible = false
 
@@ -37,13 +37,16 @@ enum e {box, move, user, target}
 var targetType
 
 func _ready(): #Generate units and add to turn order
+	if get_parent().name == "root": battleDone = false
 	targetType = $Moves.targetType
 	randomize() #funny rng
 	if opponents.size() == 0: #Random formation
 		opponents = $Formations.formationList[randi() %$Formations.formationList.size()]
 		enemyNum = opponents.size()
 	if global.storedParty.size() > 0: partyNum = global.storedParty.size()
-	for i in partyNum + enemyNum:
+	var unitNum = partyNum
+	if !battleDone: unitNum += enemyNum
+	for i in unitNum:
 		var createdUnit
 		if i < partyNum: #player
 			createdUnit = Player.instance()
@@ -78,9 +81,9 @@ func _ready(): #Generate units and add to turn order
 			for passive in unit.passives:
 				$StatusManager.add_status(unit, passive, unit.passives[passive])
 	
-	generate_rewards()
+	#generate_rewards()
 	
-	play_turn()
+	if !battleDone: play_turn()
 
 func create_enemies():
 	var createdUnit = Enemy.instance()
@@ -105,6 +108,7 @@ func create_enemies():
 		i+=1
 
 func welcome_back(): #reusing an existing battle scene for a new battle
+	$BattleUI.toggle_trackers(true)
 	$BattleUI.enemyCount = 0
 	battleDone = false
 	for unit in $Units.get_children():
@@ -133,10 +137,11 @@ func play_turn():
 			if unit.isPlayer:
 				unit.update_resource(apIncrement, $Moves.moveType.special, true)
 				unit.update_resource(unit.maxEnergy, $Moves.moveType.trick, true)
-				for display in $BattleUI/DisplayHolder.get_children():
+				for display in $BattleUI.playerHolder.get_children():
 					if display.get_node_or_null("MoveBoxes"):
 						$BattleUI.toggle_moveboxes(display.get_node("MoveBoxes"), true)
 		yield(self, "turn_taken")
+		if battleDone: return
 	if currentUnit.isPlayer: #skip along
 		$StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
@@ -147,7 +152,7 @@ func play_turn():
 			moveName = currentUnit.storedAction
 			chosenMove = $Moves.moveList[currentUnit.storedAction]
 			yield(execute_move(), "completed")
-			set_intent(currentUnit)
+			yield(set_intent(currentUnit), "completed")
 			#currentUnit.update_info(currentUnit.storedTarget.name)
 			$StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
@@ -190,6 +195,7 @@ func set_intent(unit, target = false):
 		targetText = targetText.name
 	if actionDamage: targetText = str(targetText, " (", actionDamage, ")")
 	unit.update_info(str(unit.storedAction, " -> ", targetText))
+	yield(get_tree().create_timer(.25), "timeout")
 
 func get_team(gettingPlayers, onlyAlive = false):
 	var team = []
@@ -198,9 +204,6 @@ func get_team(gettingPlayers, onlyAlive = false):
 			if (onlyAlive and unit.currentHealth > 0) or !onlyAlive:
 				team.append(unit)
 	return team
-
-static func sort_battlers(a, b) -> bool:
-	return a.speed > b.speed
 
 func evaluate_targets(move, user, box):
 	usedMoveBox = box
@@ -230,7 +233,6 @@ func target_chosen(index):
 	$GoButton.visible = true
 
 func go_button_press():
-	#print(executionOrder)
 	$BattleUI.clear_menus()
 	$GoButton.visible = false
 	for moveData in executionOrder: #box, move, user, target
@@ -239,7 +241,7 @@ func go_button_press():
 		moveUser = moveData[2]
 		moveTarget = moveData[3]
 		yield(execute_move(), "completed")
-		if battleDone: done()
+		if battleDone: return
 	executionOrder.clear()
 	emit_signal("turn_taken")
 
@@ -348,9 +350,15 @@ func activate_effect():
 				newArgs.append(argument)
 		chosenMove["effect"].call_funcv(newArgs) #Run the effect function on these arguments
 
+func evaluate_completion():
+	if deadEnemies >= enemyNum:
+		battleDone = true
+		done()
+
 func done():
+	$BattleUI.toggle_trackers(false)
 	if get_parent().name == "root":
-		return get_tree().change_scene("res://src/Project/Map.tscn")
+		return get_tree().change_scene("res://src/Project/Debug.tscn")
 	else:
 		visible = false
 

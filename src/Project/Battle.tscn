@@ -37,7 +37,7 @@ Enemy = ExtResource( 9 )
 margin_left = 1.0
 margin_top = -5.0
 margin_right = 1284.0
-margin_bottom = 727.0
+margin_bottom = 559.0
 color = Color( 0.168627, 0.141176, 0.141176, 1 )
 __meta__ = {
 "_edit_use_anchors_": false

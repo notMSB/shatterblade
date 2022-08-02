@@ -23,6 +23,17 @@ font_data = ExtResource( 6 )
 script = ExtResource( 1 )
 ItemBox = ExtResource( 2 )
 
+[node name="BG" type="ColorRect" parent="."]
+modulate = Color( 0.733333, 1, 0, 1 )
+margin_left = 1.0
+margin_top = -9.0
+margin_right = 1280.0
+margin_bottom = 560.0
+color = Color( 0.27451, 0.254902, 0.898039, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Crafting" type="Node2D" parent="."]
 script = ExtResource( 3 )
 
@@ -36,11 +47,11 @@ margin_left = 595.0
 margin_top = 547.0
 margin_right = 703.0
 margin_bottom = 615.0
-custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
 text = "Craft"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -53,11 +64,11 @@ margin_left = 595.0
 margin_top = 547.0
 margin_right = 703.0
 margin_bottom = 615.0
-custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
 text = "Reset"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -69,11 +80,11 @@ margin_left = 595.0
 margin_top = 67.0
 margin_right = 703.0
 margin_bottom = 135.0
-custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
 text = "Exit"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -93,6 +104,7 @@ PlayerProfile = ExtResource( 8 )
 PlayerMove = ExtResource( 9 )
 
 [node name="TradeHolder" type="Node2D" parent="HolderHolder"]
+visible = false
 script = ExtResource( 10 )
 
 [node name="Enemies" type="Node2D" parent="HolderHolder/TradeHolder"]
@@ -104,7 +116,6 @@ margin_top = 36.0915
 margin_right = 651.451
 margin_bottom = 56.0915
 custom_fonts/font = SubResource( 2 )
-text = "0"
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -116,7 +127,6 @@ margin_top = 37.4101
 margin_right = 739.798
 margin_bottom = 57.4101
 custom_fonts/font = SubResource( 2 )
-text = "0"
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false

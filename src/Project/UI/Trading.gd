@@ -14,10 +14,9 @@ func assign_component_values():
 	for enemy in eList:
 		for reward in eList[enemy]["rewards"]:
 			values[reward] = max(1, values[reward] - 1)
-	print(values)
 
 func get_item_value(itemName):
-	if itemName == "X": 
+	if itemName == "X":
 		return 0
 	elif Crafting.c.has(itemName):
 		return values[itemName]

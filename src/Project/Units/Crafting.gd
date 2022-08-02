@@ -22,7 +22,7 @@ var products = {
 	
 	c.fur: {c.fur: "X", c.blade: "Sucker Punch", c.bone: "Careful Strike", c.wood: "X"},
 	
-	c.blade: {c.blade: "X", c.bone: "Coldsteel", c.wood: "X"},
+	c.blade: {c.blade: "X", c.bone: "Coldsteel", c.wood: "Channel Power"},
 	
 	c.bone: {c.bone: "X", c.wood: "X"},
 	
@@ -45,6 +45,6 @@ func break_down(moveName):
 	for i in products.size():
 		for j in products[i].size():
 			if products[i][i+j] == moveName:
-				print(str(c.keys()[i]), "  ", c.keys()[i+j])
+				#print(str(c.keys()[i]), "  ", c.keys()[i+j])
 				return [c.keys()[i], c.keys()[i+j]]
-	return "X"
+	return [0,0]
