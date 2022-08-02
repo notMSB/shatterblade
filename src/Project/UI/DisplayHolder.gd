@@ -67,12 +67,13 @@ func cleanup_moves(unit, boxColor = null):
 	unit.moves.sort_custom(self, "sort_order") #Movebox resource bars appreciate sorted movelist
 	var move
 	var box
-	for i in unit.moves.size():
-		move = unit.moves[i]
-		box = unit.boxHolder.get_child(i + DEFAULTMOVES)
-		box_move(box, move)
-		if Moves.moveList[move]["type"] == Moves.moveType.none:
-			box.visible = false
+	for i in unit.moves.size() + DEFAULTMOVES:
+		box = unit.boxHolder.get_child(i)
+		if i >= DEFAULTMOVES: #don't mess with attack/defend
+			move = unit.moves[i - DEFAULTMOVES]
+			box_move(box, move)
+			if Moves.moveList[move]["type"] == Moves.moveType.none:
+				box.visible = false
 		box.get_node("Info").text = ""
 		if boxColor: box.get_node("ColorRect").color = boxColor
 

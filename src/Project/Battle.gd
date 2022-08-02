@@ -225,7 +225,7 @@ func target_chosen(index):
 	moveTarget = $Units.get_child(index)
 	executionOrder.append([usedMoveBox, chosenMove, moveUser, moveTarget])
 	usedMoveBox.usageOrder = executionOrder.size()
-	if chosenMove["target"] != targetType.none: $BattleUI.choose_movebox(usedMoveBox, moveTarget) #
+	if chosenMove["target"] != targetType.none: $BattleUI.choose_movebox(usedMoveBox, moveTarget)
 	else: $BattleUI.choose_movebox(usedMoveBox) #Choosing a box subtracts a resource, run a toggle afterwards
 	moveUser.update_resource(chosenMove["resVal"], chosenMove["type"], false)
 	$BattleUI.toggle_moveboxes(usedMoveBox.get_parent(), chosenMove.has("quick"), true, true) #If quick, check the resources. Otherwise, turn off boxes as appropriate
@@ -241,7 +241,7 @@ func go_button_press():
 		moveUser = moveData[2]
 		moveTarget = moveData[3]
 		yield(execute_move(), "completed")
-		if battleDone: return
+		if battleDone: return executionOrder.clear()
 	executionOrder.clear()
 	emit_signal("turn_taken")
 
@@ -360,6 +360,8 @@ func done():
 	if get_parent().name == "root":
 		return get_tree().change_scene("res://src/Project/Debug.tscn")
 	else:
+		for i in global.storedParty.size():
+			$BattleUI.playerHolder.cleanup_moves(global.storedParty[i], get_parent().inventoryWindow.DEFAULTCOLOR)
 		visible = false
 
 func generate_rewards():
