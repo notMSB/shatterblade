@@ -13,7 +13,7 @@ script = ExtResource( 2 )
 [node name="Button" type="Button" parent="."]
 margin_left = -36.0
 margin_right = 350.0
-margin_bottom = 100.0
+margin_bottom = 64.0
 __meta__ = {
 "_edit_use_anchors_": false
 }

@@ -98,7 +98,7 @@ func set_trackers(display, boxes):
 	for box in boxes.get_children():
 		if box.visible:
 			if box.moveType == Moves.moveType.basic: continue
-			if box.moveType != prevBox.moveType or (box.moveType == Moves.moveType.magic and box.resValue != prevBox.resValue):
+			if box.moveType != prevBox.moveType:
 				check_box_count(boxCount, display, firstMargin, lastMargin, prevBox.moveType)
 				boxCount = []
 				firstMargin = null
@@ -141,7 +141,7 @@ func link_boxes(tracker, boxCount, firstMargin, lastMargin, barType):
 	elif barType == Moves.moveType.trick:
 		bar.set_max(currentPlayer.maxEnergy)
 	elif barType == Moves.moveType.magic:
-		bar.set_max(currentPlayer.maxCharges[boxCount[0].resValue])
+		bar.set_max(currentPlayer.maxMana)
 	else:
 		pass
 	barText.rect_position.x += PLAYERINCREMENT*.5*(boxCount.size() - 1) #center the text
@@ -179,7 +179,6 @@ func set_description(moveName, move):
 	if move.has("damage"): desc += "\n Base Damage: " + String(move["damage"]) + " + " + String(Battle.currentUnit.strength)
 	if move.has("healing"): desc += "\n Healing: " + String(move["healing"])
 	if move.has("hits"): desc += "\n Repeats: " + String(move["hits"])
-	if move.has("level"): desc += "\n Level: " + String(move["level"]) + " / Charges: " + String(Battle.currentUnit.charges[move["level"]])
 	if move.has("status"):
 		desc += "\n Status: " + move["status"]
 		if move.has("value"): desc += " " + String(move["value"])

@@ -5,6 +5,7 @@ var isActive = false
 var pointType = 0
 var clicksFromStart
 var info = {}
+var sectionNum
 
 onready var Map = get_tree().current_scene
 

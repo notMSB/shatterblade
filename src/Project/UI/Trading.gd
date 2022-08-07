@@ -1,14 +1,15 @@
 extends Node2D
 
 onready var Crafting = get_node("../../Crafting")
+onready var Enemies = get_node("../../Enemies")
 
 var selectedBox
 var values = {}
-var stock = ["bone", "blade", "Vampire", "Triple Hit"]
+var stock = []
 const DEFAULTVALUE = 5
 
 func assign_component_values():
-	var eList = $Enemies.enemyList
+	var eList = Enemies.enemyList
 	for component in Crafting.c:
 		values[component] = DEFAULTVALUE
 	for enemy in eList:

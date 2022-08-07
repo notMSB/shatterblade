@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://src/Project/Map.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/Lists/Moves.gd" type="Script" id=2]
@@ -15,6 +15,7 @@
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=13]
 [ext_resource path="res://src/Project/Dungeon.tscn" type="PackedScene" id=14]
 [ext_resource path="res://src/Project/UI/Inventory.tscn" type="PackedScene" id=15]
+[ext_resource path="res://src/Project/UI/Section.tscn" type="PackedScene" id=16]
 
 [sub_resource type="DynamicFont" id=2]
 size = 20
@@ -33,6 +34,7 @@ Battle = ExtResource( 10 )
 Inventory = ExtResource( 15 )
 ChoiceUI = ExtResource( 12 )
 Dungeon = ExtResource( 14 )
+Section = ExtResource( 16 )
 
 [node name="Moves" type="Node2D" parent="."]
 script = ExtResource( 2 )
@@ -63,6 +65,8 @@ PlayerMove = ExtResource( 6 )
 [node name="TownHolder" type="Node2D" parent="HolderHolder"]
 
 [node name="DungeonHolder" type="Node2D" parent="HolderHolder"]
+
+[node name="SectionHolder" type="Node2D" parent="HolderHolder"]
 
 [node name="Events" type="Node2D" parent="."]
 visible = false

@@ -132,6 +132,7 @@ func play_turn():
 	currentUnit = $Units.get_child(turnIndex)
 	
 	if turnIndex == 0: #Start of turn, take player actions
+		if get_parent().name == "Map": get_parent().subtract_time(1)
 		for unit in $Units.get_children():
 			$StatusManager.countdown_turns(unit, true)
 			if unit.isPlayer:

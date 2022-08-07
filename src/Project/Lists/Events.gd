@@ -9,9 +9,15 @@ func _ready():
 	"Dungeon": {"time": timings.special, "description": "Enter dungeon?",
 		"choices": ["Yes", "No"],
 		"outcomes": [[funcref(self, "enter_dungeon")], [funcref(self, "advance")]]},
-	"Store": {"time": timings.special, "description": "Enter store?",
+	"Town": {"time": timings.special, "description": "It's a town.",
+		"choices": ["Trade", "Smith", "Tavern", "Inn", "Leave"],
+		"outcomes": [[funcref(self, "activate_shop")], [funcref(self, "activate_craft")], [funcref(self, "advance")], [funcref(self, "rest")], [funcref(self, "advance")]]},
+	"Store": {"time": timings.night, "description": "Enter store?",
 		"choices": ["Yes", "No"],
-		"outcomes": [[funcref(self, "activate_shop")], [funcref(self, "advance")]]},	
+		"outcomes": [[funcref(self, "activate_shop")], [funcref(self, "advance")]]},
+	"Crafting": {"time": timings.day, "description": "Craft items?",
+		"choices": ["Yes", "No"],
+		"outcomes": [[funcref(self, "activate_craft")], [funcref(self, "advance")]]},
 	"Test": {"time": timings.night, "description": "hello 1",
 		"choices": ["-4", "+4"],
 		"outcomes": [[funcref(self, "adjust_time"), -4], [funcref(self, "adjust_time"), 4]]},
@@ -25,7 +31,7 @@ func _ready():
 	"Test4": {"time": timings.night, "description": "hello 4",
 		"choices": ["Gain 5 time but P0 takes 5 damage", "Lose 5 time"],
 		"outcomes": [[funcref(self, "adjust_time"), 5, funcref(self, "damage_player"), 0, 5], [funcref(self, "adjust_time"), -5]]},
-	"Test5": {"time": timings.day, "description": "hello 5",
+	"Test5": {"time": timings.night, "description": "hello 5",
 		"choices": ["Accept quest", "Reject quest"],
 		"outcomes": [[funcref(self, "place_quest")], [funcref(self, "advance")]]}
 }
@@ -41,8 +47,8 @@ func choose(index):
 			args.clear()
 		else:
 			args.append(outcomes[index][i])
-	function.call_funcv(args)
-	Map.finish_event()
+	if !function.call_funcv(args): #if the function returns a value, keep the event UI up
+		Map.finish_event()
 
 #Conditions
 
@@ -80,8 +86,20 @@ func enter_dungeon():
 	dungeons.get_child(index).enter()
 	Map.currentDungeon = dungeons.get_child(index)
 
+func activate_craft():
+	Map.activate_inventory(Map.inventoryWindow.iModes.craft)
+	return true
+
 func activate_shop():
-	pass
+	Map.inventoryWindow.shuffle_trade_stock()
+	Map.activate_inventory(Map.inventoryWindow.iModes.trade)
+	return true
+
+func rest():
+	if !Map.isDay:
+		Map.subtract_time(Map.NIGHTLENGTH, true)
+	else:
+		pass
 
 func advance():
 	pass

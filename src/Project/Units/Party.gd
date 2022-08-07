@@ -1,4 +1,4 @@
-extends Node2D
+ extends Node2D
 
 export (PackedScene) var Player
 export (PackedScene) var ChoiceUI
@@ -32,7 +32,7 @@ func random_moveType():
 
 func make_info(unit, index):
 	var info = ""
-	info += str(unit.maxHealth, "\n", $Moves.moveType.keys()[unit.allowedType], "\n")
+	info += str(unit.maxHealth, ", ", $Moves.moveType.keys()[unit.allowedType], "\n")
 	for move in unit.moves:
 		info += "[" + move + "] "
 	var choice = ChoiceUI.instance()

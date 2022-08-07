@@ -62,6 +62,34 @@ func welcome_back(newMode):
 			box.visible = true
 			identify_product(box)
 
+func shuffle_trade_stock():
+	var restock = []
+	for i in global.storedParty.size():
+		restock.append(rando_component())
+		restock.append(rando_move(i))
+	tHolder.stock = restock
+	restock_trade()
+
+func restock_trade():
+	var box
+	for i in tHolder.get_child_count():
+		box = tHolder.get_child(i)
+		box.get_node("Name").text = tHolder.stock[i] if tHolder.stock.size() > i else "X"
+		identify_product(box)
+
+func rando_component():
+	var keys = $Crafting.c.keys()
+	return keys[randi() % keys.size()]
+
+func rando_move(index):
+	var list = $Moves.moveList
+	var rando = []
+	for move in list: #populate rando with viable moves
+		if list[move].has("type"): 
+			if list[move]["type"] == global.storedParty[index].allowedType:
+				rando.append(move)
+	return rando[randi() % rando.size()]
+
 func set_mode():
 	cHolder.visible = true if mode == iModes.craft else false
 	if mode == iModes.trade:
@@ -75,7 +103,7 @@ func set_mode():
 
 func toggle_trade_visibility(toggle):
 	tHolder.visible = toggle
-	$ResetButton.visible = toggle
+	#$ResetButton.visible = toggle
 	$Initial.visible = toggle
 	$Current.visible = toggle
 
@@ -197,7 +225,7 @@ func swap_boxes(one, two):
 func assess_trade_value():
 	var newStock = []
 	for child in tHolder.get_children():
-		if child.get_child_count() > 0: #if it has a name
+		if child.get_child_count() > 0: #if it has a name node
 			newStock.append(child.get_node("Name").text)
 	currentTraderValue = tHolder.get_inventory_value(newStock)
 	$Current.text = String(currentTraderValue)

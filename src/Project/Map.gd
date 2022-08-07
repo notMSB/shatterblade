@@ -7,15 +7,18 @@ export (PackedScene) var Battle
 export (PackedScene) var Inventory
 export (PackedScene) var ChoiceUI
 export (PackedScene) var Dungeon
+export (PackedScene) var Section
 
-const INCREMENT = 150
-const KILLDISTANCE = 140
-const MAXDISTANCE = 250
-const FUZZ = 35
+const INCREMENT = 100
+const KILLDISTANCE = 100
+const MAXDISTANCE = 200
+const FUZZ = 25
 const CORNER_CHECK = 20
 const DISTANCE_TIME_MULT = .05
 
 const MOVESPACES = 5
+const NIGHTLENGTH = 50
+const TOTALSECTIONS = 3
 
 var bottomRight
 var columnNum
@@ -27,6 +30,7 @@ var savedPoint
 var calledEvent
 var timeNode
 var time = 150
+var currentDay = 0
 var isDay = true
 var currentDungeon = false
 
@@ -51,7 +55,7 @@ func _ready():
 		for display in $HolderHolder/DisplayHolder.get_children():
 			display.get_node("Name").text = $Moves.get_classname(global.storedParty[display.get_index()].allowedType)
 	bottomRight = Vector2($ReferenceRect.margin_right, $ReferenceRect.margin_bottom)
-	timeNode.position.y += bottomRight.y
+	timeNode.position.y += bottomRight.y + 50
 	columnNum = int(ceil(bottomRight.x/INCREMENT) - 1) #ceil-1 instead of floor prevents strangeness with exact divisions
 	#print(columnNum)
 	make_points(Vector2(INCREMENT,INCREMENT*.5))
@@ -72,8 +76,11 @@ func setup_battle():
 	add_child(battleWindow)
 	battleWindow.visible = false
 
-func activate_inventory():
-	inventoryWindow.welcome_back(inventoryWindow.iModes.default)
+func activate_inventory(mode = null):
+	if mode:
+		inventoryWindow.welcome_back(mode)
+	else:
+		inventoryWindow.welcome_back(inventoryWindow.iModes.default)
 
 func activate_point(type):
 	if type == pointTypes.start:
@@ -83,6 +90,8 @@ func activate_point(type):
 		battleWindow.welcome_back()
 	elif type == pointTypes.dungeon:
 		run_event("Dungeon")
+	elif type == pointTypes.town:
+		run_event("Town")
 	elif type == pointTypes.event:
 		var list = $Events.eventList
 		var pool = []
@@ -165,7 +174,10 @@ func categorize_points():
 		dungeonList.append_array(threeList)
 		print("appending backup dungeons")
 	var dungeons = place_landmarks(dungeonList, "Dungeon")
-	if towns and dungeons: finalize_dungeons(towns, dungeons)
+	if towns and dungeons:
+		finalize_dungeons(towns, dungeons)
+		for town in towns:
+			town.pointType = pointTypes.town
 
 func place_landmarks(list, landmark):
 	if list.size() <= 1: 
@@ -219,13 +231,32 @@ func finalize_dungeons(towns, dungeons):
 			connection = null
 
 func clean_up():
+	var divider = bottomRight.x / TOTALSECTIONS
+	add_sections(divider)
 	for point in $HolderHolder/PointHolder.get_children():
-		point.set_name(point.clicksFromStart)
+		point.sectionNum = floor(point.position.x / divider)
+		point.set_name(str(point.sectionNum, " | ", point.clicksFromStart))
 	set_label(endIndex, "End", true)
 	if !canEnd: 
 		print("disaster")
 	else: 
 		categorize_points()
+
+func add_sections(divider):
+	var newSection
+	var sectionBG
+	for i in TOTALSECTIONS:
+		newSection = Section.instance()
+		$HolderHolder/SectionHolder.add_child(newSection)
+		sectionBG = newSection.get_node("BG")
+		sectionBG.margin_left = i * divider
+		sectionBG.margin_right = sectionBG.margin_left + divider
+	set_sections()
+
+func set_sections():
+	var sHolder = $HolderHolder/SectionHolder
+	for i in $HolderHolder/SectionHolder.get_child_count():
+		sHolder.get_child(i).visible = false if currentDay == i else true
 
 func set_label(point, label, distance = false):
 	if distance: point.set_name(str(label, " ", point.clicksFromStart))
@@ -242,7 +273,7 @@ func organize_lines():
 			elif point.position.x < startIndex.position.x: startIndex = point
 			if !endIndex: endIndex = point
 			elif point.position.x >= endIndex.position.x: endIndex = point
-			point.pointType = pointTypes.battle
+			point.pointType = pointTypes.event
 
 func determine_distances(checkPoint): #gives every node a distance from start and returns if the end node is accessible
 	if checkPoint == startIndex: checkPoint.clicksFromStart = 0
@@ -308,16 +339,28 @@ func analyze_points(one, two):
 			one.lines.append(pointLine) #add line to points
 			two.lines.append(pointLine)
 
-func subtract_time(diff):
+func subtract_time(diff, refillAllMana = false):
 	time -= diff
+	if refillAllMana: update_mana()
+	else: update_mana(diff)
 	if time <= 0:
 		time = 150 + time
-		isDay = true
+		advance_day()
 		timeNode.get_node("State").text = "Day"
 	elif time <= 50: 
 		isDay = false
 		timeNode.get_node("State").text = "Night"
 	timeNode.get_node("Hour").text = String(time)
+
+func advance_day():
+	isDay = true
+	currentDay += 1
+	set_sections()
+
+func update_mana(gain = null):
+	for unit in global.storedParty:
+		if gain: unit.update_resource(gain, $Moves.moveType.magic, true)
+		else: unit.update_resource(unit.maxMana, $Moves.moveType.magic, true)
 
 func get_point(i, diff):
 	return $HolderHolder/PointHolder.get_child(i - diff)
@@ -327,6 +370,7 @@ func fuzz_point(currentPoint):
 	currentPoint.position.x = min(currentPoint.position.x - FUZZ + pointChange, bottomRight.x - CORNER_CHECK)
 	pointChange = rando_fuzz() #reroll for the Y
 	currentPoint.position.y = min(currentPoint.position.y - FUZZ + pointChange, bottomRight.y - CORNER_CHECK)
+	currentPoint.position.y = max(currentPoint.position.y, CORNER_CHECK * 2)
 
 func rando_fuzz():
 	return randi() % (FUZZ * 2)

@@ -40,6 +40,9 @@ script = ExtResource( 3 )
 [node name="Moves" type="Node2D" parent="."]
 script = ExtResource( 5 )
 
+[node name="Enemies" type="Node2D" parent="."]
+script = ExtResource( 11 )
+
 [node name="CraftButton" type="Button" parent="."]
 visible = false
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
@@ -106,9 +109,6 @@ PlayerMove = ExtResource( 9 )
 [node name="TradeHolder" type="Node2D" parent="HolderHolder"]
 visible = false
 script = ExtResource( 10 )
-
-[node name="Enemies" type="Node2D" parent="HolderHolder/TradeHolder"]
-script = ExtResource( 11 )
 
 [node name="Initial" type="Label" parent="."]
 margin_left = 556.451
