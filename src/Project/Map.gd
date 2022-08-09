@@ -9,10 +9,10 @@ export (PackedScene) var ChoiceUI
 export (PackedScene) var Dungeon
 export (PackedScene) var Section
 
-const INCREMENT = 100
-const KILLDISTANCE = 100
+const INCREMENT = 92
+const KILLDISTANCE = 81 #lower kill distance means more points
 const MAXDISTANCE = 200
-const FUZZ = 25
+const FUZZ = 45 #should never be more than half of the increment
 const CORNER_CHECK = 20
 const DISTANCE_TIME_MULT = .05
 
@@ -22,8 +22,10 @@ const TOTALSECTIONS = 3
 
 var bottomRight
 var columnNum
+
 var startIndex
 var endIndex
+
 var activePoint
 var savedPoint
 
@@ -149,86 +151,70 @@ func make_points(nextPos):
 		nextPos.x = INCREMENT
 	make_points(nextPos)
 
-func categorize_points():
-	var townList = []
-	var fourList = []
-	var dungeonList = []
-	var threeList = []
-	#var dungeonList = []
+func find_border_points():
+	var checkSection
+	var adjacentPoint
+	var possibleDungeons = [] #2D array of lines
+	var exitPoints = []
+	for i in TOTALSECTIONS - 1:
+		possibleDungeons.append([])
+		exitPoints.append([])
 	for point in $HolderHolder/PointHolder.get_children():
-		if point.visible and point.clicksFromStart:
-			if point.clicksFromStart >= 3 and point.clicksFromStart < endIndex.clicksFromStart:
-				if point.lines.size() >= 5:
-					townList.append(point)
-				elif point.lines.size() == 4:
-					fourList.append(point)
-				elif point.lines.size() == 3:
-					threeList.append(point)
-				elif point.lines.size() == 2:
-					dungeonList.append(point)
-	if townList.size() < 3: 
-		townList.append_array(fourList)
-		print("appending backup towns")
-	var towns = place_landmarks(townList, "Town")
-	if dungeonList.size() < 3:
-		dungeonList.append_array(threeList)
-		print("appending backup dungeons")
-	var dungeons = place_landmarks(dungeonList, "Dungeon")
-	if towns and dungeons:
-		finalize_dungeons(towns, dungeons)
-		for town in towns:
-			town.pointType = pointTypes.town
+		if point.visible and point.clicksFromStart and point.sectionNum != TOTALSECTIONS - 1: #no reason to check points in the last section
+			checkSection = point.sectionNum
+			for line in point.lines:
+				adjacentPoint = line.get_connection(point)
+				if adjacentPoint.sectionNum > checkSection:
+					print(str(checkSection, " ", adjacentPoint.sectionNum))
+					possibleDungeons[checkSection].append(line)
+					exitPoints[checkSection].append(adjacentPoint)
+	place_dungeons(possibleDungeons, exitPoints)
 
-func place_landmarks(list, landmark):
-	if list.size() <= 1: 
-		print("not enough")
-		return
-	var closest = list[0]
-	var furthest = list[0]
-	list.remove(0)
-	for point in list:
-		if point.clicksFromStart > furthest.clicksFromStart:
-			furthest = point
-		if point.clicksFromStart < closest.clicksFromStart:
-			closest = point
-	set_label(closest, str("Closest ", landmark), true)
-	set_label(furthest, str("Furthest ", landmark), true)
-	return [closest, furthest]
+func place_dungeons(possibleDungeons, borderPoints): #dungeons start in one section and end in the next
+	var dungeonLine
+	var entrySection
+	for border in possibleDungeons:
+		if border.empty(): return print("dungeon shortage")
+		var newDungeon = Dungeon.instance()
+		$HolderHolder/DungeonHolder.add_child(newDungeon)
+		dungeonLine = border[randi() % border.size()]
+		entrySection = min(dungeonLine.linePoints[0].sectionNum, dungeonLine.linePoints[1].sectionNum)
+		for point in dungeonLine.linePoints: #border[rando] is a line
+			point.pointType = pointTypes.dungeon
+			point.info["dungeonIndex"] = entrySection
+			point.info["direction"] = point.sectionNum - entrySection #0 for entry 1 for exit
+			if entrySection == point.sectionNum: 
+				newDungeon.originLocation = point
+				point.set_name("Entry")
+			else: 
+				newDungeon.exitLocation = point
+				point.set_name("Exit")
+		dungeonLine.dungeonize()
+		newDungeon.setup(dungeonLine)
+		place_town(newDungeon.exitLocation, borderPoints[entrySection])
 
-func finalize_dungeons(towns, dungeons):
-	var connection
-	var cLine
-	var connections = []
-	for i in dungeons.size():
-		dungeons[i].pointType = pointTypes.dungeon
-		dungeons[i].info["dungeonIndex"] = i
-		for line in dungeons[i].lines:
-			for point in line.linePoints:
-				if !(towns.has(point) or dungeons.has(point) or connections.has(point) or endIndex == point):
-					connection = point
-					cLine = line
-		if connection: #Set up the dungeon and link the two points together
-			cLine.dungeonize()
-			var newDungeon = Dungeon.instance()
-			$HolderHolder/DungeonHolder.add_child(newDungeon)
-			newDungeon.setup(cLine)
-			if dungeons[i].position.x < connection.position.x: #0 is left 1 is right
-				dungeons[i].info["direction"] = 0
-				connection.info["direction"] = 1
-				newDungeon.originLocation = dungeons[i]
-				newDungeon.exitLocation = connection
-			else:
-				dungeons[i].info["direction"] = 1
-				connection.info["direction"] = 0
-				newDungeon.originLocation = connection
-				newDungeon.exitLocation = dungeons[i]
-			set_label(connection, "Connection", true)
-			connection.pointType = pointTypes.dungeon
-			connections.append(connection)
-			connection.info["dungeonIndex"] = i
-			newDungeon.originLocation = dungeons[i]
-			newDungeon.exitLocation = connection
-			connection = null
+func place_town(exitPoint, borderPoints): #towns are adjacent to dungeon exits and in the same section, if possible they are also on the border. ties broken by closeness to center
+	var checkPoint
+	var bestSpot
+	var bestDistance = bottomRight.y/2
+	var townSpots = []
+	var backupSpots = []
+	for line in exitPoint.lines:
+		checkPoint = line.get_connection(exitPoint)
+		if borderPoints.has(checkPoint): townSpots.append(checkPoint)
+		elif checkPoint.sectionNum == exitPoint.sectionNum: backupSpots.append(checkPoint)
+	if townSpots.empty(): 
+		if backupSpots.empty(): return print("no spots for town")
+		print("backup spots")
+		townSpots = backupSpots
+	print(townSpots.size())
+	for i in townSpots.size():
+		if abs(townSpots[i].position.y - bottomRight.y/2) < bestDistance:
+			bestSpot = townSpots[i]
+			print("swap")
+	bestSpot.set_name("Town")
+	bestSpot.pointType = pointTypes.town
+	#print(bottomRight.y/2)
 
 func clean_up():
 	var divider = bottomRight.x / TOTALSECTIONS
@@ -240,7 +226,8 @@ func clean_up():
 	if !canEnd: 
 		print("disaster")
 	else: 
-		categorize_points()
+		find_border_points()
+		#categorize_points()
 
 func add_sections(divider):
 	var newSection
@@ -277,18 +264,19 @@ func organize_lines():
 
 func determine_distances(checkPoint): #gives every node a distance from start and returns if the end node is accessible
 	if checkPoint == startIndex: checkPoint.clicksFromStart = 0
+	var connectedPoint
 	#print(str("Evaluating Point at: ", checkPoint.clicksFromStart))
 	var killLines = []
 	for line in checkPoint.lines:
 		if is_instance_valid(line):
-			for point in line.linePoints:
-				if !point.visible: continue
-				if point.clicksFromStart == null:
-					point.clicksFromStart = checkPoint.clicksFromStart+1
-					nextCheck.append(point)
-					#print(str("Appending point.", " Total lines: ", checkPoint.lines.size()))
-				if point == endIndex: 
-					canEnd = true
+			connectedPoint = line.get_connection(checkPoint)
+			if !connectedPoint.visible: continue
+			if connectedPoint.clicksFromStart == null:
+				connectedPoint.clicksFromStart = checkPoint.clicksFromStart+1
+				nextCheck.append(connectedPoint)
+				#print(str("Appending point.", " Total lines: ", checkPoint.lines.size()))
+			if connectedPoint == endIndex: 
+				canEnd = true
 		else: #kill deleted lines
 			killLines.append(line)
 	for line in killLines:
