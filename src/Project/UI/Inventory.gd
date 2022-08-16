@@ -32,10 +32,10 @@ var currentTraderValue
 enum iModes {default, craft, trade}
 var mode = iModes.craft
 
-func _ready():
+func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
 	tHolder.assign_component_values()
 	if global.itemDict.empty():
-		global.itemDict = {"fang": 1, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 1, "bone": 2, "wood": 1, "moves": []}
+		global.itemDict = {"fang": 1, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 1, "bone": 2, "wood": 1, "moves": ["Test Relic"]}
 	make_grid()
 	make_actionboxes(CRAFTBOXES, true)
 	make_actionboxes(TRADERINVSIZE)
@@ -156,10 +156,9 @@ func make_actionboxes(boxCount, isCraft = false):
 			identify_product(box)
 
 func select_box(box = null):
-	if box.moveType != $Moves.moveType.basic:
-		box.get_parent().selectedBox = box
-		box.get_node("ColorRect").color = Color(.5,.1,.5,1)
-		check_swap(box)
+	box.get_parent().selectedBox = box
+	box.get_node("ColorRect").color = Color(.5,.1,.5,1)
+	check_swap(box)
 
 func deselect_box(box):
 	if box: 
@@ -184,12 +183,19 @@ func check_swap(selectedBox):
 
 func player_inv_check(playerBox, otherBox):
 	var checkName = otherBox.get_node("Name").text
+	var playerName = playerBox.get_node("Name").text
 	if $Crafting.c.get(checkName) == null: #can't move in crafting material
-		var playerType = global.storedParty[playerBox.get_node("../../").get_index()].allowedType #Grandpa ia a PlayerProfile, its index matches the global index
+		var playerType = $Moves.moveList[playerName]["type"]
 		var checkType = $Moves.moveList[checkName]["type"]
-		if checkType == playerType or checkType == $Moves.moveType.none: #The correct move type or an empty spot can be swapped
-			swap_boxes(playerBox, otherBox)
-			return
+		#swapping into the attack/defend boxes, cannot swap an X from other players but can from inventory
+		if ((playerType == $Moves.moveType.relic or playerType == $Moves.moveType.basic) 
+		and (checkType == $Moves.moveType.relic or checkType == $Moves.moveType.basic or (checkType == $Moves.moveType.none and otherBox.get_parent().name != "MoveBoxes"))):
+			return swap_boxes(playerBox, otherBox, true) #restore attack/defend on boxes if necessary
+		
+		#swapping into player's class inventory boxes
+		var playerClass = global.storedParty[playerBox.get_node("../../").get_index()].allowedType #Grandpa ia a PlayerProfile, its index matches the global index
+		if checkType == playerClass or checkType == $Moves.moveType.none: #The correct move type or an empty spot can be swapped
+			return swap_boxes(playerBox, otherBox)
 	deselect_multi([playerBox, otherBox])
 
 func check_crafts(craftBox, otherBox):
@@ -215,13 +221,26 @@ func check_crafts(craftBox, otherBox):
 		else: #replacing a valid box with an invalid one would yield this result
 			$CraftButton.visible = false
 
-func swap_boxes(one, two):
+func swap_boxes(one, two, check = false):
 	var temp = one.get_node("Name").text
 	one.get_node("Name").text = two.get_node("Name").text
 	two.get_node("Name").text = temp
 	deselect_multi([one, two])
 	if tHolder.visible: assess_trade_value()
-	
+	if check: restore_basics([one, two])
+
+func restore_basics(boxes): #puts attack/defend back on non-relic boxes and remove them from inventory box
+	for box in boxes:
+		if box.get_parent().name == "MoveBoxes": #player box
+			if $Moves.moveList[box.get_node("Name").text]["type"] <= $Moves.moveType.basic: #X or attack/defend
+				if box.get_index() == 0: #attack
+					box.get_node("Name").text = "Attack"
+				else: #defend
+					box.get_node("Name").text = "Defend"
+		else: #inventory box
+			if $Moves.moveList[box.get_node("Name").text]["type"] == $Moves.moveType.basic:
+				box.get_node("Name").text = "X"
+
 func assess_trade_value():
 	var newStock = []
 	for child in tHolder.get_children():
@@ -263,12 +282,22 @@ func confirm_craft(): #Subtract one from each ingredient from inventory and put 
 	$CraftButton.visible = false
 
 func exit(): #Save inventory and leave
+	var unit
+	var moveName
+	var moveData
+	var checkType
 	for i in global.storedParty.size():
-		global.storedParty[i].moves.clear()
+		unit = global.storedParty[i]
+		unit.moves.clear()
+		unit.passives.clear()
 		for box in dHolder.get_child(i).get_node("MoveBoxes").get_children(): #Accessing the moveboxes
-			var moveName = box.get_node("Name").text
-			if $Moves.moveList[moveName]["type"] != $Moves.moveType.basic:
-				 global.storedParty[i].moves.append(moveName)
+			moveName = box.get_node("Name").text
+			moveData = $Moves.moveList[moveName]
+			checkType = moveData["type"]
+			if checkType != $Moves.moveType.relic and checkType != $Moves.moveType.basic:
+				unit.moves.append(moveName)
+			if moveData.has("passive"):
+				unit.passives[moveData["passive"][0]] = moveData["passive"][1]
 	for item in global.itemDict:
 		global.itemDict[item] = 0
 	global.itemDict[MOVEHOLDER] = [] #Redoing the moveholder with potential new moves

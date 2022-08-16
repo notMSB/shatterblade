@@ -17,7 +17,7 @@ func assign_component_values():
 			values[reward] = max(1, values[reward] - 1)
 
 func get_item_value(itemName):
-	if itemName == "X":
+	if typeof(itemName) == TYPE_INT or itemName == "X":
 		return 0
 	elif Crafting.c.has(itemName):
 		return values[itemName]

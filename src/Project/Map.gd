@@ -260,7 +260,7 @@ func organize_lines():
 			elif point.position.x < startIndex.position.x: startIndex = point
 			if !endIndex: endIndex = point
 			elif point.position.x >= endIndex.position.x: endIndex = point
-			point.pointType = pointTypes.event
+			point.pointType = pointTypes.battle
 
 func determine_distances(checkPoint): #gives every node a distance from start and returns if the end node is accessible
 	if checkPoint == startIndex: checkPoint.clicksFromStart = 0

@@ -41,11 +41,12 @@ func create_move(unit, playerCount, posIndex):
 	if posIndex < DEFAULTMOVES: #set up attack and defend defaults
 		moveBox.position.x = xPos - PLAYERINCREMENT if playerCount % 2 == 0 else xPos + PLAYERINCREMENT
 		moveBox.get_node("ColorRect").rect_size.y = 40
+		move = moveBox.get_node("Name").text
 		if posIndex == 0:
-			move = "Attack"
+			if move == "": move = "Attack"
 			moveBox.position.y -= PLAYERINCREMENT*.25
 		else:
-			move = "Defend"
+			if move == "": move = "Defend"
 			moveBox.position.y += PLAYERINCREMENT*.25
 	else: #set up other moves
 		move = unit.moves[posIndex - DEFAULTMOVES]
@@ -63,17 +64,19 @@ func box_move(moveBox, move):
 	if moveBox.moveType == Moves.moveType.trick: moveBox.moves.append("Reload")
 	moveBox.get_node("Name").text = move
 
-func cleanup_moves(unit, boxColor = null):
+func cleanup_moves(unit, boxColor = null): #makes all boxes perform the move they say that they are and sets passives from them
 	unit.moves.sort_custom(self, "sort_order") #Movebox resource bars appreciate sorted movelist
 	var move
 	var box
 	for i in unit.moves.size() + DEFAULTMOVES:
 		box = unit.boxHolder.get_child(i)
-		if i >= DEFAULTMOVES: #don't mess with attack/defend
+		if i < DEFAULTMOVES: #Adjust for relic swaps in attack/defend
+			move = box.get_node("Name").text
+		else: #Place the rest of the moves down
 			move = unit.moves[i - DEFAULTMOVES]
-			box_move(box, move)
 			if Moves.moveList[move]["type"] == Moves.moveType.none:
 				box.visible = false
+		box_move(box, move)
 		box.get_node("Info").text = ""
 		if boxColor: box.get_node("ColorRect").color = boxColor
 

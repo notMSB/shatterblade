@@ -3,7 +3,7 @@ extends Node2D
 onready var Battle = get_parent()
 var moveList
 enum timings {before, after}
-enum moveType {none, basic, special, magic, trick, item}
+enum moveType {none, basic, relic, special, magic, trick, item}
 enum targetType {enemy, enemies, enemyTargets, ally, allies, user, none}
 
 func _ready():
@@ -58,6 +58,7 @@ func _ready():
 	
 	"Double Slash": {"target": targetType.enemy, "damage": 4, "resVal": 1, "type": moveType.item},
 	
+	"Test Relic": {"type": moveType.relic, "resVal": 0, "unusable": true, "passive": ["Dodgy", 1]},
 	
 	"X": {"type": moveType.none, "resVal": 999} #temp
 }

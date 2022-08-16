@@ -121,8 +121,11 @@ func welcome_back(): #reusing an existing battle scene for a new battle
 			unit.statuses.clear()
 			$StatusManager.initialize_statuses(unit)
 			unit.update_box_bars()
-			unit.update_status_ui()
 			unit.update_strength()
+			if unit.passives.size() > 0:
+				for passive in unit.passives:
+					$StatusManager.add_status(unit, passive, unit.passives[passive])
+			unit.update_status_ui()
 	turnIndex = -1
 	create_enemies()
 	play_turn()
