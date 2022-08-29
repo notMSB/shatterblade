@@ -12,7 +12,7 @@ const PLAYERINCREMENT = 80
 const UNITYSTART = 200
 const XINCREMENT = 300
 
-onready var Moves = get_node("../../Moves") #obtain uncle
+onready var Moves = get_node("../../../Data/Moves")
 
 func setup_player(unit, playerCount):
 	var display = PlayerProfile.instance()
@@ -88,7 +88,7 @@ func sort_order(a, b):
 func setup_enemy(unit, enemyCount, totalEnemies):
 	var display = UnitUI.instance()
 	add_child(display)
-	display.checkRoot()
+	display.check_mode()
 	#display.get_node("Name").text = unit.name
 	display.get_node("BattleElements/HP").text = String(unit.currentHealth)
 	if unit.shield > 0:

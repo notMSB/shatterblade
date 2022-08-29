@@ -1,7 +1,9 @@
- extends Node2D
+extends Node2D
 
 export (PackedScene) var Player
 export (PackedScene) var ChoiceUI
+
+onready var Moves = get_node("../Data/Moves")
 
 const BASEHP = 40
 const OPTIONS = 3
@@ -20,19 +22,19 @@ func create_options(number):
 	for i in number:
 		var createdUnit = Player.instance()
 		createdUnit.allowedType = random_moveType()
-		createdUnit.title = $Moves.get_classname(createdUnit.allowedType)
+		createdUnit.title = Moves.get_classname(createdUnit.allowedType)
 		set_stats(createdUnit, BASEHP)
 		rando_moves(createdUnit, MOVES_AVAILABLE)
 		tempParty.append(createdUnit)
 		make_info(createdUnit, i)
 
 func random_moveType():
-	var typeList = [$Moves.moveType.special, $Moves.moveType.magic, $Moves.moveType.trick]
+	var typeList = [Moves.moveType.special, Moves.moveType.magic, Moves.moveType.trick]
 	return random_item(typeList)
 
 func make_info(unit, index):
 	var info = ""
-	info += str(unit.maxHealth, ", ", $Moves.moveType.keys()[unit.allowedType], "\n")
+	info += str(unit.maxHealth, ", ", Moves.moveType.keys()[unit.allowedType], "\n")
 	for move in unit.moves:
 		info += "[" + move + "] "
 	var choice = ChoiceUI.instance()
@@ -49,7 +51,7 @@ func choose(index):
 	if global.storedParty.size() < PARTYSIZE:
 		create_options(OPTIONS)
 	else:
-		return get_tree().change_scene("res://src/Project/Debug.tscn")
+		return get_tree().reload_current_scene()
 
 func random_item(list):
 	return list[randi() % list.size()]
@@ -59,7 +61,7 @@ func set_stats(unit, hp):
 	unit.currentHealth = unit.maxHealth
 	
 func rando_moves(unit, number):
-	var list = $Moves.moveList
+	var list = Moves.moveList
 	var rando = []
 	for move in list: #populate rando with viable moves
 		if list[move].has("type"): 

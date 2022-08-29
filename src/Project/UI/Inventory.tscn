@@ -1,16 +1,12 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://src/Project/UI/Inventory.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/UI/ItemBox.tscn" type="PackedScene" id=2]
-[ext_resource path="res://src/Project/Units/Crafting.gd" type="Script" id=3]
 [ext_resource path="res://src/Project/UI/BoxHolder.gd" type="Script" id=4]
-[ext_resource path="res://src/Project/Lists/Moves.gd" type="Script" id=5]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=6]
 [ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=7]
 [ext_resource path="res://src/Project/UI/PlayerProfile.tscn" type="PackedScene" id=8]
 [ext_resource path="res://src/Project/UI/PlayerMove.tscn" type="PackedScene" id=9]
-[ext_resource path="res://src/Project/UI/Trading.gd" type="Script" id=10]
-[ext_resource path="res://src/Project/Units/Enemies.gd" type="Script" id=11]
 
 [sub_resource type="DynamicFont" id=1]
 size = 34
@@ -34,15 +30,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Crafting" type="Node2D" parent="."]
-script = ExtResource( 3 )
-
-[node name="Moves" type="Node2D" parent="."]
-script = ExtResource( 5 )
-
-[node name="Enemies" type="Node2D" parent="."]
-script = ExtResource( 11 )
-
 [node name="CraftButton" type="Button" parent="."]
 visible = false
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
@@ -50,11 +37,11 @@ margin_left = 595.0
 margin_top = 547.0
 margin_right = 703.0
 margin_bottom = 615.0
+custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Craft"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -67,11 +54,11 @@ margin_left = 595.0
 margin_top = 547.0
 margin_right = 703.0
 margin_bottom = 615.0
+custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Reset"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -83,11 +70,11 @@ margin_left = 595.0
 margin_top = 67.0
 margin_right = 703.0
 margin_bottom = 135.0
+custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Exit"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -108,7 +95,7 @@ PlayerMove = ExtResource( 9 )
 
 [node name="TradeHolder" type="Node2D" parent="HolderHolder"]
 visible = false
-script = ExtResource( 10 )
+script = ExtResource( 4 )
 
 [node name="Initial" type="Label" parent="."]
 margin_left = 556.451

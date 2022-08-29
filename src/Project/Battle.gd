@@ -3,6 +3,11 @@ extends Node2D
 export (PackedScene) var Player
 export (PackedScene) var Enemy
 
+onready var Moves = get_node("../Data/Moves")
+onready var StatusManager = get_node("../Data/StatusManager")
+onready var Enemies = get_node("../Data/Enemies")
+onready var Formations = get_node("../Data/Formations")
+
 var partyNum = 1
 var enemyNum = 1
 var deadEnemies = 0
@@ -37,11 +42,11 @@ enum e {box, move, user, target}
 var targetType
 
 func _ready(): #Generate units and add to turn order
-	if get_parent().name == "root": battleDone = false
-	targetType = $Moves.targetType
+	if !get_parent().mapMode: battleDone = false
+	targetType = Moves.targetType
 	randomize() #funny rng
 	if opponents.size() == 0: #Random formation
-		opponents = $Formations.formationList[randi() %$Formations.formationList.size()]
+		opponents = Formations.formationList[randi() % Formations.formationList.size()]
 		enemyNum = opponents.size()
 	if global.storedParty.size() > 0: partyNum = global.storedParty.size()
 	var unitNum = partyNum
@@ -58,7 +63,7 @@ func _ready(): #Generate units and add to turn order
 		else: #enemy
 			createdUnit = Enemy.instance()
 			if opponents.size() > i - partyNum:
-				var enemy = $Enemies.enemyList[opponents[i - partyNum]]
+				var enemy = Enemies.enemyList[opponents[i - partyNum]]
 				createdUnit.callv("make_stats", enemy["stats"])
 				createdUnit.identity = str(opponents[i - partyNum])
 				createdUnit.name = str(createdUnit.identity, String(i))
@@ -69,7 +74,7 @@ func _ready(): #Generate units and add to turn order
 			else:
 				createdUnit.callv("make_stats", [400])
 				createdUnit.name = str("E", String(i))
-		$StatusManager.initialize_statuses(createdUnit)
+		StatusManager.initialize_statuses(createdUnit)
 		$Units.add_child(createdUnit)
 	for unit in $Units.get_children():
 		$BattleUI.setup_display(unit, opponents.size())
@@ -79,7 +84,7 @@ func _ready(): #Generate units and add to turn order
 			unit.update_strength()
 		if unit.passives.size() > 0:
 			for passive in unit.passives:
-				$StatusManager.add_status(unit, passive, unit.passives[passive])
+				StatusManager.add_status(unit, passive, unit.passives[passive])
 	
 	#generate_rewards()
 	
@@ -90,7 +95,7 @@ func create_enemies():
 	var enemy
 	var i = 0
 	for opponent in opponents:
-		enemy = $Enemies.enemyList[opponent]
+		enemy = Enemies.enemyList[opponent]
 		createdUnit.callv("make_stats", enemy["stats"])
 		createdUnit.identity = opponent
 		createdUnit.name = str(createdUnit.identity, String(i))
@@ -98,13 +103,13 @@ func create_enemies():
 		if enemy.has("specials"): 
 			createdUnit.moves = enemy["specials"]
 			createdUnit.allMoves.append_array(createdUnit.moves)
-		$StatusManager.initialize_statuses(createdUnit)
+		StatusManager.initialize_statuses(createdUnit)
 		$Units.add_child(createdUnit)
 		$BattleUI.setup_display(createdUnit, opponents.size())
 		set_intent(createdUnit)
 		if createdUnit.passives.size() > 0:
 			for passive in createdUnit.passives:
-				$StatusManager.add_status(createdUnit, passive, createdUnit.passives[passive])
+				StatusManager.add_status(createdUnit, passive, createdUnit.passives[passive])
 		i+=1
 
 func welcome_back(): #reusing an existing battle scene for a new battle
@@ -119,12 +124,12 @@ func welcome_back(): #reusing an existing battle scene for a new battle
 			unit.ap = 0
 			unit.energy = unit.maxEnergy
 			unit.statuses.clear()
-			$StatusManager.initialize_statuses(unit)
+			StatusManager.initialize_statuses(unit)
 			unit.update_box_bars()
 			unit.update_strength()
 			if unit.passives.size() > 0:
 				for passive in unit.passives:
-					$StatusManager.add_status(unit, passive, unit.passives[passive])
+					StatusManager.add_status(unit, passive, unit.passives[passive])
 			unit.update_status_ui()
 	turnIndex = -1
 	create_enemies()
@@ -137,28 +142,28 @@ func play_turn():
 	if turnIndex == 0: #Start of turn, take player actions
 		if get_parent().name == "Map": get_parent().subtract_time(1)
 		for unit in $Units.get_children():
-			$StatusManager.countdown_turns(unit, true)
+			StatusManager.countdown_turns(unit, true)
 			if unit.isPlayer:
-				unit.update_resource(apIncrement, $Moves.moveType.special, true)
-				unit.update_resource(unit.maxEnergy, $Moves.moveType.trick, true)
+				unit.update_resource(apIncrement, Moves.moveType.special, true)
+				unit.update_resource(unit.maxEnergy, Moves.moveType.trick, true)
 				for display in $BattleUI.playerHolder.get_children():
 					if display.get_node_or_null("MoveBoxes"):
 						$BattleUI.toggle_moveboxes(display.get_node("MoveBoxes"), true)
 		yield(self, "turn_taken")
 		if battleDone: return
 	if currentUnit.isPlayer: #skip along
-		$StatusManager.countdown_turns(currentUnit, false)
+		StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
 	else: #Enemy turn
 		if currentUnit.currentHealth > 0: #if you're dead stop doing moves
 			moveUser = currentUnit
 			moveTarget = currentUnit.storedTarget
 			moveName = currentUnit.storedAction
-			chosenMove = $Moves.moveList[currentUnit.storedAction]
+			chosenMove = Moves.moveList[currentUnit.storedAction]
 			yield(execute_move(), "completed")
 			yield(set_intent(currentUnit), "completed")
 			#currentUnit.update_info(currentUnit.storedTarget.name)
-			$StatusManager.countdown_turns(currentUnit, false)
+			StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
 
 func set_action(unit):
@@ -168,7 +173,7 @@ func set_intent(unit, target = false):
 	set_action(unit)
 	
 	#Target
-	var actionInfo = $Moves.moveList[unit.storedAction]
+	var actionInfo = Moves.moveList[unit.storedAction]
 	var actionDamage
 	if actionInfo.has("damage"):
 		actionDamage = actionInfo["damage"] + unit.strength
@@ -211,7 +216,7 @@ func get_team(gettingPlayers, onlyAlive = false):
 
 func evaluate_targets(move, user, box):
 	usedMoveBox = box
-	chosenMove = $Moves.moveList[move]
+	chosenMove = Moves.moveList[move]
 	moveName = move
 	$BattleUI.set_description(move, chosenMove)
 	moveUser = user
@@ -283,7 +288,7 @@ func checkChannel(unit): #Channels can only be used as the first action of a tur
 func execute_move():
 	if moveUser.isPlayer:
 		moveUser.storedTarget = moveTarget
-		if chosenMove["type"] == $Moves.moveType.trick or chosenMove.has("cycle"):
+		if chosenMove["type"] == Moves.moveType.trick or chosenMove.has("cycle"):
 			$BattleUI.advance_box_move(usedMoveBox)
 	
 	#Set up for multi target moves
@@ -310,15 +315,15 @@ func execute_move():
 	var i = 0
 	while i < hits: #repeat for every hit, while loop enables it to be modified on the fly by move effects from outside this file
 		for target in targets: #repeat for every target	
-			if chosenMove.has("timing") and chosenMove["timing"] == $Moves.timings.before: #Some moves activate effects before the damage
+			if chosenMove.has("timing") and chosenMove["timing"] == Moves.timings.before: #Some moves activate effects before the damage
 				activate_effect()
 			if chosenMove.has("damage"): #Get base damage, evaluate target status to final damage, deal said damage, update UI
 				damageCalc = chosenMove["damage"] + moveUser.strength - moveTarget.defense
 				var tempDamage
 				#One status check for the user's attack modifiers and another for the target's defense modifiers
-				tempDamage = $StatusManager.evaluate_statuses(moveUser, $StatusManager.statusActivations.usingAttack, [damageCalc])
+				tempDamage = StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.usingAttack, [damageCalc])
 				if tempDamage != null: damageCalc = tempDamage #Sometimes the status doesn't return anything
-				tempDamage = $StatusManager.evaluate_statuses(moveTarget, $StatusManager.statusActivations.gettingHit, [damageCalc]) 
+				tempDamage = StatusManager.evaluate_statuses(moveTarget, StatusManager.statusActivations.gettingHit, [damageCalc]) 
 				if tempDamage != null: damageCalc = tempDamage
 				damageCalc = target.take_damage(damageCalc) #Returns the amount of damage dealt (for recoil reasons). Multihit moves recalculate damage.
 			
@@ -327,14 +332,14 @@ func execute_move():
 			
 			if chosenMove.has("status"): #Update target status if there is a status on the move
 				if chosenMove.has("value"): #Value determines length of status effect
-					$StatusManager.add_status(target, chosenMove["status"], chosenMove["value"])
+					StatusManager.add_status(target, chosenMove["status"], chosenMove["value"])
 				else: #Status lasts forever or until manually removed
-					$StatusManager.add_status(target, chosenMove["status"])
+					StatusManager.add_status(target, chosenMove["status"])
 				if chosenMove["status"] == "Provoke": #intent changing status is unique
-					for cond in target.statuses[$StatusManager.statusActivations.passive]:
-						if cond["name"] == "Provoke" and cond["value"] >= $StatusManager.THRESHOLD:
+					for cond in target.statuses[StatusManager.statusActivations.passive]:
+						if cond["name"] == "Provoke" and cond["value"] >= StatusManager.THRESHOLD:
 							set_intent(target, moveUser) #just taunt for now
-			if !chosenMove.has("timing") or chosenMove["timing"] == $Moves.timings.after: #Default timing is after damage
+			if !chosenMove.has("timing") or chosenMove["timing"] == Moves.timings.after: #Default timing is after damage
 				activate_effect()
 		yield(get_tree().create_timer(.5), "timeout")
 		i+=1
@@ -361,15 +366,15 @@ func evaluate_completion():
 
 func done():
 	$BattleUI.toggle_trackers(false)
-	if get_parent().name == "root":
-		return get_tree().change_scene("res://src/Project/Debug.tscn")
-	else:
+	if get_parent().name == "Game":
+		return get_tree().reload_current_scene()
+	else: #Map
 		for i in global.storedParty.size():
 			$BattleUI.playerHolder.cleanup_moves(global.storedParty[i], get_parent().inventoryWindow.DEFAULTCOLOR)
 		visible = false
 
 func generate_rewards():
-	var rewards = $Enemies.enemyList[opponents[randi() % opponents.size()]]["rewards"] #Random enemy from the opponents list gives rewards
+	var rewards = Enemies.enemyList[opponents[randi() % opponents.size()]]["rewards"] #Random enemy from the opponents list gives rewards
 	var categories = [[0],[0]] #0 loot 1 learn
 	var finalRewards = []
 	

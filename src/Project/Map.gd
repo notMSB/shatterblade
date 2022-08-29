@@ -9,6 +9,8 @@ export (PackedScene) var ChoiceUI
 export (PackedScene) var Dungeon
 export (PackedScene) var Section
 
+onready var Moves = get_node("../Data/Moves")
+
 const INCREMENT = 92
 const KILLDISTANCE = 81 #lower kill distance means more points
 const MAXDISTANCE = 200
@@ -55,7 +57,7 @@ func _ready():
 			global.storedParty[i].ui = $HolderHolder/DisplayHolder.setup_player(global.storedParty[i], i)
 			global.storedParty[i].update_hp()
 		for display in $HolderHolder/DisplayHolder.get_children():
-			display.get_node("Name").text = $Moves.get_classname(global.storedParty[display.get_index()].allowedType)
+			display.get_node("Name").text = Moves.get_classname(global.storedParty[display.get_index()].allowedType)
 	bottomRight = Vector2($ReferenceRect.margin_right, $ReferenceRect.margin_bottom)
 	timeNode.position.y += bottomRight.y + 50
 	columnNum = int(ceil(bottomRight.x/INCREMENT) - 1) #ceil-1 instead of floor prevents strangeness with exact divisions
@@ -70,12 +72,12 @@ func _ready():
 
 func setup_inventory():
 	inventoryWindow = Inventory.instance()
-	add_child(inventoryWindow)
+	get_parent().add_child(inventoryWindow)
 	inventoryWindow.visible = false
 
 func setup_battle():
 	battleWindow = Battle.instance()
-	add_child(battleWindow)
+	get_parent().add_child(battleWindow)
 	battleWindow.visible = false
 
 func activate_inventory(mode = null):
@@ -144,6 +146,7 @@ func make_points(nextPos):
 		if nextPos.y >= bottomRight.y: #done, clean up leftovers and set start/end points
 			organize_lines()
 			startIndex.pointType = pointTypes.start
+			activePoint = startIndex
 			startIndex.toggle_activation(true)
 			startIndex.set_name("Start")
 			determine_distances(startIndex)
@@ -165,7 +168,6 @@ func find_border_points():
 			for line in point.lines:
 				adjacentPoint = line.get_connection(point)
 				if adjacentPoint.sectionNum > checkSection:
-					print(str(checkSection, " ", adjacentPoint.sectionNum))
 					possibleDungeons[checkSection].append(line)
 					exitPoints[checkSection].append(adjacentPoint)
 	place_dungeons(possibleDungeons, exitPoints)
@@ -207,11 +209,10 @@ func place_town(exitPoint, borderPoints): #towns are adjacent to dungeon exits a
 		if backupSpots.empty(): return print("no spots for town")
 		print("backup spots")
 		townSpots = backupSpots
-	print(townSpots.size())
 	for i in townSpots.size():
 		if abs(townSpots[i].position.y - bottomRight.y/2) < bestDistance:
 			bestSpot = townSpots[i]
-			print("swap")
+			print("swapping town to more central spot")
 	bestSpot.set_name("Town")
 	bestSpot.pointType = pointTypes.town
 	#print(bottomRight.y/2)
@@ -347,8 +348,8 @@ func advance_day():
 
 func update_mana(gain = null):
 	for unit in global.storedParty:
-		if gain: unit.update_resource(gain, $Moves.moveType.magic, true)
-		else: unit.update_resource(unit.maxMana, $Moves.moveType.magic, true)
+		if gain: unit.update_resource(gain, Moves.moveType.magic, true)
+		else: unit.update_resource(unit.maxMana, Moves.moveType.magic, true)
 
 func get_point(i, diff):
 	return $HolderHolder/PointHolder.get_child(i - diff)

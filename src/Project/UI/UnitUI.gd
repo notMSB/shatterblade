@@ -11,10 +11,8 @@ func _ready():
 func set_battle():
 	Battle = checkNode.battleWindow
 
-
-
-func checkRoot():
-	if Battle.get_parent().name != "root":
+func check_mode():
+	if Battle.get_parent().mapMode:
 		fixTargets = true
 
 func _on_Button_pressed():

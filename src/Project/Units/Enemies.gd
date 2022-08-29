@@ -1,6 +1,6 @@
-extends Node
+extends Node2D
 
-var enemyList = {
+onready var enemyList = {
 	"Bat": {"stats": [15], "passives": {"Dodgy": 1}, "specials": ["Vampire"], 
 		"rewards": ["wing", "fang"]},
 	"Bird": {"stats": [20], "specials": ["Dive Bomb", "Triple Hit"], 

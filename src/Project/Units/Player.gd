@@ -15,7 +15,7 @@ var title
 
 func _ready():
 	isPlayer = true
-	types = Battle.get_node("Moves").moveType
+	types = Battle.Moves.moveType
 
 func update_resource(resValue, type, isGain: bool):
 	if type == types.special:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://src/Project/Debug.gd" type="Script" id=1]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=2]
@@ -6,19 +6,53 @@
 [ext_resource path="res://src/Project/UI/Inventory.tscn" type="PackedScene" id=4]
 [ext_resource path="res://src/Project/Map.tscn" type="PackedScene" id=5]
 [ext_resource path="res://src/Project/Battle.tscn" type="PackedScene" id=6]
+[ext_resource path="res://src/Project/Lists/StatusManager.gd" type="Script" id=7]
+[ext_resource path="res://src/Project/Quests.gd" type="Script" id=8]
+[ext_resource path="res://src/Project/Lists/Formations.gd" type="Script" id=9]
+[ext_resource path="res://src/Project/Lists/Moves.gd" type="Script" id=10]
+[ext_resource path="res://src/Project/UI/Trading.gd" type="Script" id=11]
+[ext_resource path="res://src/Project/Units/Enemies.gd" type="Script" id=12]
+[ext_resource path="res://src/Project/Game.gd" type="Script" id=13]
+[ext_resource path="res://src/Project/Units/Crafting.gd" type="Script" id=14]
 
 [sub_resource type="DynamicFont" id=1]
 size = 34
 font_data = ExtResource( 2 )
 
-[node name="Debug" type="Node2D"]
+[node name="Game" type="Node2D"]
+script = ExtResource( 13 )
+
+[node name="Data" type="Node2D" parent="."]
+
+[node name="Moves" type="Node2D" parent="Data"]
+script = ExtResource( 10 )
+
+[node name="StatusManager" type="Node2D" parent="Data"]
+script = ExtResource( 7 )
+
+[node name="Enemies" type="Node2D" parent="Data"]
+script = ExtResource( 12 )
+
+[node name="Formations" type="Node2D" parent="Data"]
+script = ExtResource( 9 )
+
+[node name="Trading" type="Node2D" parent="Data"]
+script = ExtResource( 11 )
+
+[node name="Quests" type="Node2D" parent="Data"]
+script = ExtResource( 8 )
+
+[node name="Crafting" type="Node2D" parent="Data"]
+script = ExtResource( 14 )
+
+[node name="Debug" type="Node2D" parent="."]
 script = ExtResource( 1 )
 Party = ExtResource( 3 )
 Inventory = ExtResource( 4 )
 Battle = ExtResource( 6 )
 Map = ExtResource( 5 )
 
-[node name="FullBG" type="ColorRect" parent="."]
+[node name="FullBG" type="ColorRect" parent="Debug"]
 margin_left = 1.0
 margin_top = -5.0
 margin_right = 1284.0
@@ -28,7 +62,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Party" type="Button" parent="."]
+[node name="Party" type="Button" parent="Debug"]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 900.0
 margin_top = 68.149
@@ -44,7 +78,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Inventory" type="Button" parent="."]
+[node name="Inventory" type="Button" parent="Debug"]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 600.0
 margin_top = 64.0
@@ -60,7 +94,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Map" type="Button" parent="."]
+[node name="Map" type="Button" parent="Debug"]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 600.0
 margin_top = 192.0
@@ -76,7 +110,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Battle" type="Button" parent="."]
+[node name="Battle" type="Button" parent="Debug"]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 300.0
 margin_top = 64.0
@@ -92,7 +126,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[connection signal="pressed" from="Party" to="." method="_on_Party_pressed"]
-[connection signal="pressed" from="Inventory" to="." method="_on_Inventory_pressed"]
-[connection signal="pressed" from="Map" to="." method="_on_Map_pressed"]
-[connection signal="pressed" from="Battle" to="." method="_on_Battle_pressed"]
+[connection signal="pressed" from="Debug/Party" to="Debug" method="_on_Party_pressed"]
+[connection signal="pressed" from="Debug/Inventory" to="Debug" method="_on_Inventory_pressed"]
+[connection signal="pressed" from="Debug/Map" to="Debug" method="_on_Map_pressed"]
+[connection signal="pressed" from="Debug/Battle" to="Debug" method="_on_Battle_pressed"]

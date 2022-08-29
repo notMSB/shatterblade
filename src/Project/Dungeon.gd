@@ -1,6 +1,6 @@
 extends Node2D
 
-onready var Map = get_tree().current_scene
+onready var Map = get_node("../../../")
 
 var index
 var type

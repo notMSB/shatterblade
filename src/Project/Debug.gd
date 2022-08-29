@@ -1,13 +1,24 @@
 extends Node2D
 
+export (PackedScene) var Party
+export (PackedScene) var Inventory
+export (PackedScene) var Battle
+export (PackedScene) var Map
+onready var Game = get_parent()
+
 func _on_Party_pressed():
-	return get_tree().change_scene("res://src/Project/Units/Party.tscn")
+	add_scene(Party)
 
 func _on_Inventory_pressed():
-	return get_tree().change_scene("res://src/Project/UI/Inventory.tscn")
+	add_scene(Inventory)
 
 func _on_Battle_pressed():
-	return get_tree().change_scene("res://src/Project/Battle.tscn")
+	add_scene(Battle)
 
 func _on_Map_pressed():
-	return get_tree().change_scene("res://src/Project/Map.tscn")
+	Game.mapMode = true
+	add_scene(Map)
+
+func add_scene(sceneName):
+	Game.add_child(sceneName.instance())
+	visible = false

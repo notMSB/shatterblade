@@ -18,6 +18,9 @@ const MOVESPACES = 5
 onready var iHolder = $HolderHolder/InventoryHolder
 onready var cHolder = $HolderHolder/CraftboxHolder
 onready var tHolder = $HolderHolder/TradeHolder
+onready var Trading = get_node("../Data/Trading")
+onready var Moves = get_node("../Data/Moves")
+onready var Crafting = get_node("../Data/Crafting")
 var dHolder
 
 var productBox
@@ -33,7 +36,7 @@ enum iModes {default, craft, trade}
 var mode = iModes.craft
 
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
-	tHolder.assign_component_values()
+	Trading.assign_component_values()
 	if global.itemDict.empty():
 		global.itemDict = {"fang": 1, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 1, "bone": 2, "wood": 1, "moves": ["Test Relic"]}
 	make_grid()
@@ -47,7 +50,7 @@ func _ready(): #Broken with relics as a standalone scene, but works when the Map
 				global.storedParty[i].moves.append("X")
 			dHolder.setup_player(global.storedParty[i], i)
 		for display in dHolder.get_children():
-			display.get_node("Name").text = $Moves.get_classname(global.storedParty[display.get_index()].allowedType)
+			display.get_node("Name").text = Moves.get_classname(global.storedParty[display.get_index()].allowedType)
 			for box in display.get_node("MoveBoxes").get_children():
 				identify_product(box)
 	else:
@@ -67,22 +70,22 @@ func shuffle_trade_stock():
 	for i in global.storedParty.size():
 		restock.append(rando_component())
 		restock.append(rando_move(i))
-	tHolder.stock = restock
+	Trading.stock = restock
 	restock_trade()
 
 func restock_trade():
 	var box
 	for i in tHolder.get_child_count():
 		box = tHolder.get_child(i)
-		box.get_node("Name").text = tHolder.stock[i] if tHolder.stock.size() > i else "X"
+		box.get_node("Name").text = Trading.stock[i] if Trading.stock.size() > i else "X"
 		identify_product(box)
 
 func rando_component():
-	var keys = $Crafting.c.keys()
+	var keys = Crafting.c.keys()
 	return keys[randi() % keys.size()]
 
 func rando_move(index):
-	var list = $Moves.moveList
+	var list = Moves.moveList
 	var rando = []
 	for move in list: #populate rando with viable moves
 		if list[move].has("type"): 
@@ -94,7 +97,7 @@ func set_mode():
 	cHolder.visible = true if mode == iModes.craft else false
 	if mode == iModes.trade:
 		toggle_trade_visibility(true)
-		initialTraderValue = tHolder.get_inventory_value(tHolder.stock)
+		initialTraderValue = Trading.get_inventory_value(Trading.stock)
 		currentTraderValue = initialTraderValue
 		set_text($Initial, initialTraderValue)
 		set_text($Current, currentTraderValue)
@@ -128,7 +131,7 @@ func make_inventorybox(boxName):
 	box.position.x = XSTART + (boxesCount.x * XINCREMENT)
 	box.position.y = YSTART + (boxesCount.y * YINCREMENT)
 	box.get_node("Name").text = boxName
-	box.get_node("Info").text = String(tHolder.get_item_value(boxName))
+	box.get_node("Info").text = String(Trading.get_item_value(boxName))
 	incrementBoxCount()
 	return box
 	
@@ -152,7 +155,7 @@ func make_actionboxes(boxCount, isCraft = false):
 				productBox = box
 		else: 
 			box.position.x = XSTART + (i * XINCREMENT)
-			box.get_node("Name").text = usedHolder.stock[i] if usedHolder.stock.size() > i else "X"
+			box.get_node("Name").text = Trading.stock[i] if Trading.stock.size() > i else "X"
 			identify_product(box)
 
 func select_box(box = null):
@@ -184,22 +187,22 @@ func check_swap(selectedBox):
 func player_inv_check(playerBox, otherBox):
 	var checkName = otherBox.get_node("Name").text
 	var playerName = playerBox.get_node("Name").text
-	if $Crafting.c.get(checkName) == null: #can't move in crafting material
-		var playerType = $Moves.moveList[playerName]["type"]
-		var checkType = $Moves.moveList[checkName]["type"]
+	if Crafting.c.get(checkName) == null: #can't move in crafting material
+		var playerType = Moves.moveList[playerName]["type"]
+		var checkType = Moves.moveList[checkName]["type"]
 		#swapping into the attack/defend boxes, cannot swap an X from other players but can from inventory
-		if ((playerType == $Moves.moveType.relic or playerType == $Moves.moveType.basic) 
-		and (checkType == $Moves.moveType.relic or checkType == $Moves.moveType.basic or (checkType == $Moves.moveType.none and otherBox.get_parent().name != "MoveBoxes"))):
+		if ((playerType == Moves.moveType.relic or playerType == Moves.moveType.basic) 
+		and (checkType == Moves.moveType.relic or checkType == Moves.moveType.basic or (checkType == Moves.moveType.none and otherBox.get_parent().name != "MoveBoxes"))):
 			return swap_boxes(playerBox, otherBox, true) #restore attack/defend on boxes if necessary
 		
 		#swapping into player's class inventory boxes
 		var playerClass = global.storedParty[playerBox.get_node("../../").get_index()].allowedType #Grandpa ia a PlayerProfile, its index matches the global index
-		if checkType == playerClass or checkType == $Moves.moveType.none: #The correct move type or an empty spot can be swapped
+		if checkType == playerClass or checkType == Moves.moveType.none: #The correct move type or an empty spot can be swapped
 			return swap_boxes(playerBox, otherBox)
 	deselect_multi([playerBox, otherBox])
 
 func check_crafts(craftBox, otherBox):
-	if !$Crafting.c.get(otherBox.get_node("Name").text) == null: 
+	if !Crafting.c.get(otherBox.get_node("Name").text) == null: 
 		swap_boxes(craftBox, otherBox)
 		var components = [] #Now check if both craft boxes have an entry, and if so show product and confirm button
 		var productName = productBox.get_node("Name")
@@ -214,7 +217,7 @@ func check_crafts(craftBox, otherBox):
 				if global.itemDict[components[0]] < 2: #cannot merge component with itself if you only have 1 of it
 					cHolder.get_child(1).get_node("Name").text = "X"
 					return
-			productName.text = $Crafting.sort_then_combine($Crafting.c.get(components[0]), $Crafting.c.get(components[1])) #Get result from table
+			productName.text = Crafting.sort_then_combine(Crafting.c.get(components[0]), Crafting.c.get(components[1])) #Get result from table
 			#productName.text = product #Put result name in product box
 			identify_product(productBox)
 			$CraftButton.visible = true
@@ -232,13 +235,13 @@ func swap_boxes(one, two, check = false):
 func restore_basics(boxes): #puts attack/defend back on non-relic boxes and remove them from inventory box
 	for box in boxes:
 		if box.get_parent().name == "MoveBoxes": #player box
-			if $Moves.moveList[box.get_node("Name").text]["type"] <= $Moves.moveType.basic: #X or attack/defend
+			if Moves.moveList[box.get_node("Name").text]["type"] <= Moves.moveType.basic: #X or attack/defend
 				if box.get_index() == 0: #attack
 					box.get_node("Name").text = "Attack"
 				else: #defend
 					box.get_node("Name").text = "Defend"
 		else: #inventory box
-			if $Moves.moveList[box.get_node("Name").text]["type"] == $Moves.moveType.basic:
+			if Moves.moveList[box.get_node("Name").text]["type"] == Moves.moveType.basic:
 				box.get_node("Name").text = "X"
 
 func assess_trade_value():
@@ -246,24 +249,25 @@ func assess_trade_value():
 	for child in tHolder.get_children():
 		if child.get_child_count() > 0: #if it has a name node
 			newStock.append(child.get_node("Name").text)
-	currentTraderValue = tHolder.get_inventory_value(newStock)
+	currentTraderValue = Trading.get_inventory_value(newStock)
 	$Current.text = String(currentTraderValue)
 	$ExitButton.visible = true if currentTraderValue >= initialTraderValue else false
 
 func identify_product(box):
 	var skipValue = false
 	var boxName = box.get_node("Name").text
-	if $Moves.moveList.has(boxName):
-		var productType = $Moves.moveList[boxName]["type"]
+	if Moves.moveList.has(boxName):
+		var productType = Moves.moveList[boxName]["type"]
 		box.moveType = productType
-		if productType == $Moves.moveType.special: box.get_node("ColorRect").color = Color(.9,.3,.3,1) #R
-		elif productType == $Moves.moveType.trick: box.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
-		elif productType == $Moves.moveType.magic: box.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
+		if productType == Moves.moveType.special: box.get_node("ColorRect").color = Color(.9,.3,.3,1) #R
+		elif productType == Moves.moveType.trick: box.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
+		elif productType == Moves.moveType.magic: box.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
+		elif productType == Moves.moveType.relic: box.get_node("ColorRect").color = DEFAULTCOLOR #relics need a color
 		else: #attack/defend/X/other
 			box.get_node("ColorRect").color = DEFAULTCOLOR
 			skipValue = true
 	else: box.get_node("ColorRect").color = DEFAULTCOLOR #component
-	box.get_node("Info").text = "0" if skipValue else String(tHolder.get_item_value(boxName))
+	box.get_node("Info").text = "0" if skipValue else String(Trading.get_item_value(boxName))
 
 
 func confirm_craft(): #Subtract one from each ingredient from inventory and put in the new product
@@ -292,9 +296,9 @@ func exit(): #Save inventory and leave
 		unit.passives.clear()
 		for box in dHolder.get_child(i).get_node("MoveBoxes").get_children(): #Accessing the moveboxes
 			moveName = box.get_node("Name").text
-			moveData = $Moves.moveList[moveName]
+			moveData = Moves.moveList[moveName]
 			checkType = moveData["type"]
-			if checkType != $Moves.moveType.relic and checkType != $Moves.moveType.basic:
+			if checkType != Moves.moveType.relic and checkType != Moves.moveType.basic:
 				unit.moves.append(moveName)
 			if moveData.has("passive"):
 				unit.passives[moveData["passive"][0]] = moveData["passive"][1]
@@ -312,7 +316,7 @@ func exit(): #Save inventory and leave
 
 func done():
 	if get_parent().name == "root":
-		return get_tree().change_scene("res://src/Project/Debug.tscn")
+		return get_tree().reload_current_scene()
 	else:
 		for i in global.storedParty.size():
 			dHolder.cleanup_moves(global.storedParty[i], DEFAULTCOLOR)

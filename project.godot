@@ -15,7 +15,7 @@ _global_script_class_icons={
 [application]
 
 config/name="rpgtest"
-run/main_scene="res://src/Project/Debug.tscn"
+run/main_scene="res://src/Project/Game.tscn"
 config/icon="res://icon.png"
 
 [autoload]

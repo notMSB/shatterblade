@@ -7,7 +7,7 @@ var clicksFromStart
 var info = {}
 var sectionNum
 
-onready var Map = get_tree().current_scene
+onready var Map = get_node("../../../")
 
 func toggle_activation(active, skip = false):
 	if active: 

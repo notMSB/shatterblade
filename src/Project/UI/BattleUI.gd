@@ -5,7 +5,7 @@ export (PackedScene) var ResourceTracker
 const PLAYERINCREMENT = 80
 
 onready var Battle = get_parent()
-onready var Moves = get_node("../Moves")
+onready var Moves = get_node("../../Data/Moves")
 
 const DefaultMoves = 2
 
@@ -20,7 +20,7 @@ var currentPlayer
 
 func _ready():
 	var grandpa = get_node("../../")
-	playerHolder = $DisplayHolder if grandpa.name == "root" else grandpa.get_node("HolderHolder/DisplayHolder")
+	playerHolder = $DisplayHolder if !grandpa.mapMode else grandpa.get_node("Map/HolderHolder/DisplayHolder")
 
 func setup_display(unit, totalEnemies):
 	var display

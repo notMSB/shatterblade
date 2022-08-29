@@ -1,6 +1,6 @@
 extends Node2D
 
-onready var Battle = get_parent()
+var Battle
 var moveList
 enum timings {before, after}
 enum moveType {none, basic, relic, special, magic, trick, item}
@@ -58,15 +58,28 @@ func _ready():
 	
 	"Double Slash": {"target": targetType.enemy, "damage": 4, "resVal": 1, "type": moveType.item},
 	
-	"Test Relic": {"type": moveType.relic, "resVal": 0, "unusable": true, "passive": ["Dodgy", 1]},
+	"Test Relic": {"type": moveType.relic, "resVal": 0, "unusable": true, "passive": ["Dodgy", 1], "price": 5},
+	"Another Relic": {"type": moveType.relic, "resVal": 0, "unusable": true, "passive": ["Dodgy", 1], "price": 5},
 	
 	"X": {"type": moveType.none, "resVal": 999} #temp
 }
+
+func set_battle(battleNode):
+	Battle = battleNode
 
 func get_classname(type):
 	if type == moveType.special: return "Fighter"
 	elif type == moveType.magic: return "Mage"
 	elif type == moveType.trick: return "Rogue"
+
+func get_relics():
+	var relics = []
+	var moveData
+	for move in moveList:
+		moveData = moveList[move]
+		if moveData.has("type") and moveData["type"] == moveType.relic:
+			relics.append(move)
+	return relics
 
 #Effects
 func get_enemy_targeters(unit):
