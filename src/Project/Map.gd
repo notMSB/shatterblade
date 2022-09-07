@@ -10,6 +10,7 @@ export (PackedScene) var Dungeon
 export (PackedScene) var Section
 
 onready var Moves = get_node("../Data/Moves")
+onready var Quests = get_node("../Data/Quests")
 
 const INCREMENT = 92
 const KILLDISTANCE = 81 #lower kill distance means more points
@@ -86,39 +87,50 @@ func activate_inventory(mode = null):
 	else:
 		inventoryWindow.welcome_back(inventoryWindow.iModes.default)
 
-func activate_point(type):
+func activate_point(point):
+	var type = point.pointType
 	if type == pointTypes.start:
 		print("Start")
 	elif type == pointTypes.battle:
-		battleWindow.visible = true
-		battleWindow.welcome_back()
+		activate_battle()
 	elif type == pointTypes.dungeon:
-		run_event("Dungeon")
+		grab_event("Dungeon")
 	elif type == pointTypes.town:
-		run_event("Town")
+		grab_event("Town")
 	elif type == pointTypes.event:
-		var list = $Events.eventList
-		var pool = []
-		if isDay:
-			for option in list: #day has a lesser value than overworld in the enum
-				if list[option]["time"] <= $Events.timings.overworld: pool.append(option)
+		if point.pointQuest:
+			$Events/EventDescription.text = str(point.pointQuest["description"], "\nfor\n", point.pointQuest["prize"])
+			run_event(point.pointQuest)
 		else:
-			for option in list: #night has a greater value than overworld
-				if list[option]["time"] >= $Events.timings.overworld: pool.append(option)
-		run_event(pool[randi() % pool.size()])
+			var list = $Events.eventList
+			var pool = []
+			if isDay:
+				for option in list: #day has a lesser value than overworld in the enum
+					if list[option]["time"] <= $Events.timings.overworld: pool.append(option)
+			else:
+				for option in list: #night has a greater value than overworld
+					if list[option]["time"] >= $Events.timings.overworld: pool.append(option)
+			grab_event(pool[randi() % pool.size()])
 
-func run_event(eventName):
+func activate_battle(newOpponents = null):
+	battleWindow.visible = true
+	battleWindow.welcome_back(newOpponents)
+
+func grab_event(eventName): #used for premade events, generated events have their own system
 	calledEvent = eventName
-	$Events.visible = true
 	$Events/EventDescription.text = $Events.eventList[eventName]["description"]
-	var choice
+	run_event($Events.eventList[eventName])
+
+func run_event(event):
 	var yIncrement = $Events/EventDescription.rect_size.y
-	var event
-	for i in $Events.eventList[eventName]["choices"].size():
-		event = $Events.eventList[eventName]
+	var choice
+	var cond
+	var function
+	$Events.visible = true
+	for i in event["choices"].size():
 		if event.has("conditions") and typeof(event["conditions"][i]) == TYPE_ARRAY: #assess the condition
-			var cond = event["conditions"][i]
-			var function = event["conditions"][i][0] #first element is the function, rest is the args
+			cond = event["conditions"][i]
+			function = event["conditions"][i][0] #first element is the function, rest is the args
 			if !function.call_funcv(cond.slice(1, cond.size()-1)): continue #skip using it as an option if the condition is false
 		choice = ChoiceUI.instance()
 		$Events/Choices.add_child(choice)
@@ -130,6 +142,7 @@ func finish_event():
 	for option in $Events/Choices.get_children():
 		option.queue_free()
 	$Events.visible = false
+	calledEvent = null #clearing this out is needed because it's checked to process event outcomes
 
 func make_points(nextPos):
 	var currentPoint = Point.instance()
@@ -261,7 +274,11 @@ func organize_lines():
 			elif point.position.x < startIndex.position.x: startIndex = point
 			if !endIndex: endIndex = point
 			elif point.position.x >= endIndex.position.x: endIndex = point
-			point.pointType = pointTypes.battle
+			point.pointType = pointTypes.event
+			if point.pointType == pointTypes.event: make_quest(point)
+
+func make_quest(point):
+	point.pointQuest = $Events.generate_event(Quests.generate_quest())
 
 func determine_distances(checkPoint): #gives every node a distance from start and returns if the end node is accessible
 	if checkPoint == startIndex: checkPoint.clicksFromStart = 0

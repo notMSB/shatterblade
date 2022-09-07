@@ -71,7 +71,11 @@ func get_classname(type):
 	if type == moveType.special: return "Fighter"
 	elif type == moveType.magic: return "Mage"
 	elif type == moveType.trick: return "Rogue"
-
+	
+func random_moveType():
+	var typeList = [moveType.special, moveType.magic, moveType.trick]
+	return typeList[randi() % typeList.size()]
+	
 func get_relics():
 	var relics = []
 	var moveData

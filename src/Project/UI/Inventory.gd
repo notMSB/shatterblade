@@ -3,7 +3,7 @@ extends Node2D
 export (PackedScene) var ItemBox
 
 const XSTART = 360
-const YSTART = 200
+const YSTART = 125
 
 const XINCREMENT = 80
 const YINCREMENT = 60
@@ -18,6 +18,7 @@ const MOVESPACES = 5
 onready var iHolder = $HolderHolder/InventoryHolder
 onready var cHolder = $HolderHolder/CraftboxHolder
 onready var tHolder = $HolderHolder/TradeHolder
+onready var oHolder = $HolderHolder/OfferingHolder
 onready var Trading = get_node("../Data/Trading")
 onready var Moves = get_node("../Data/Moves")
 onready var Crafting = get_node("../Data/Crafting")
@@ -28,22 +29,29 @@ var otherSelection #Used to sync a selection across all non-inventory box holder
 
 var boxesCount = Vector2(0,0)
 
+var currentInvSize = 0
+
 const TRADERINVSIZE = 8
 var initialTraderValue
 var currentTraderValue
 
-enum iModes {default, craft, trade}
+enum oTypes {component, weapon}
+var offerType
+var offerNeed
+
+enum iModes {default, craft, trade, offer}
 var mode = iModes.craft
 
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
-	Trading.assign_component_values()
+	if !Trading.assigned: Trading.assign_component_values()
 	if global.itemDict.empty():
 		global.itemDict = {"fang": 1, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 1, "bone": 2, "wood": 1, "moves": ["Test Relic"]}
 	make_grid()
-	make_actionboxes(CRAFTBOXES, true)
-	make_actionboxes(TRADERINVSIZE)
+	make_actionboxes(CRAFTBOXES, iModes.craft)
+	make_actionboxes(TRADERINVSIZE, iModes.trade)
+	make_actionboxes(1, iModes.offer)
 	set_mode()
-	if get_parent().name == "root" and global.storedParty.size() > 0: 
+	if !get_parent().mapMode and global.storedParty.size() > 0: 
 		dHolder = $HolderHolder/DisplayHolder
 		for i in global.storedParty.size():
 			while global.storedParty[i].moves.size() < MOVESPACES:
@@ -54,7 +62,7 @@ func _ready(): #Broken with relics as a standalone scene, but works when the Map
 			for box in display.get_node("MoveBoxes").get_children():
 				identify_product(box)
 	else:
-		dHolder = get_node_or_null("../HolderHolder/DisplayHolder")
+		dHolder = get_node_or_null("../Map/HolderHolder/DisplayHolder")
 
 func welcome_back(newMode):
 	visible = true
@@ -95,6 +103,7 @@ func rando_move(index):
 
 func set_mode():
 	cHolder.visible = true if mode == iModes.craft else false
+	oHolder.visible = true if mode == iModes.offer else false
 	if mode == iModes.trade:
 		toggle_trade_visibility(true)
 		initialTraderValue = Trading.get_inventory_value(Trading.stock)
@@ -106,7 +115,8 @@ func set_mode():
 
 func toggle_trade_visibility(toggle):
 	tHolder.visible = toggle
-	#$ResetButton.visible = toggle
+	if toggle: toggle_action_button(true, "Reset")
+	else: toggle_action_button(false)
 	$Initial.visible = toggle
 	$Current.visible = toggle
 
@@ -141,22 +151,30 @@ func incrementBoxCount():
 		boxesCount.x = 0
 		boxesCount.y +=1
 
-func make_actionboxes(boxCount, isCraft = false):
+func make_actionboxes(boxCount, boxMode):
 	var box
-	var usedHolder = cHolder if isCraft else tHolder
+	var usedHolder 
+	if boxMode == iModes.craft:
+		usedHolder = cHolder
+	elif boxMode == iModes.trade:
+		usedHolder = tHolder
+	else:
+		usedHolder = oHolder
 	for i in boxCount:
 		box = ItemBox.instance()
 		usedHolder.add_child(box)
-		box.position.y = YSTART*2.5
-		if isCraft: 
+		box.position.y = YSTART*3.25
+		if boxMode == iModes.craft: 
 			box.position.x = XSTART*1.25 + (i*i*XINCREMENT) #different spacing for crafting/trading
 			if i == boxCount - 1: #The crafting product box shouldn't be clickable
 				box.get_node("Button").visible = false
 				productBox = box
-		else: 
+		elif boxMode == iModes.trade: 
 			box.position.x = XSTART + (i * XINCREMENT)
 			box.get_node("Name").text = Trading.stock[i] if Trading.stock.size() > i else "X"
 			identify_product(box)
+		else: #offer
+			box.position.x = XSTART * 1.77
 
 func select_box(box = null):
 	box.get_parent().selectedBox = box
@@ -178,9 +196,21 @@ func check_swap(selectedBox):
 	if !otherSelection:
 		otherSelection = selectedBox
 	else:
-		if selectedBox.get_parent() == cHolder: check_crafts(selectedBox, otherSelection) #crafting related checks
-		elif otherSelection.get_parent() == cHolder: check_crafts(otherSelection, selectedBox)
-		elif selectedBox.get_parent().name == "MoveBoxes": player_inv_check(selectedBox, otherSelection)
+		if mode == iModes.offer:
+			var canOffer = false
+			if selectedBox.get_parent() == oHolder: canOffer = check_offering(otherSelection)
+			elif otherSelection.get_parent() == oHolder: canOffer = check_offering(selectedBox)
+			if !canOffer: 
+				deselect_multi([selectedBox, otherSelection])
+				return
+		elif mode == iModes.craft:
+			if selectedBox.get_parent() == cHolder: 
+				check_crafts(selectedBox, otherSelection) #crafting related checks
+				return
+			elif otherSelection.get_parent() == cHolder: 
+				check_crafts(otherSelection, selectedBox)
+				return
+		if selectedBox.get_parent().name == "MoveBoxes": player_inv_check(selectedBox, otherSelection)
 		elif otherSelection.get_parent().name == "MoveBoxes": player_inv_check(otherSelection, selectedBox)
 		else: swap_boxes(selectedBox, otherSelection)
 
@@ -220,9 +250,28 @@ func check_crafts(craftBox, otherBox):
 			productName.text = Crafting.sort_then_combine(Crafting.c.get(components[0]), Crafting.c.get(components[1])) #Get result from table
 			#productName.text = product #Put result name in product box
 			identify_product(productBox)
-			$CraftButton.visible = true
+			toggle_action_button(true, "Craft")
 		else: #replacing a valid box with an invalid one would yield this result
-			$CraftButton.visible = false
+			toggle_action_button(false)
+	else:
+		deselect_multi([craftBox, otherBox])
+
+func check_offering(offeringBox):
+	if offeringBox.get_node("Name").text == "X": return true
+	elif offerType == oTypes.component:
+		if offeringBox.get_node("Name").text != offerNeed:
+			return false
+	elif offerType == oTypes.weapon:
+		var boxName = offeringBox.get_node("Name").text
+		if Moves.moveList.has(boxName):
+			if Moves.moveList[boxName]["type"] != Moves.moveType.get(offerNeed):
+				return false
+	toggle_action_button(true, "Offer")
+	return true
+
+func toggle_action_button(toggle, buttonText = ""):
+	$ActionButton.visible = toggle
+	$ActionButton.text = buttonText
 
 func swap_boxes(one, two, check = false):
 	var temp = one.get_node("Name").text
@@ -269,21 +318,35 @@ func identify_product(box):
 	else: box.get_node("ColorRect").color = DEFAULTCOLOR #component
 	box.get_node("Info").text = "0" if skipValue else String(Trading.get_item_value(boxName))
 
-
 func confirm_craft(): #Subtract one from each ingredient from inventory and put in the new product
 	for cBox in cHolder.get_children():
 		if !cBox.get_node("Button").visible: #Button is only visible on the non-result boxes, so this runs once on the result box
 			cBox.get_node("ColorRect").color = DEFAULTCOLOR
-			var iName
-			for iBox in iHolder.get_children():
-				iName = iBox.get_node("Name").text
-				if iName == "X":
-					iBox.get_node("Name").text = cBox.get_node("Name").text #Put product in there
-					identify_product(iBox)
-					break
+			add_item(cBox.get_node("Name").text)
 		cBox.get_node("Name").text = "X"
 		cBox.get_node("Info").text = ""
-	$CraftButton.visible = false
+	toggle_action_button(false)
+
+func add_item(itemName): #todo: case for full inventory
+	var iName
+	for iBox in iHolder.get_children():
+		iName = iBox.get_node("Name").text
+		if iName == "X":
+			iBox.get_node("Name").text = itemName #Put product in there
+			identify_product(iBox)
+			break
+
+	update_itemDict(itemName)
+
+func update_itemDict(itemName):
+	currentInvSize += 1
+	if currentInvSize > XMAX * YMAX: 
+		print("inventory overflow")
+	else:
+		if global.itemDict.has(itemName): #it's a component
+			global.itemDict[itemName] += 1
+		else: #it's a move and goes in the holder
+			global.itemDict[MOVEHOLDER].append(itemName)
 
 func exit(): #Save inventory and leave
 	var unit
@@ -305,17 +368,15 @@ func exit(): #Save inventory and leave
 	for item in global.itemDict:
 		global.itemDict[item] = 0
 	global.itemDict[MOVEHOLDER] = [] #Redoing the moveholder with potential new moves
+	currentInvSize = 0
 	for iBox in iHolder.get_children():
 		var iName = iBox.get_node("Name").text
 		if iName == "X": continue #do not want to do anything with the Xs
-		if global.itemDict.has(iName): #it's a move and goes in the holder
-			global.itemDict[iName] += 1
-		else: #it's a move and goes in the holder
-			global.itemDict[MOVEHOLDER].append(iName)
+		update_itemDict(iName)
 	done()
 
 func done():
-	if get_parent().name == "root":
+	if !get_parent().mapMode:
 		return get_tree().reload_current_scene()
 	else:
 		for i in global.storedParty.size():
@@ -324,3 +385,12 @@ func done():
 
 func reset_trade():
 	return get_tree().reload_current_scene()
+
+func _on_ActionButton_pressed():
+	if mode == iModes.craft:
+		confirm_craft()
+	elif mode == iModes.trade:
+		reset_trade()
+	elif mode == iModes.offer:
+		exit()
+		get_node("../Map/Events").give_reward()

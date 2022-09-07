@@ -112,7 +112,7 @@ func create_enemies():
 				StatusManager.add_status(createdUnit, passive, createdUnit.passives[passive])
 		i+=1
 
-func welcome_back(): #reusing an existing battle scene for a new battle
+func welcome_back(newOpponents = null): #reusing an existing battle scene for a new battle
 	$BattleUI.toggle_trackers(true)
 	$BattleUI.enemyCount = 0
 	battleDone = false
@@ -132,6 +132,7 @@ func welcome_back(): #reusing an existing battle scene for a new battle
 					StatusManager.add_status(unit, passive, unit.passives[passive])
 			unit.update_status_ui()
 	turnIndex = -1
+	if newOpponents: opponents = newOpponents
 	create_enemies()
 	play_turn()
 

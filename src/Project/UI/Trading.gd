@@ -4,6 +4,7 @@ onready var Crafting = get_node("../Crafting")
 onready var Enemies = get_node("../Enemies")
 onready var Moves = get_node("../Moves")
 
+var assigned = false
 var selectedBox
 var values = {}
 var stock = []
@@ -16,6 +17,7 @@ func assign_component_values():
 	for enemy in eList:
 		for reward in eList[enemy]["rewards"]:
 			values[reward] = max(1, values[reward] - 1)
+	assigned = true
 
 func get_item_value(itemName):
 	if typeof(itemName) == TYPE_INT or itemName == "X":

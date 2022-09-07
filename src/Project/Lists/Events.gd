@@ -39,8 +39,12 @@ func _ready():
 func choose(index):
 	var function
 	var args = []
-	var outcomes = eventList[Map.calledEvent]["outcomes"]
-	for i in outcomes[index].size():
+	var outcomes
+	if Map.calledEvent:
+		outcomes = eventList[Map.calledEvent]["outcomes"]
+	else: #quest event contained in a point
+		outcomes = Map.activePoint.pointQuest["outcomes"]
+	for i in outcomes[index].size(): #The first entry in an outcomes list is the function, followed by the arguments
 		if typeof(outcomes[index][i]) == TYPE_OBJECT:
 			if function: function.call_funcv(args)
 			function = outcomes[index][i]
@@ -50,15 +54,51 @@ func choose(index):
 	if !function.call_funcv(args): #if the function returns a value, keep the event UI up
 		Map.finish_event()
 
-#Conditions
+func generate_event(questData):
+	var newEvent = {}
+	newEvent["time"] = timings.special
+	newEvent["description"] = str("This is a generated ", questData["type"], " event.")
+	newEvent["choices"] = [String(questData["objective"]), "Do not"]
+	newEvent["outcomes"] = []
+	newEvent["outcomes"].append([funcref(self, "activate_quest"), questData["type"], questData["objective"]])
+	newEvent["outcomes"].append([funcref(self, "advance")])
+	newEvent["prize"] = questData["prize"]
+	return newEvent
 
+func give_reward(): #todo: service reward
+	Map.inventoryWindow.add_item(Map.activePoint.pointQuest["prize"])
+
+#Conditions
 func has_class(className):
 	for unit in global.storedParty:
 		if unit.title == className:
 			return true
 	return false
 
+
 #Outcomes
+
+func activate_quest(questType, objective):
+	var questFunc = funcref(self, str("quest_", questType))
+	questFunc.call_func(objective)
+
+func quest_fetch(neededComponment): #need for certain component
+	Map.inventoryWindow.offerType = Map.inventoryWindow.oTypes.component
+	Map.inventoryWindow.offerNeed = neededComponment
+	Map.activate_inventory(Map.inventoryWindow.iModes.offer)
+
+func quest_labor(time): #task that takes X time
+	adjust_time(time * -1)
+	give_reward()
+
+func quest_hunt(target): #battle with night enemy
+	give_reward() #reward can be given in advance since battles are currently inescapable
+	Map.activate_battle([target])
+
+func quest_weapon_request(weaponType): #random weapon of a certain class
+	Map.inventoryWindow.offerType = Map.inventoryWindow.oTypes.weapon
+	Map.inventoryWindow.offerNeed = weaponType
+	Map.activate_inventory(Map.inventoryWindow.iModes.offer)
 
 func adjust_time(value):
 	Map.subtract_time(value * -1)

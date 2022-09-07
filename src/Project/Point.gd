@@ -6,13 +6,14 @@ var pointType = 0
 var clicksFromStart
 var info = {}
 var sectionNum
+var pointQuest = null
 
 onready var Map = get_node("../../../")
 
 func toggle_activation(active, skip = false):
 	if active: 
 		Map.activePoint = self
-		if (!skip and pointType != Map.pointTypes.visited): Map.activate_point(self.pointType) #skip used to exit dungeon without reactivating it
+		if (!skip and pointType != Map.pointTypes.visited): Map.activate_point(self) #skip used to exit dungeon without reactivating it
 		$Sprite.visible = true
 		$Sprite.modulate = Color(1,1,1,1)
 	else: 

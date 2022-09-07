@@ -21,16 +21,12 @@ func _ready():
 func create_options(number):
 	for i in number:
 		var createdUnit = Player.instance()
-		createdUnit.allowedType = random_moveType()
+		createdUnit.allowedType = Moves.random_moveType()
 		createdUnit.title = Moves.get_classname(createdUnit.allowedType)
 		set_stats(createdUnit, BASEHP)
 		rando_moves(createdUnit, MOVES_AVAILABLE)
 		tempParty.append(createdUnit)
 		make_info(createdUnit, i)
-
-func random_moveType():
-	var typeList = [Moves.moveType.special, Moves.moveType.magic, Moves.moveType.trick]
-	return random_item(typeList)
 
 func make_info(unit, index):
 	var info = ""

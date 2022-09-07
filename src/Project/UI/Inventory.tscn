@@ -30,51 +30,32 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CraftButton" type="Button" parent="."]
-visible = false
+[node name="ActionButton" type="Button" parent="."]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
-margin_left = 595.0
-margin_top = 547.0
-margin_right = 703.0
-margin_bottom = 615.0
-custom_fonts/font = SubResource( 1 )
+margin_left = 587.0
+margin_top = 483.0
+margin_right = 695.0
+margin_bottom = 551.0
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-text = "Craft"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ResetButton" type="Button" parent="."]
-visible = false
-modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
-margin_left = 595.0
-margin_top = 547.0
-margin_right = 703.0
-margin_bottom = 615.0
 custom_fonts/font = SubResource( 1 )
-custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
-custom_colors/font_color = Color( 1, 1, 1, 1 )
-custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
-custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-text = "Reset"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ExitButton" type="Button" parent="."]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
-margin_left = 595.0
-margin_top = 67.0
-margin_right = 703.0
-margin_bottom = 135.0
-custom_fonts/font = SubResource( 1 )
+margin_left = 587.0
+margin_top = 19.0
+margin_right = 695.0
+margin_bottom = 87.0
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
 text = "Exit"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -88,14 +69,18 @@ script = ExtResource( 4 )
 [node name="CraftboxHolder" type="Node2D" parent="HolderHolder"]
 script = ExtResource( 4 )
 
-[node name="DisplayHolder" type="Node2D" parent="HolderHolder"]
-script = ExtResource( 7 )
-PlayerProfile = ExtResource( 8 )
-PlayerMove = ExtResource( 9 )
+[node name="OfferingHolder" type="Node2D" parent="HolderHolder"]
+visible = false
+script = ExtResource( 4 )
 
 [node name="TradeHolder" type="Node2D" parent="HolderHolder"]
 visible = false
 script = ExtResource( 4 )
+
+[node name="DisplayHolder" type="Node2D" parent="HolderHolder"]
+script = ExtResource( 7 )
+PlayerProfile = ExtResource( 8 )
+PlayerMove = ExtResource( 9 )
 
 [node name="Initial" type="Label" parent="."]
 margin_left = 556.451
@@ -119,6 +104,5 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[connection signal="pressed" from="CraftButton" to="." method="confirm_craft"]
-[connection signal="pressed" from="ResetButton" to="." method="reset_trade"]
+[connection signal="pressed" from="ActionButton" to="." method="_on_ActionButton_pressed"]
 [connection signal="pressed" from="ExitButton" to="." method="exit"]
