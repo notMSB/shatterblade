@@ -26,6 +26,7 @@ margin_top = -19.1893
 margin_right = 1.79987
 margin_bottom = 4.81073
 custom_fonts/font = SubResource( 1 )
+text = "X"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -36,6 +37,18 @@ margin_top = -3.1893
 margin_right = 1.79987
 margin_bottom = 20.8107
 custom_fonts/font = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Uses" type="Label" parent="."]
+margin_left = 0.7999
+margin_top = 24.8107
+margin_right = 38.0
+margin_bottom = 38.0
+custom_fonts/font = SubResource( 1 )
+text = "test"
+align = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -54,7 +67,8 @@ __meta__ = {
 [node name="Button" type="Button" parent="."]
 margin_left = -40.0
 margin_top = -20.0
-margin_right = -28.0
+margin_right = 40.0
+margin_bottom = 39.0
 flat = true
 __meta__ = {
 "_edit_use_anchors_": false

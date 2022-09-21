@@ -43,10 +43,10 @@ func create_move(unit, playerCount, posIndex):
 		moveBox.get_node("ColorRect").rect_size.y = 40
 		move = moveBox.get_node("Name").text
 		if posIndex == 0:
-			if move == "": move = "Attack"
+			if move == "X": move = "Attack"
 			moveBox.position.y -= PLAYERINCREMENT*.25
 		else:
-			if move == "": move = "Defend"
+			if move == "X": move = "Defend"
 			moveBox.position.y += PLAYERINCREMENT*.25
 	else: #set up other moves
 		move = unit.moves[posIndex - DEFAULTMOVES]
@@ -54,6 +54,7 @@ func create_move(unit, playerCount, posIndex):
 	if Moves.moveList[move].has("resVal"):
 		moveBox.resValue = Moves.moveList[move]["resVal"]
 	box_move(moveBox, move)
+	moveBox.set_uses(Moves.get_uses(move))
 	var button = moveBox.get_node("Button")
 	button.rect_size = moveBox.get_node("ColorRect").rect_size
 

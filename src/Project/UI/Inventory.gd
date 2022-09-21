@@ -1,6 +1,6 @@
 extends Node2D
 
-export (PackedScene) var ItemBox
+export (PackedScene) var MoveBox
 
 const XSTART = 360
 const YSTART = 125
@@ -136,13 +136,14 @@ func make_grid():
 		make_inventorybox("X")
 
 func make_inventorybox(boxName):
-	var box = ItemBox.instance()
+	var box = MoveBox.instance()
 	iHolder.add_child(box)
 	box.position.x = XSTART + (boxesCount.x * XINCREMENT)
 	box.position.y = YSTART + (boxesCount.y * YINCREMENT)
 	box.get_node("Name").text = boxName
 	box.get_node("Info").text = String(Trading.get_item_value(boxName))
 	incrementBoxCount()
+	box.set_uses(Moves.get_uses(boxName))
 	return box
 	
 func incrementBoxCount():
@@ -161,7 +162,7 @@ func make_actionboxes(boxCount, boxMode):
 	else:
 		usedHolder = oHolder
 	for i in boxCount:
-		box = ItemBox.instance()
+		box = MoveBox.instance()
 		usedHolder.add_child(box)
 		box.position.y = YSTART*3.25
 		if boxMode == iModes.craft: 
@@ -274,12 +275,18 @@ func toggle_action_button(toggle, buttonText = ""):
 	$ActionButton.text = buttonText
 
 func swap_boxes(one, two, check = false):
-	var temp = one.get_node("Name").text
-	one.get_node("Name").text = two.get_node("Name").text
-	two.get_node("Name").text = temp
+	var temp = [one.get_node("Name").text, one.maxUses, one.currentUses]
+	flip_values(one, [two.get_node("Name").text, two.maxUses, two.currentUses])
+	flip_values(two, temp)
 	deselect_multi([one, two])
 	if tHolder.visible: assess_trade_value()
 	if check: restore_basics([one, two])
+
+func flip_values(box, values):
+	box.get_node("Name").text = values[0]
+	box.maxUses = values[1]
+	box.currentUses = values[2]
+	box.set_uses()
 
 func restore_basics(boxes): #puts attack/defend back on non-relic boxes and remove them from inventory box
 	for box in boxes:

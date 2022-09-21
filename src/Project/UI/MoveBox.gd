@@ -1,6 +1,6 @@
 extends Node2D
 
-onready var CurrentScene = $"../../../../../" #Battle, Inventory, and Map are all equally ancient grandpas
+onready var CheckScene = $"../../../"
 var user
 var moves = []
 var moveIndex = 0
@@ -11,6 +11,8 @@ var trackerBar
 var buttonMode = true
 var savedTargetName = ""
 var boxModeScene
+var maxUses = 0
+var currentUses = maxUses
 
 func updateInfo(targetName = null):
 	if targetName:
@@ -18,12 +20,21 @@ func updateInfo(targetName = null):
 	$Info.text = str(usageOrder, ": ", savedTargetName)
 
 func set_mode_scene():
-	if CurrentScene.name != "Battle" and CurrentScene.name != "Inventory": #map scene
-		if CurrentScene.battleWindow.visible == true:
-			return CurrentScene.battleWindow
-		elif CurrentScene.inventoryWindow.visible == true:
-			return CurrentScene.inventoryWindow
-	return CurrentScene
+	if CheckScene.name == "DisplayHolder": #holder
+		CheckScene = CheckScene.get_node("../../")
+	if CheckScene.name == "Map":
+		if CheckScene.battleWindow.visible == true:
+			return CheckScene.battleWindow
+		elif CheckScene.inventoryWindow.visible == true:
+			return CheckScene.inventoryWindow
+	return CheckScene
+
+func set_uses(var newMax = null):
+	if newMax: 
+		maxUses = newMax
+		currentUses = newMax
+	$Uses.visible = true if maxUses >= 0 else false
+	if visible: $Uses.text = str(currentUses, "/", maxUses)
 
 func _on_Button_pressed():
 	boxModeScene = set_mode_scene()

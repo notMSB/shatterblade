@@ -1,5 +1,7 @@
 extends Node2D
 
+const DEFAULTUSES = 4
+
 var Battle
 var moveList
 enum timings {before, after}
@@ -84,6 +86,13 @@ func get_relics():
 		if moveData.has("type") and moveData["type"] == moveType.relic:
 			relics.append(move)
 	return relics
+
+func get_uses(moveName):
+	if !moveList.has(moveName) or moveList[moveName]["type"] <= moveType.relic: return -1
+	if moveList[moveName].has("uses"):
+		return moveList[moveName]["uses"]
+	else:
+		return DEFAULTUSES
 
 #Effects
 func get_enemy_targeters(unit):
