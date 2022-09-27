@@ -31,6 +31,8 @@ var boxesCount = Vector2(0,0)
 
 var currentInvSize = 0
 
+var craftingRestriction = null
+
 const TRADERINVSIZE = 8
 var initialTraderValue
 var currentTraderValue
@@ -65,13 +67,13 @@ func _ready(): #Broken with relics as a standalone scene, but works when the Map
 		dHolder = get_node_or_null("../Map/HolderHolder/DisplayHolder")
 
 func welcome_back(newMode):
-	visible = true
 	mode = newMode
 	set_mode()
 	for i in global.storedParty.size():
 		for box in global.storedParty[i].boxHolder.get_children():
 			box.visible = true
 			identify_product(box)
+	visible = true
 
 func shuffle_trade_stock():
 	var restock = []
@@ -232,26 +234,48 @@ func player_inv_check(playerBox, otherBox):
 			return swap_boxes(playerBox, otherBox)
 	deselect_multi([playerBox, otherBox])
 
+func isValidMove(boxName):
+	if Moves.moveList.has(boxName):
+		var checkType = Moves.moveList[boxName]["type"]
+		if checkType > Moves.moveType.relic:
+			return true
+	return false
+
+#todo - section this into multiple funcs for different methods, run a player inv check for weapons
 func check_crafts(craftBox, otherBox):
-	if !Crafting.c.get(otherBox.get_node("Name").text) == null: 
+	var boxName = otherBox.get_node("Name").text
+	if Crafting.c.get(boxName) != null or isValidMove(boxName): 
 		swap_boxes(craftBox, otherBox)
-		var components = [] #Now check if both craft boxes have an entry, and if so show product and confirm button
+		if isValidMove(boxName):
+			craftingRestriction = Crafting.break_down(boxName)
+			print(craftingRestriction)
 		var productName = productBox.get_node("Name")
 		if productName.text != "X":
 			productName.text = "X" #Reset the field in case something was already there from prior
 			productBox.get_node("ColorRect").color = DEFAULTCOLOR
+		
+		var components = [] #Now check if both craft boxes have an entry, and if so show product and confirm button
 		for box in cHolder.get_children():
 			if box.get_node("Name").text != "X": #Product box cannot be appended as it was reset
 				components.append(box.get_node("Name").text)
 		if components.size() > 1: #both boxes filled
-			if components[0] == components[1]:
-				if global.itemDict[components[0]] < 2: #cannot merge component with itself if you only have 1 of it
-					cHolder.get_child(1).get_node("Name").text = "X"
-					return
-			productName.text = Crafting.sort_then_combine(Crafting.c.get(components[0]), Crafting.c.get(components[1])) #Get result from table
-			#productName.text = product #Put result name in product box
-			identify_product(productBox)
-			toggle_action_button(true, "Craft")
+			if craftingRestriction: #weapon repair check
+				for i in components.size():
+					if Crafting.c.get(components[i]) != null and craftingRestriction.has(components[i]):
+						var weaponBox = cHolder.get_child(abs(i-1))
+						flip_values(productBox, [weaponBox.get_node("Name").text, weaponBox.maxUses, weaponBox.currentUses])
+						productBox.repair_uses()
+						identify_product(productBox)
+						toggle_action_button(true, "Repair")
+						break
+					if i == 1: #only gets in this if it's an invalid repair
+						toggle_action_button(false)
+			else:
+				productName.text = Crafting.sort_then_combine(Crafting.c.get(components[0]), Crafting.c.get(components[1])) #Get result from table
+				#productName.text = product #Put result name in product box
+				identify_product(productBox)
+				productBox.set_uses(Moves.get_uses(productName.text))
+				toggle_action_button(true, "Craft")
 		else: #replacing a valid box with an invalid one would yield this result
 			toggle_action_button(false)
 	else:
@@ -309,7 +333,7 @@ func assess_trade_value():
 	$Current.text = String(currentTraderValue)
 	$ExitButton.visible = true if currentTraderValue >= initialTraderValue else false
 
-func identify_product(box):
+func identify_product(box): #updates box color and trade value
 	var skipValue = false
 	var boxName = box.get_node("Name").text
 	if Moves.moveList.has(boxName):
@@ -325,24 +349,31 @@ func identify_product(box):
 	else: box.get_node("ColorRect").color = DEFAULTCOLOR #component
 	box.get_node("Info").text = "0" if skipValue else String(Trading.get_item_value(boxName))
 
-func confirm_craft(): #Subtract one from each ingredient from inventory and put in the new product
-	for cBox in cHolder.get_children():
-		if !cBox.get_node("Button").visible: #Button is only visible on the non-result boxes, so this runs once on the result box
-			cBox.get_node("ColorRect").color = DEFAULTCOLOR
-			add_item(cBox.get_node("Name").text)
-		cBox.get_node("Name").text = "X"
-		cBox.get_node("Info").text = ""
-	toggle_action_button(false)
-
-func add_item(itemName): #todo: case for full inventory
+func xCheck(): #returns an empty inventory space, todo: scenario for full inventory
 	var iName
 	for iBox in iHolder.get_children():
 		iName = iBox.get_node("Name").text
 		if iName == "X":
-			iBox.get_node("Name").text = itemName #Put product in there
-			identify_product(iBox)
-			break
+			return iBox
 
+func clear_box(box):
+	box.get_node("Name").text = "X" 
+	box.get_node("Info").text = ""
+	box.set_uses(-1)
+	identify_product(box)
+
+func confirm_craft():
+	for cBox in cHolder.get_children():
+		if !cBox.get_node("Button").visible: #Button is only visible on the non-result boxes, so this runs once on the result box
+			swap_boxes(cBox, xCheck())
+		else:
+			clear_box(cBox)
+	toggle_action_button(false)
+
+func add_item(itemName): #todo: case for full inventory
+	var openBox = xCheck()
+	openBox.get_node("Name").text = itemName #Put product in there
+	identify_product(openBox)
 	update_itemDict(itemName)
 
 func update_itemDict(itemName):
@@ -387,8 +418,24 @@ func done():
 		return get_tree().reload_current_scene()
 	else:
 		for i in global.storedParty.size():
-			dHolder.cleanup_moves(global.storedParty[i], DEFAULTCOLOR)
+			#dHolder.cleanup_moves(global.storedParty[i], DEFAULTCOLOR)
+			cleanup_boxes(global.storedParty[i])
 		visible = false
+
+func cleanup_boxes(unit): #slides valid boxes down and hides invalid ones
+	var box
+	var i = 0
+	var earliestX = 0
+	while i < unit.boxHolder.get_children().size(): #foreach loop doesn't seem to work for this
+		box = unit.boxHolder.get_child(i)
+		if box.get_node("Name").text == "X":
+			if earliestX == 0: earliestX = i
+		elif earliestX != 0:
+			swap_boxes(unit.boxHolder.get_child(earliestX), unit.boxHolder.get_child(i))
+			i = earliestX
+			earliestX = 0
+		i+=1
+	dHolder.hide_and_color_boxes(unit, DEFAULTCOLOR)
 
 func reset_trade():
 	return get_tree().reload_current_scene()

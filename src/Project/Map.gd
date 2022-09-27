@@ -3,6 +3,7 @@ extends Node2D
 export (PackedScene) var Point
 export (PackedScene) var Line
 export (PackedScene) var Time
+export (PackedScene) var Favor
 export (PackedScene) var Battle
 export (PackedScene) var Inventory
 export (PackedScene) var ChoiceUI
@@ -34,6 +35,7 @@ var savedPoint
 
 var calledEvent
 var timeNode
+var favorNode
 var time = 150
 var currentDay = 0
 var isDay = true
@@ -51,6 +53,8 @@ func _ready():
 	randomize()
 	timeNode = Time.instance()
 	add_child(timeNode)
+	favorNode = Favor.instance()
+	add_child(favorNode)
 	if global.storedParty.size() > 0: 
 		for i in global.storedParty.size():
 			while global.storedParty[i].moves.size() < MOVESPACES:
@@ -61,6 +65,8 @@ func _ready():
 			display.get_node("Name").text = Moves.get_classname(global.storedParty[display.get_index()].allowedType)
 	bottomRight = Vector2($ReferenceRect.margin_right, $ReferenceRect.margin_bottom)
 	timeNode.position.y += bottomRight.y + 50
+	favorNode.position.y += bottomRight.y + 50
+	favorNode.position.x += bottomRight.x - 150
 	columnNum = int(ceil(bottomRight.x/INCREMENT) - 1) #ceil-1 instead of floor prevents strangeness with exact divisions
 	#print(columnNum)
 	make_points(Vector2(INCREMENT,INCREMENT*.5))
@@ -362,6 +368,9 @@ func advance_day():
 	isDay = true
 	currentDay += 1
 	set_sections()
+
+func update_favor(amount):
+	favorNode.get_node("Amount").text = String(amount)
 
 func update_mana(gain = null):
 	for unit in global.storedParty:

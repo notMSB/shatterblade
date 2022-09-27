@@ -81,6 +81,16 @@ func cleanup_moves(unit, boxColor = null): #makes all boxes perform the move the
 		box.get_node("Info").text = ""
 		if boxColor: box.get_node("ColorRect").color = boxColor
 
+func hide_and_color_boxes(unit, boxColor):
+	var box
+	var move
+	for i in unit.moves.size() + DEFAULTMOVES:
+		box = unit.boxHolder.get_child(i)
+		move = box.get_node("Name").text
+		if Moves.moveList[move]["type"] == Moves.moveType.none:
+			box.visible = false
+		box.get_node("ColorRect").color = boxColor
+
 func sort_order(a, b):
 	if Moves.moveList[a]["resVal"] > Moves.moveList[b]["resVal"]:
 		return false

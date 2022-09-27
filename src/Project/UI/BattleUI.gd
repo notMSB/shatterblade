@@ -59,7 +59,8 @@ func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false, disableCha
 		if !keepMoves or (keepMoves and box.buttonMode):
 			move = box.moves[box.moveIndex]
 			var moveData = Moves.moveList[move]
-			if toggle and !(disableChannels and moveData.has("channel")) and !moveData.has("unusable"): #Channels are disabled if the unit already has an action in the queue, unusables are always disabled
+			#Channels are disabled if the unit already has an action in the queue, broken equipment and unusables are always disabled
+			if toggle and !(disableChannels and moveData.has("channel")) and box.currentUses != 0 and !moveData.has("unusable"): 
 				toggle_single(box, true)
 			else:
 				toggle_single(box, false)

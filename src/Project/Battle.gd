@@ -7,6 +7,7 @@ onready var Moves = get_node("../Data/Moves")
 onready var StatusManager = get_node("../Data/StatusManager")
 onready var Enemies = get_node("../Data/Enemies")
 onready var Formations = get_node("../Data/Formations")
+onready var Boons = get_node("../Data/Boons")
 
 var partyNum = 1
 var enemyNum = 1
@@ -33,7 +34,7 @@ var hits
 
 var battleDone = true
 
-var opponents = ["Skeleton"]
+var opponents = []
 
 var targetsVisible = false
 
@@ -42,6 +43,9 @@ enum e {box, move, user, target}
 var targetType
 
 func _ready(): #Generate units and add to turn order
+	Moves.Battle = self
+	StatusManager.Battle = self
+	Boons.start_battle()
 	if !get_parent().mapMode: battleDone = false
 	targetType = Moves.targetType
 	randomize() #funny rng
@@ -180,9 +184,9 @@ func set_intent(unit, target = false):
 		actionDamage = actionInfo["damage"] + unit.strength
 		if actionInfo.has("hits"):
 			actionDamage = str(actionDamage, "x", actionInfo["hits"])
-	if actionInfo["target"] == targetType.ally:
-		$BattleUI.toggle_buttons(true, get_team(true))
-	elif actionInfo["target"] == targetType.allies:
+	#if actionInfo["target"] == targetType.ally:
+		#$BattleUI.toggle_buttons(true, get_team(true))
+	if actionInfo["target"] == targetType.allies:
 		unit.storedTarget = "Allies"
 	elif actionInfo["target"] == targetType.user: #Self target
 		unit.storedTarget = unit
@@ -289,6 +293,7 @@ func checkChannel(unit): #Channels can only be used as the first action of a tur
 func execute_move():
 	if moveUser.isPlayer:
 		moveUser.storedTarget = moveTarget
+		if chosenMove["type"] > Moves.moveType.relic: usedMoveBox.reduce_uses(1) #durability does not go down for reloads and does not exist for basics/relics
 		if chosenMove["type"] == Moves.moveType.trick or chosenMove.has("cycle"):
 			$BattleUI.advance_box_move(usedMoveBox)
 	
@@ -344,6 +349,8 @@ func execute_move():
 				activate_effect()
 		yield(get_tree().create_timer(.5), "timeout")
 		i+=1
+	if moveUser.isPlayer: Boons.check_move(usedMoveBox, moveTarget.currentHealth)
+
 
 func activate_effect():
 	if chosenMove.has("effect") and chosenMove.has("args"):
@@ -366,12 +373,13 @@ func evaluate_completion():
 		done()
 
 func done():
-	$BattleUI.toggle_trackers(false)
+	#$BattleUI.toggle_trackers(false)
 	if get_parent().name == "Game":
 		return get_tree().reload_current_scene()
 	else: #Map
+		Boons.end_battle()
 		for i in global.storedParty.size():
-			$BattleUI.playerHolder.cleanup_moves(global.storedParty[i], get_parent().inventoryWindow.DEFAULTCOLOR)
+			$BattleUI.playerHolder.hide_and_color_boxes(global.storedParty[i], get_parent().inventoryWindow.DEFAULTCOLOR)
 		visible = false
 
 func generate_rewards():

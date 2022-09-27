@@ -66,9 +66,6 @@ func _ready():
 	"X": {"type": moveType.none, "resVal": 999} #temp
 }
 
-func set_battle(battleNode):
-	Battle = battleNode
-
 func get_classname(type):
 	if type == moveType.special: return "Fighter"
 	elif type == moveType.magic: return "Mage"

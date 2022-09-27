@@ -1,6 +1,9 @@
 extends Node2D
 
 onready var CheckScene = $"../../../"
+
+const REPAIRVALUE = .5
+
 var user
 var moves = []
 var moveIndex = 0
@@ -19,8 +22,8 @@ func updateInfo(targetName = null):
 		savedTargetName = targetName
 	$Info.text = str(usageOrder, ": ", savedTargetName)
 
-func set_mode_scene():
-	if CheckScene.name == "DisplayHolder": #holder
+func set_mode_scene(): #returns battle, inventory, or map
+	if CheckScene.name == "DisplayHolder": 
 		CheckScene = CheckScene.get_node("../../")
 	if CheckScene.name == "Map":
 		if CheckScene.battleWindow.visible == true:
@@ -29,12 +32,23 @@ func set_mode_scene():
 			return CheckScene.inventoryWindow
 	return CheckScene
 
+func reduce_uses(amount):
+	currentUses = max(0, currentUses - amount)
+	set_uses()
+
+func repair_uses():
+	currentUses = min(maxUses, currentUses + floor(maxUses * REPAIRVALUE))
+	set_uses()
+
 func set_uses(var newMax = null):
 	if newMax: 
 		maxUses = newMax
 		currentUses = newMax
-	$Uses.visible = true if maxUses >= 0 else false
-	if visible: $Uses.text = str(currentUses, "/", maxUses)
+		$Uses.max_value = newMax
+	$Uses.visible = true if maxUses > 0 else false
+	if visible: 
+		$Uses.value = currentUses
+		$Uses/Text.text = str(currentUses, "/", maxUses)
 
 func _on_Button_pressed():
 	boxModeScene = set_mode_scene()

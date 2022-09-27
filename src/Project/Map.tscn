@@ -1,6 +1,7 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://src/Project/Map.gd" type="Script" id=1]
+[ext_resource path="res://src/Project/UI/Favor.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=3]
 [ext_resource path="res://src/Project/UI/UnitUI.tscn" type="PackedScene" id=4]
 [ext_resource path="res://src/Project/UI/PlayerProfile.tscn" type="PackedScene" id=5]
@@ -29,6 +30,7 @@ script = ExtResource( 1 )
 Point = ExtResource( 7 )
 Line = ExtResource( 8 )
 Time = ExtResource( 9 )
+Favor = ExtResource( 2 )
 Battle = ExtResource( 10 )
 Inventory = ExtResource( 15 )
 ChoiceUI = ExtResource( 12 )
@@ -94,11 +96,11 @@ margin_left = 1.0
 margin_top = 470.0
 margin_right = 109.0
 margin_bottom = 538.0
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 2 )
 text = "Items"
 __meta__ = {
 "_edit_use_anchors_": false

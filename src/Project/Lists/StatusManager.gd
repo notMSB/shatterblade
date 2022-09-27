@@ -1,6 +1,6 @@
 extends Node2D
 
-onready var Battle = get_parent()
+onready var Battle
 
 #Statuses are stored using a 2D array which is set by activation condition
 #When a condition occurs, functions are run if that condition's array has 1 or more items in it
