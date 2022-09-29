@@ -45,7 +45,6 @@ var targetType
 func _ready(): #Generate units and add to turn order
 	Moves.Battle = self
 	StatusManager.Battle = self
-	Boons.start_battle()
 	if !get_parent().mapMode: battleDone = false
 	targetType = Moves.targetType
 	randomize() #funny rng
@@ -89,6 +88,7 @@ func _ready(): #Generate units and add to turn order
 		if unit.passives.size() > 0:
 			for passive in unit.passives:
 				StatusManager.add_status(unit, passive, unit.passives[passive])
+	Boons.start_battle(get_partyHealth())
 	
 	#generate_rewards()
 	
@@ -115,6 +115,7 @@ func create_enemies():
 			for passive in createdUnit.passives:
 				StatusManager.add_status(createdUnit, passive, createdUnit.passives[passive])
 		i+=1
+	enemyNum = opponents.size()
 
 func welcome_back(newOpponents = null): #reusing an existing battle scene for a new battle
 	$BattleUI.toggle_trackers(true)
@@ -124,28 +125,37 @@ func welcome_back(newOpponents = null): #reusing an existing battle scene for a 
 		if !unit.isPlayer:
 			unit.cease_to_exist()
 		else:
-			unit.strength = 0
-			unit.ap = 0
-			unit.energy = unit.maxEnergy
-			unit.statuses.clear()
-			StatusManager.initialize_statuses(unit)
-			unit.update_box_bars()
-			unit.update_strength()
-			if unit.passives.size() > 0:
-				for passive in unit.passives:
-					StatusManager.add_status(unit, passive, unit.passives[passive])
-			unit.update_status_ui()
+			set_ui(unit, true)
 	turnIndex = -1
 	if newOpponents: opponents = newOpponents
 	create_enemies()
+	Boons.start_battle(get_partyHealth())
 	play_turn()
+
+func set_ui(unit, setPassives = false):
+	unit.strength = 0
+	unit.ap = 0
+	unit.energy = unit.maxEnergy
+	unit.statuses.clear()
+	StatusManager.initialize_statuses(unit)
+	unit.update_box_bars()
+	unit.update_strength()
+	unit.shield = 0
+	unit.update_hp()
+	if setPassives and unit.passives.size() > 0:
+		for passive in unit.passives:
+			StatusManager.add_status(unit, passive, unit.passives[passive])
+	unit.update_status_ui()
+
+func get_partyHealth():
+	return 5
 
 func play_turn():
 	turnIndex = (turnIndex + 1) % $Units.get_child_count() #Advance to next unit
 	currentUnit = $Units.get_child(turnIndex)
 	
 	if turnIndex == 0: #Start of turn, take player actions
-		if get_parent().name == "Map": get_parent().subtract_time(1)
+		if get_parent().mapMode: get_node("../Map").subtract_time(1)
 		for unit in $Units.get_children():
 			StatusManager.countdown_turns(unit, true)
 			if unit.isPlayer:
@@ -291,6 +301,9 @@ func checkChannel(unit): #Channels can only be used as the first action of a tur
 	return false
 
 func execute_move():
+	if moveTarget.currentHealth <= 0:
+		yield(get_tree().create_timer(.5), "timeout")
+		return
 	if moveUser.isPlayer:
 		moveUser.storedTarget = moveTarget
 		if chosenMove["type"] > Moves.moveType.relic: usedMoveBox.reduce_uses(1) #durability does not go down for reloads and does not exist for basics/relics
@@ -368,18 +381,21 @@ func activate_effect():
 		chosenMove["effect"].call_funcv(newArgs) #Run the effect function on these arguments
 
 func evaluate_completion():
+	print(deadEnemies)
+	print(enemyNum)
 	if deadEnemies >= enemyNum:
 		battleDone = true
 		done()
 
 func done():
-	#$BattleUI.toggle_trackers(false)
-	if get_parent().name == "Game":
+	$BattleUI.toggle_trackers(false)
+	if !get_parent().mapMode:
 		return get_tree().reload_current_scene()
 	else: #Map
-		Boons.end_battle()
+		Boons.end_battle(get_partyHealth())
 		for i in global.storedParty.size():
-			$BattleUI.playerHolder.hide_and_color_boxes(global.storedParty[i], get_parent().inventoryWindow.DEFAULTCOLOR)
+			set_ui(global.storedParty[i])
+			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], get_node("../Map").inventoryWindow.DEFAULTCOLOR)
 		visible = false
 
 func generate_rewards():

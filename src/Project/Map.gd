@@ -91,7 +91,7 @@ func activate_inventory(mode = null):
 	if mode:
 		inventoryWindow.welcome_back(mode)
 	else:
-		inventoryWindow.welcome_back(inventoryWindow.iModes.default)
+		inventoryWindow.welcome_back(inventoryWindow.iModes.craft) #can always craft
 
 func activate_point(point):
 	var type = point.pointType

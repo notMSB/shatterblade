@@ -30,7 +30,7 @@ func setup_display(unit, totalEnemies):
 			display = playerHolder.setup_player(unit, playerCount)
 		else:
 			display = unit.boxHolder.get_parent()
-		set_trackers(display, display.get_node("MoveBoxes")) #moveboxes toggled on at round start
+		set_trackers(display, display.get_node("MoveBoxes"), unit.allowedType) #moveboxes toggled on at round start
 		playerCount += 1
 	else: #Enemy
 		display = $DisplayHolder.setup_enemy(unit, enemyCount, totalEnemies)
@@ -51,7 +51,7 @@ func advance_box_move(box): #For boxes with multiple moves
 	box.moveIndex = (box.moveIndex + 1) % box.moves.size()
 	prepare_box(box)
 	if box.moveIndex > 0:
-		box.get_node("Info").text = box.moves[box.moveIndex -1]
+		box.get_node("Info").text = box.moves[box.moveIndex - 1]
 
 func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false, disableChannels: bool = false): #keepMoves as true means only boxes that aren't already committed are enabled
 	var move
@@ -67,7 +67,7 @@ func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false, disableCha
 
 func toggle_single(box, toggle): #true for purple false for black
 	if toggle:
-		if box.trackerBar and box.trackerBar.value < box.resValue: #Check the resources before enabling a box
+		if box.moveType != Moves.moveType.item and box.trackerBar and box.trackerBar.value < box.resValue: #Check the resources before enabling a box
 			box.get_node("ColorRect").color = Color(.53,.3,.3,1)
 			toggle = false #needed to disable the button
 		else: #box can be enabled
@@ -91,28 +91,21 @@ func toggle_channels(boxes):
 		if Moves.moveList[move].has("channel"):
 			toggle_single(box, false)
 
-func set_trackers(display, boxes):
+func set_trackers(display, boxes, classType):
 	var firstMargin
 	var lastMargin
 	var boxCount = []
-	var prevBox = boxes.get_children()[0]
 	
 	for box in boxes.get_children():
 		if box.visible:
-			if box.moveType == Moves.moveType.basic: continue
-			if box.moveType != prevBox.moveType:
-				check_box_count(boxCount, display, firstMargin, lastMargin, prevBox.moveType)
-				boxCount = []
-				firstMargin = null
-				lastMargin = null
+			if box.moveType == Moves.moveType.basic or box.moveType == Moves.moveType.relic: continue
 			boxCount.append(box)
 			if firstMargin:
 				lastMargin = box.position.x
 			else:
 				firstMargin = box.position.x
 				lastMargin = box.position.x
-			prevBox = box
-	check_box_count(boxCount, display, firstMargin, lastMargin, prevBox.moveType)
+	check_box_count(boxCount, display, firstMargin, lastMargin, classType)
 
 func toggle_trackers(toggle):
 	for display in playerHolder.get_children():

@@ -58,12 +58,16 @@ func create_move(unit, playerCount, posIndex):
 	var button = moveBox.get_node("Button")
 	button.rect_size = moveBox.get_node("ColorRect").rect_size
 
-func box_move(moveBox, move):
+func box_move(moveBox, move, isUseless = false):
 	moveBox.moves.clear()
+	moveBox.moveIndex = 0
 	moveBox.moveType = Moves.moveList[move]["type"]
+	moveBox.resValue = Moves.moveList[move]["resVal"]
 	moveBox.moves.append(move)
 	if moveBox.moveType == Moves.moveType.trick: moveBox.moves.append("Reload")
 	moveBox.get_node("Name").text = move
+	moveBox.get_node("Info").text = ""
+	if isUseless: moveBox.set_uses(-1)
 
 func cleanup_moves(unit, boxColor = null): #makes all boxes perform the move they say that they are and sets passives from them
 	unit.moves.sort_custom(self, "sort_order") #Movebox resource bars appreciate sorted movelist
@@ -75,20 +79,20 @@ func cleanup_moves(unit, boxColor = null): #makes all boxes perform the move the
 			move = box.get_node("Name").text
 		else: #Place the rest of the moves down
 			move = unit.moves[i - DEFAULTMOVES]
-			if Moves.moveList[move]["type"] == Moves.moveType.none:
-				box.visible = false
 		box_move(box, move)
 		box.get_node("Info").text = ""
 		if boxColor: box.get_node("ColorRect").color = boxColor
 
-func hide_and_color_boxes(unit, boxColor):
+func manage_and_color_boxes(unit, boxColor): #Puts all of a unit's boxes in map mode and kills spent items
 	var box
 	var move
 	for i in unit.moves.size() + DEFAULTMOVES:
 		box = unit.boxHolder.get_child(i)
-		move = box.get_node("Name").text
-		if Moves.moveList[move]["type"] == Moves.moveType.none:
-			box.visible = false
+		move = box.moves[0]
+		if Moves.moveList[move]["type"] == Moves.moveType.item and box.currentUses == 0: #kill
+			box_move(box, "X", true)
+		else:
+			box_move(box, move)
 		box.get_node("ColorRect").color = boxColor
 
 func sort_order(a, b):

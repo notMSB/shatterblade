@@ -22,7 +22,7 @@ var products = {
 	
 	c.fur: {c.fur: "X", c.blade: "Sucker Punch", c.bone: "Careful Strike", c.wood: "X"},
 	
-	c.blade: {c.blade: "X", c.bone: "Coldsteel", c.wood: "Channel Power"},
+	c.blade: {c.blade: "Double Slash", c.bone: "Coldsteel", c.wood: "Channel Power"},
 	
 	c.bone: {c.bone: "X", c.wood: "X"},
 	

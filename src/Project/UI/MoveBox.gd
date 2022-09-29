@@ -37,7 +37,7 @@ func reduce_uses(amount):
 	set_uses()
 
 func repair_uses():
-	currentUses = min(maxUses, currentUses + floor(maxUses * REPAIRVALUE))
+	currentUses = min(maxUses, currentUses + ceil(maxUses * REPAIRVALUE)) #round up for odds
 	set_uses()
 
 func set_uses(var newMax = null):

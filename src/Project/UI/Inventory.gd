@@ -47,7 +47,7 @@ var mode = iModes.craft
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
 	if !Trading.assigned: Trading.assign_component_values()
 	if global.itemDict.empty():
-		global.itemDict = {"fang": 1, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 1, "bone": 2, "wood": 1, "moves": ["Test Relic"]}
+		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["Test Relic"]}
 	make_grid()
 	make_actionboxes(CRAFTBOXES, iModes.craft)
 	make_actionboxes(TRADERINVSIZE, iModes.trade)
@@ -230,7 +230,7 @@ func player_inv_check(playerBox, otherBox):
 		
 		#swapping into player's class inventory boxes
 		var playerClass = global.storedParty[playerBox.get_node("../../").get_index()].allowedType #Grandpa ia a PlayerProfile, its index matches the global index
-		if checkType == playerClass or checkType == Moves.moveType.none: #The correct move type or an empty spot can be swapped
+		if checkType == playerClass or checkType == Moves.moveType.none or checkType == Moves.moveType.item: #The correct move type, an item, or an empty spot can be swapped
 			return swap_boxes(playerBox, otherBox)
 	deselect_multi([playerBox, otherBox])
 
@@ -342,6 +342,7 @@ func identify_product(box): #updates box color and trade value
 		if productType == Moves.moveType.special: box.get_node("ColorRect").color = Color(.9,.3,.3,1) #R
 		elif productType == Moves.moveType.trick: box.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
 		elif productType == Moves.moveType.magic: box.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
+		elif productType == Moves.moveType.item:  box.get_node("ColorRect").color = Color(.9,.7, 0,1) #Y
 		elif productType == Moves.moveType.relic: box.get_node("ColorRect").color = DEFAULTCOLOR #relics need a color
 		else: #attack/defend/X/other
 			box.get_node("ColorRect").color = DEFAULTCOLOR
@@ -435,7 +436,7 @@ func cleanup_boxes(unit): #slides valid boxes down and hides invalid ones
 			i = earliestX
 			earliestX = 0
 		i+=1
-	dHolder.hide_and_color_boxes(unit, DEFAULTCOLOR)
+	dHolder.manage_and_color_boxes(unit, DEFAULTCOLOR)
 
 func reset_trade():
 	return get_tree().reload_current_scene()
