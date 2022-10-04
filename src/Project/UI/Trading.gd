@@ -15,8 +15,15 @@ func assign_component_values():
 	for component in Crafting.c:
 		values[component] = DEFAULTVALUE
 	for enemy in eList:
-		for reward in eList[enemy]["rewards"]:
-			values[reward] = max(1, values[reward] - 1)
+		if eList[enemy]["locations"].has(Enemies.l.dungeon):
+			for reward in eList[enemy]["rewards"]:
+				values[reward] = max(1, values[reward] - 1)
+		elif eList[enemy]["locations"].has(Enemies.l.night):
+			for reward in eList[enemy]["rewards"]:
+				values[reward] = max(1, values[reward] - 2)
+		elif eList[enemy]["locations"].has(Enemies.l.day):
+			for reward in eList[enemy]["rewards"]:
+				values[reward] = max(1, values[reward] - 3)
 	assigned = true
 
 func get_item_value(itemName):

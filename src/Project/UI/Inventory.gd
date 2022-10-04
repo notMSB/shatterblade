@@ -13,7 +13,7 @@ const YMAX = 4
 const CRAFTBOXES = 3
 const DEFAULTCOLOR = Color(.53,.3,.3,1)
 const MOVEHOLDER = "moves"
-const MOVESPACES = 5
+const MOVESPACES = 4
 
 onready var iHolder = $HolderHolder/InventoryHolder
 onready var cHolder = $HolderHolder/CraftboxHolder
@@ -47,7 +47,8 @@ var mode = iModes.craft
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
 	if !Trading.assigned: Trading.assign_component_values()
 	if global.itemDict.empty():
-		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["Test Relic"]}
+		pass
+		#global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["Test Relic"]}
 	make_grid()
 	make_actionboxes(CRAFTBOXES, iModes.craft)
 	make_actionboxes(TRADERINVSIZE, iModes.trade)
@@ -217,7 +218,7 @@ func check_swap(selectedBox):
 		elif otherSelection.get_parent().name == "MoveBoxes": player_inv_check(otherSelection, selectedBox)
 		else: swap_boxes(selectedBox, otherSelection)
 
-func player_inv_check(playerBox, otherBox):
+func player_inv_check(playerBox, otherBox): #returns true/false depending on if it swaps or not
 	var checkName = otherBox.get_node("Name").text
 	var playerName = playerBox.get_node("Name").text
 	if Crafting.c.get(checkName) == null: #can't move in crafting material
@@ -226,13 +227,16 @@ func player_inv_check(playerBox, otherBox):
 		#swapping into the attack/defend boxes, cannot swap an X from other players but can from inventory
 		if ((playerType == Moves.moveType.relic or playerType == Moves.moveType.basic) 
 		and (checkType == Moves.moveType.relic or checkType == Moves.moveType.basic or (checkType == Moves.moveType.none and otherBox.get_parent().name != "MoveBoxes"))):
-			return swap_boxes(playerBox, otherBox, true) #restore attack/defend on boxes if necessary
+			swap_boxes(playerBox, otherBox, true) #restore attack/defend on boxes if necessary
+			return true
 		
 		#swapping into player's class inventory boxes
 		var playerClass = global.storedParty[playerBox.get_node("../../").get_index()].allowedType #Grandpa ia a PlayerProfile, its index matches the global index
 		if checkType == playerClass or checkType == Moves.moveType.none or checkType == Moves.moveType.item: #The correct move type, an item, or an empty spot can be swapped
-			return swap_boxes(playerBox, otherBox)
+			swap_boxes(playerBox, otherBox)
+			return true
 	deselect_multi([playerBox, otherBox])
+	return false
 
 func isValidMove(boxName):
 	if Moves.moveList.has(boxName):
@@ -243,12 +247,20 @@ func isValidMove(boxName):
 
 #todo - section this into multiple funcs for different methods, run a player inv check for weapons
 func check_crafts(craftBox, otherBox):
+	var didSwap = false
 	var boxName = otherBox.get_node("Name").text
-	if Crafting.c.get(boxName) != null or isValidMove(boxName): 
+	if Crafting.c.get(boxName): 
 		swap_boxes(craftBox, otherBox)
-		if isValidMove(boxName):
+		didSwap = true
+	if isValidMove(boxName) or boxName == "X":
+		if otherBox.get_parent().name == "MoveBoxes":
+			didSwap = player_inv_check(otherBox, craftBox) #returns true/false and does a swap
 			craftingRestriction = Crafting.break_down(boxName)
-			print(craftingRestriction)
+		else:
+			swap_boxes(craftBox, otherBox)
+			didSwap = true
+			craftingRestriction = Crafting.break_down(boxName)
+	if didSwap:
 		var productName = productBox.get_node("Name")
 		if productName.text != "X":
 			productName.text = "X" #Reset the field in case something was already there from prior
@@ -302,6 +314,7 @@ func swap_boxes(one, two, check = false):
 	var temp = [one.get_node("Name").text, one.maxUses, one.currentUses]
 	flip_values(one, [two.get_node("Name").text, two.maxUses, two.currentUses])
 	flip_values(two, temp)
+	dHolder.set_boxes([one, two])
 	deselect_multi([one, two])
 	if tHolder.visible: assess_trade_value()
 	if check: restore_basics([one, two])
@@ -371,10 +384,11 @@ func confirm_craft():
 			clear_box(cBox)
 	toggle_action_button(false)
 
-func add_item(itemName): #todo: case for full inventory
+func add_item(itemName, newUses = false): #todo: case for full inventory
 	var openBox = xCheck()
 	openBox.get_node("Name").text = itemName #Put product in there
 	identify_product(openBox)
+	if newUses: openBox.set_uses(Moves.get_uses(itemName))
 	update_itemDict(itemName)
 
 func update_itemDict(itemName):
@@ -419,24 +433,8 @@ func done():
 		return get_tree().reload_current_scene()
 	else:
 		for i in global.storedParty.size():
-			#dHolder.cleanup_moves(global.storedParty[i], DEFAULTCOLOR)
-			cleanup_boxes(global.storedParty[i])
+			dHolder.manage_and_color_boxes(global.storedParty[i])
 		visible = false
-
-func cleanup_boxes(unit): #slides valid boxes down and hides invalid ones
-	var box
-	var i = 0
-	var earliestX = 0
-	while i < unit.boxHolder.get_children().size(): #foreach loop doesn't seem to work for this
-		box = unit.boxHolder.get_child(i)
-		if box.get_node("Name").text == "X":
-			if earliestX == 0: earliestX = i
-		elif earliestX != 0:
-			swap_boxes(unit.boxHolder.get_child(earliestX), unit.boxHolder.get_child(i))
-			i = earliestX
-			earliestX = 0
-		i+=1
-	dHolder.manage_and_color_boxes(unit, DEFAULTCOLOR)
 
 func reset_trade():
 	return get_tree().reload_current_scene()

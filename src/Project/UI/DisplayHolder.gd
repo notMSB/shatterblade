@@ -58,6 +58,13 @@ func create_move(unit, playerCount, posIndex):
 	var button = moveBox.get_node("Button")
 	button.rect_size = moveBox.get_node("ColorRect").rect_size
 
+func set_boxes(boxes):
+	var boxName
+	for box in boxes:
+		boxName = box.get_node("Name").text
+		if Moves.moveList.has(boxName):
+			box_move(box, boxName)
+
 func box_move(moveBox, move, isUseless = false):
 	moveBox.moves.clear()
 	moveBox.moveIndex = 0
@@ -83,17 +90,16 @@ func cleanup_moves(unit, boxColor = null): #makes all boxes perform the move the
 		box.get_node("Info").text = ""
 		if boxColor: box.get_node("ColorRect").color = boxColor
 
-func manage_and_color_boxes(unit, boxColor): #Puts all of a unit's boxes in map mode and kills spent items
-	var box
+func manage_and_color_boxes(unit, boxColor = null): #Puts all of a unit's boxes in map mode and kills spent items
 	var move
-	for i in unit.moves.size() + DEFAULTMOVES:
-		box = unit.boxHolder.get_child(i)
+	for box in unit.boxHolder.get_children():
 		move = box.moves[0]
 		if Moves.moveList[move]["type"] == Moves.moveType.item and box.currentUses == 0: #kill
 			box_move(box, "X", true)
-		else:
-			box_move(box, move)
-		box.get_node("ColorRect").color = boxColor
+		elif Moves.moveList[move]["type"] == Moves.moveType.trick:
+			box_move(box, move) #Needed to make sure multimove equipment resets
+		box.get_node("Info").text = ""
+		if boxColor: box.get_node("ColorRect").color = boxColor
 
 func sort_order(a, b):
 	if Moves.moveList[a]["resVal"] > Moves.moveList[b]["resVal"]:

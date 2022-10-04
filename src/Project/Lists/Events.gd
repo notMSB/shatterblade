@@ -66,7 +66,7 @@ func generate_event(questData):
 	return newEvent
 
 func give_reward(): #todo: service reward
-	Map.inventoryWindow.add_item(Map.activePoint.pointQuest["prize"])
+	Map.inventoryWindow.add_item(Map.activePoint.pointQuest["prize"], true)
 
 #Conditions
 func has_class(className):

@@ -58,13 +58,18 @@ func set_stats(unit, hp):
 	
 func rando_moves(unit, number):
 	var list = Moves.moveList
-	var rando = []
+	var rando = [[],[]] #damaging, other
 	for move in list: #populate rando with viable moves
 		if list[move].has("type"): 
 			if list[move]["type"] == unit.allowedType:
-				rando.append(move)
+				if list[move].has("damage") or list[move].has("damaging"):
+					rando[0].append(move)
+				else:
+					rando[1].append(move)
+	var randoIndex
 	var randomMove
 	for i in number: #add number of moves from rando to unit's move list
-		randomMove = random_item(rando)
+		randoIndex = i % rando.size()
+		randomMove = random_item(rando[randoIndex])
 		unit.moves.append(randomMove)
-		rando.erase(randomMove)
+		rando[randoIndex].erase(randomMove)

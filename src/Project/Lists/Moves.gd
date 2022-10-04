@@ -11,7 +11,7 @@ enum targetType {enemy, enemies, enemyTargets, ally, allies, user, none}
 
 func _ready():
 	moveList = {
-	"Attack": {"target": targetType.enemy, "damage": 5, "resVal": 0, "args": ["moveUser", 10], "type": moveType.basic},
+	"Attack": {"target": targetType.enemy, "damage": 5, "resVal": 0, "type": moveType.basic, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .2], "description": "20% Recoil"},
 	"Defend": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5], "description": "Adds 5 shield", "type": moveType.basic},
 	
 	"Earthshaker": {"target": targetType.enemies, "damage": 10, "resVal": 60, "status": "Stun", "value": 100, "type": 1},
@@ -34,27 +34,26 @@ func _ready():
 	"Turtle Up": {"target": targetType.user, "resVal": 20, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5, funcref(self, "get_enemy_targeters")], "description": "Shields more for each enemy targeting the user", "type": moveType.special},
 	
 	
-	"Constrict": {"target": targetType.enemy, "damage": 2, "resVal": 1, "effect": funcref(self, "give_status"), "args": ["moveUser", "Constricting", 1], "description": "Grabs target and strikes next turn if not removed", "type": moveType.magic},
-	"Frostfang": {"target": targetType.enemy, "damage": 10, "resVal": 2, "status": "Chill", "value": 50, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", .5, true], "description": "Multiplies target chill by 1.5 after the hit", "type": moveType.magic},
-	"Plague": {"target": targetType.enemies, "resVal": 2, "status": "Poison", "value": 75, "type": moveType.magic},
+	"Constrict": {"target": targetType.enemy, "damage": 2, "resVal": 10, "effect": funcref(self, "give_status"), "args": ["moveUser", "Constricting", 1], "description": "Grabs target and strikes next turn if not removed", "type": moveType.magic},
+	"Frostfang": {"target": targetType.enemy, "damage": 10, "resVal": 20, "status": "Chill", "value": 50, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", .5, true], "description": "Multiplies target chill by 1.5 after the hit", "type": moveType.magic},
+	"Plague": {"target": targetType.enemies, "damaging": true, "resVal": 30, "status": "Poison", "value": 75, "type": moveType.magic},
+	"Venoshock": {"target": targetType.enemy, "damaging": true, "resVal": 10, "description": "Inflict 100 poison on an enemy. Shield 1 for every 20 poison that enemy has.", "type": moveType.magic},
 	
-	"Channel Power": {"target": targetType.user, "resVal": 0, "channel": true, "quick": true, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "strength", 5], "description": "Attacks used this turn deal 5 extra damage.", "type": moveType.magic},
-	"Dodge": {"target": targetType.user, "resVal": 1, "status": "Dodge", "value": 1, "type": moveType.magic},
-	"Growth": {"target": targetType.ally, "resVal": 1, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "strength", 5], "description": "Strength +5 for the battle", "type": moveType.magic},
-	"Hide": {"target": targetType.ally, "resVal": 1, "effect": funcref(self, "switch_intents"), "args": ["moveUser", "moveTarget"], "type": moveType.magic},
-	"Restore": {"target": targetType.ally, "resVal": 1, "description": "Remove 100 from all statuses of target ally.", "type": moveType.magic},
-	"Venoshock": {"target": targetType.enemy, "resVal": 1, "description": "Inflict 100 poison on an enemy. Shield 1 for every 20 poison that enemy has.", "type": moveType.magic},
+	"Dodge": {"target": targetType.user, "resVal": 20, "status": "Dodge", "value": 1, "type": moveType.magic},
+	"Growth": {"target": targetType.ally, "resVal": 10, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "strength", 5], "description": "Strength +5 for the battle", "type": moveType.magic},
+	"Hide": {"target": targetType.ally, "resVal": 5, "effect": funcref(self, "switch_intents"), "args": ["moveUser", "moveTarget"], "type": moveType.magic},
+	"Restore": {"target": targetType.ally, "resVal": 5, "description": "Remove 100 from all statuses of target ally.", "type": moveType.magic},
 	
 	
-	"Bonemerang": {"target": targetType.enemy, "damage": 3, "resVal": 1, "quick": true},
+	"Bonemerang": {"target": targetType.enemy, "damage": 3, "resVal": 1, "quick": true, "type": moveType.trick},
 	"Coldsteel": {"target": targetType.enemy, "damage": 5, "resVal": 2, "status": "Chill", "value": 50, "hits": 2, "type": moveType.trick},
 	"Crusher Claw": {"target": targetType.enemy, "damage": 6, "resVal": 2, "timing": timings.before, "effect": funcref(self, "add_hits"), "args": ["moveTarget:shield", 0, 2, false], "description": "Extra hit if the target has shields", "type": moveType.trick},
-	"Eye Poke": {"target": targetType.enemy, "damage": 6, "resVal": 2, "description": "Inflict 100 stun if enemy is targeting the user.", "type": moveType.trick},
-	"Piercing Sting": {"target": targetType.enemy, "damage": 20, "resVal": 1, "status": "Poison", "value": 100, "type": moveType.trick},
+	"Piercing Sting": {"target": targetType.enemy, "damage": 20, "resVal": 5, "status": "Poison", "value": 100, "type": moveType.trick},
 	"Quick Attack": {"target": targetType.enemy, "damage": 3, "resVal": 5, "quick": true, "type": moveType.trick},
 	"Sucker Punch": {"target": targetType.enemy, "damage": 6, "resVal": 3, "effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 2], "description": "Extra hit if enemy targetType user", "type": moveType.trick},
 	
 	"Taunt": {"target": targetType.enemy, "status": "Provoke", "value": 100, "resVal": 2, "quick": true, "type": moveType.trick},
+	"Eye Poke": {"target": targetType.enemy, "resVal": 2, "description": "Inflict 100 stun if enemy is targeting the user.", "type": moveType.trick},
 	
 	"Reload": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "type": moveType.basic},
 	
@@ -63,6 +62,8 @@ func _ready():
 	
 	"Test Relic": {"type": moveType.relic, "resVal": 0, "unusable": true, "passive": ["Dodgy", 1], "price": 5},
 	"Another Relic": {"type": moveType.relic, "resVal": 0, "unusable": true, "passive": ["Dodgy", 1], "price": 5},
+	
+	"Channel Power": {"target": targetType.user, "resVal": 0, "channel": true, "quick": true, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "strength", 5], "description": "Attacks used this turn deal 5 extra damage.", "type": moveType.relic},
 	
 	"X": {"type": moveType.none, "resVal": 999} #temp
 }

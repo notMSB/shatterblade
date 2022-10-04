@@ -42,6 +42,7 @@ func combine(one, two):
 	return products[one][two]
 
 func break_down(moveName):
+	if moveName == "X": return null
 	for i in products.size():
 		for j in products[i].size():
 			if products[i][i+j] == moveName:

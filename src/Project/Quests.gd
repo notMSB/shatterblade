@@ -5,7 +5,7 @@ onready var Trading = get_node("../Trading")
 onready var Enemies = get_node("../Enemies")
 onready var Crafting = get_node("../Crafting")
 
-const RARECOST = 4
+const RARECOST = 5
 const LABORMIN = 5
 const LABORMAX = 21
 const UNIQUETYPES = 2

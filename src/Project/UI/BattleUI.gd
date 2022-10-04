@@ -84,6 +84,12 @@ func choose_movebox(box, target = null): #happens when move and target are selec
 	box.get_node("Button").visible = true
 	if target: box.updateInfo(target.name)
 
+func toggle_movebox_buttons(toggle):
+	for display in playerHolder.get_children():
+		if display.get_node_or_null("MoveBoxes"):
+			for box in display.get_node("MoveBoxes").get_children():
+				box.get_node("Button").visible = toggle
+
 func toggle_channels(boxes):
 	var move
 	for box in boxes:
@@ -144,6 +150,8 @@ func link_boxes(tracker, boxCount, firstMargin, lastMargin, barType):
 func clear_menus():
 	$Description.text = ""
 	$Description.visible = false
+
+
 
 func toggle_buttons(toggle, units = []):
 	if toggle:

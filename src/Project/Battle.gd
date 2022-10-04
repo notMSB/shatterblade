@@ -88,7 +88,6 @@ func _ready(): #Generate units and add to turn order
 		if unit.passives.size() > 0:
 			for passive in unit.passives:
 				StatusManager.add_status(unit, passive, unit.passives[passive])
-	Boons.start_battle(get_partyHealth())
 	
 	#generate_rewards()
 	
@@ -148,7 +147,10 @@ func set_ui(unit, setPassives = false):
 	unit.update_status_ui()
 
 func get_partyHealth():
-	return 5
+	var total = 0
+	for unit in global.storedParty:
+		total += unit.currentHealth
+	return total
 
 func play_turn():
 	turnIndex = (turnIndex + 1) % $Units.get_child_count() #Advance to next unit
@@ -257,6 +259,7 @@ func target_chosen(index):
 	$GoButton.visible = true
 
 func go_button_press():
+	$BattleUI.toggle_movebox_buttons(false)
 	$BattleUI.clear_menus()
 	$GoButton.visible = false
 	for moveData in executionOrder: #box, move, user, target
@@ -380,23 +383,24 @@ func activate_effect():
 				newArgs.append(argument)
 		chosenMove["effect"].call_funcv(newArgs) #Run the effect function on these arguments
 
-func evaluate_completion():
-	print(deadEnemies)
-	print(enemyNum)
+func evaluate_completion(deadUnit):
 	if deadEnemies >= enemyNum:
 		battleDone = true
-		done()
+		done(Enemies.enemyList[deadUnit.identity]["rewards"][0])
 
-func done():
+func done(reward):
 	$BattleUI.toggle_trackers(false)
 	if !get_parent().mapMode:
 		return get_tree().reload_current_scene()
 	else: #Map
+		var map = get_node("../Map")
 		Boons.end_battle(get_partyHealth())
 		for i in global.storedParty.size():
 			set_ui(global.storedParty[i])
-			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], get_node("../Map").inventoryWindow.DEFAULTCOLOR)
+			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], map.inventoryWindow.DEFAULTCOLOR)
+		map.inventoryWindow.add_item(reward)
 		visible = false
+		$BattleUI.toggle_movebox_buttons(true)
 
 func generate_rewards():
 	var rewards = Enemies.enemyList[opponents[randi() % opponents.size()]]["rewards"] #Random enemy from the opponents list gives rewards
