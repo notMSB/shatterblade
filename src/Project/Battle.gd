@@ -89,15 +89,16 @@ func _ready(): #Generate units and add to turn order
 			for passive in unit.passives:
 				StatusManager.add_status(unit, passive, unit.passives[passive])
 	
-	#generate_rewards()
-	
-	if !battleDone: play_turn()
+	if !battleDone: 
+		Boons.start_battle(get_partyHealth())
+		play_turn(false)
 
 func create_enemies():
-	var createdUnit = Enemy.instance()
+	var createdUnit
 	var enemy
 	var i = 0
 	for opponent in opponents:
+		createdUnit = Enemy.instance()
 		enemy = Enemies.enemyList[opponent]
 		createdUnit.callv("make_stats", enemy["stats"])
 		createdUnit.identity = opponent
@@ -129,7 +130,7 @@ func welcome_back(newOpponents = null): #reusing an existing battle scene for a 
 	if newOpponents: opponents = newOpponents
 	create_enemies()
 	Boons.start_battle(get_partyHealth())
-	play_turn()
+	play_turn(false)
 
 func set_ui(unit, setPassives = false):
 	unit.strength = 0
@@ -152,7 +153,7 @@ func get_partyHealth():
 		total += unit.currentHealth
 	return total
 
-func play_turn():
+func play_turn(resetShield = true):
 	turnIndex = (turnIndex + 1) % $Units.get_child_count() #Advance to next unit
 	currentUnit = $Units.get_child(turnIndex)
 	
@@ -160,7 +161,11 @@ func play_turn():
 		if get_parent().mapMode: get_node("../Map").subtract_time(1)
 		for unit in $Units.get_children():
 			StatusManager.countdown_turns(unit, true)
+			if resetShield: 
+					unit.shield = 0
+					unit.update_hp()
 			if unit.isPlayer:
+				StatusManager.evaluate_statuses(currentUnit, StatusManager.statusActivations.beforeTurn)
 				unit.update_resource(apIncrement, Moves.moveType.special, true)
 				unit.update_resource(unit.maxEnergy, Moves.moveType.trick, true)
 				for display in $BattleUI.playerHolder.get_children():
@@ -173,14 +178,16 @@ func play_turn():
 		play_turn()
 	else: #Enemy turn
 		if currentUnit.currentHealth > 0: #if you're dead stop doing moves
-			moveUser = currentUnit
-			moveTarget = currentUnit.storedTarget
-			moveName = currentUnit.storedAction
-			chosenMove = Moves.moveList[currentUnit.storedAction]
-			yield(execute_move(), "completed")
-			yield(set_intent(currentUnit), "completed")
-			#currentUnit.update_info(currentUnit.storedTarget.name)
-			StatusManager.countdown_turns(currentUnit, false)
+			StatusManager.evaluate_statuses(currentUnit, StatusManager.statusActivations.beforeTurn)
+			if currentUnit.currentHealth > 0: #poison could kill
+				moveUser = currentUnit
+				moveTarget = currentUnit.storedTarget
+				moveName = currentUnit.storedAction
+				chosenMove = Moves.moveList[currentUnit.storedAction]
+				yield(execute_move(), "completed")
+				yield(set_intent(currentUnit), "completed")
+				#currentUnit.update_info(currentUnit.storedTarget.name)
+				StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
 
 func set_action(unit):
@@ -189,7 +196,7 @@ func set_action(unit):
 func set_intent(unit, target = false):
 	set_action(unit)
 	
-	#Target
+	#Writing the intent out
 	var actionInfo = Moves.moveList[unit.storedAction]
 	var actionDamage
 	if actionInfo.has("damage"):
@@ -303,16 +310,7 @@ func checkChannel(unit): #Channels can only be used as the first action of a tur
 			return true
 	return false
 
-func execute_move():
-	if moveTarget.currentHealth <= 0:
-		yield(get_tree().create_timer(.5), "timeout")
-		return
-	if moveUser.isPlayer:
-		moveUser.storedTarget = moveTarget
-		if chosenMove["type"] > Moves.moveType.relic: usedMoveBox.reduce_uses(1) #durability does not go down for reloads and does not exist for basics/relics
-		if chosenMove["type"] == Moves.moveType.trick or chosenMove.has("cycle"):
-			$BattleUI.advance_box_move(usedMoveBox)
-	
+func execute_move():	
 	#Set up for multi target moves
 	var targets = []
 	if chosenMove["target"] == targetType.enemies:
@@ -326,6 +324,15 @@ func execute_move():
 		targets = get_team(moveUser.isPlayer, true)
 	else: #single target
 		targets = [moveTarget] 
+		if moveTarget.currentHealth <= 0:
+			yield(get_tree().create_timer(.5), "timeout")
+			return
+	
+	if moveUser.isPlayer:
+		moveUser.storedTarget = moveTarget
+		if chosenMove["type"] > Moves.moveType.relic and !chosenMove.has("cycle"): usedMoveBox.reduce_uses(1) #durability does not go down for reloads and does not exist for basics/relics
+		if chosenMove["type"] == Moves.moveType.trick or chosenMove.has("cycle"):
+			$BattleUI.advance_box_move(usedMoveBox)
 	
 	#Actual effects of move handled here
 	if !chosenMove.has("hits"):

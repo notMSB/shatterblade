@@ -13,7 +13,7 @@ const YMAX = 4
 const CRAFTBOXES = 3
 const DEFAULTCOLOR = Color(.53,.3,.3,1)
 const MOVEHOLDER = "moves"
-const MOVESPACES = 4
+var MOVESPACES = 4
 
 onready var iHolder = $HolderHolder/InventoryHolder
 onready var cHolder = $HolderHolder/CraftboxHolder
@@ -22,6 +22,7 @@ onready var oHolder = $HolderHolder/OfferingHolder
 onready var Trading = get_node("../Data/Trading")
 onready var Moves = get_node("../Data/Moves")
 onready var Crafting = get_node("../Data/Crafting")
+onready var Boons = get_node("../Data/Boons")
 var dHolder
 
 var productBox
@@ -45,10 +46,10 @@ enum iModes {default, craft, trade, offer}
 var mode = iModes.craft
 
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
+	if Boons.chosen == Boons.v.j: MOVESPACES += 1
 	if !Trading.assigned: Trading.assign_component_values()
 	if global.itemDict.empty():
-		pass
-		#global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["Test Relic"]}
+		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["Test Relic", "Coin", "Coin", "Coin"]}
 	make_grid()
 	make_actionboxes(CRAFTBOXES, iModes.craft)
 	make_actionboxes(TRADERINVSIZE, iModes.trade)
@@ -222,6 +223,9 @@ func player_inv_check(playerBox, otherBox): #returns true/false depending on if 
 	var checkName = otherBox.get_node("Name").text
 	var playerName = playerBox.get_node("Name").text
 	if Crafting.c.get(checkName) == null: #can't move in crafting material
+		if Moves.moveList[checkName].has("unequippable"): 
+			deselect_multi([playerBox, otherBox])
+			return false
 		var playerType = Moves.moveList[playerName]["type"]
 		var checkType = Moves.moveList[checkName]["type"]
 		#swapping into the attack/defend boxes, cannot swap an X from other players but can from inventory

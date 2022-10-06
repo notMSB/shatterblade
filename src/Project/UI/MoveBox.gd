@@ -34,6 +34,7 @@ func set_mode_scene(): #returns battle, inventory, or map
 
 func reduce_uses(amount):
 	currentUses = max(0, currentUses - amount)
+	currentUses = min(currentUses, maxUses) #in the event that an effect puts the current too high
 	set_uses()
 
 func repair_uses():

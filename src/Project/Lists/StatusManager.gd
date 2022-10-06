@@ -13,10 +13,10 @@ const COUNTDOWNVAL = 50
 var statusList = {
 	"Regen": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "regenerate"), "args": ["unit", 1]},
 	
-	"Poison": {"activation": statusActivations.beforeTurn, "system": true, "effect": funcref(self, "percentage_damage"), "args": ["unit", "value", 0.001]},
+	"Poison": {"activation": statusActivations.beforeTurn, "countdownhalf": true , "system": true, "effect": funcref(self, "value_damage"), "args": ["unit", "value",]},
 	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.002, "value"]},
 	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -0.002, "value"]},
-	"Stun": {"activation": statusActivations.beforeTurn, "system": true, "effect": funcref(self, "stunned")},
+	"Stun": {"activation": statusActivations.beforeTurn, "threshold": true, "system": true, "effect": funcref(self, "stunned")},
 	"Provoke": {"activation": statusActivations.passive, "system": true},
 	
 	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 2]},
@@ -49,7 +49,12 @@ func countdown_turns(unit, turnStart):
 			var status = statusList[cond["name"]]
 			if status.has("system"): #Pass if there is no countdown system
 				if !turnStart and status["system"]: #Points subtract at turn end
-					cond["value"] -= 2*COUNTDOWNVAL if cond["value"] >= THRESHOLD else COUNTDOWNVAL
+					if status.has("threshold"):
+						cond["value"] -= THRESHOLD
+					elif status.has("countdownhalf"):
+						cond["value"] -= ceil(cond["value"] *.5)
+					else:
+						cond["value"] -= COUNTDOWNVAL
 				elif turnStart and !status["system"] : #Turns subtract at turn start
 					cond["value"] -= 1
 				if cond["value"] <= 0:
@@ -92,7 +97,7 @@ func evaluate_statuses(unit, type, args = []):
 			var statusInfo = statusList[cond["name"]]
 			if statusInfo.has("effect"):
 				if statusInfo.has("system") and statusInfo["system"]: #If using points system
-					if cond["value"] < THRESHOLD: #Points system statuses do not take effect if points value is below the threshold
+					if statusInfo.has("threshold") and cond["value"] < THRESHOLD: #Points system statuses do not take effect if points value is below the threshold
 						#print("skipping")
 						continue
 				var newArgs = []
@@ -119,11 +124,17 @@ func evaluate_statuses(unit, type, args = []):
 #Effects
 
 func adjust_damage(damage, adjustment, value = 1):
-	return damage - (damage * value * adjustment)
+	var multiplier = 1 if adjustment >= 0 else -1
+	var damageMod = floor(damage * value * abs(adjustment)) #abs needed since floor/ceil round negative numbers oppositely
+	return damage + (damageMod * multiplier)
 
 func percentage_damage(unit, value, damage):
 	unit.take_damage(unit.maxHealth * value * damage)
 	return unit.maxHealth * damage
+
+func value_damage(unit, value, multiplier = 1):
+	unit.take_damage(value * multiplier)
+	return unit.currentHealth
 
 func counter_attack(user, target, value):
 	target.take_damage(user.strength - target.defense + value)

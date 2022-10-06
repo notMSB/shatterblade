@@ -53,13 +53,13 @@ func _on_Button_pressed():
 		for line in lines:
 			movementLine = check_neighbor(line, true) #exclude dungeon lines
 			if movementLine: #the nodes are adjacent
+				if Map.currentDungeon: 
+					Map.currentDungeon.evaluate_exit(self)
+					Map.subtract_time(1)
+				else:
+					Map.subtract_time(ceil(movementLine.points[0].distance_to(movementLine.points[1]) * Map.DISTANCE_TIME_MULT))
 				Map.activePoint.toggle_activation(false) #toggle off map's active node
 				toggle_activation(true) #this is now the map's active node
-				if Map.currentDungeon: 
-					Map.currentDungeon.evaluate_exit(Map.activePoint)
-					Map.subtract_time(1)
-				else: 
-					Map.subtract_time(ceil(movementLine.points[0].distance_to(movementLine.points[1]) * Map.DISTANCE_TIME_MULT))
 				return #done
 
 func _on_Button_mouse_entered():

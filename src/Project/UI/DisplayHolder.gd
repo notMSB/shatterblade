@@ -69,7 +69,8 @@ func box_move(moveBox, move, isUseless = false):
 	moveBox.moves.clear()
 	moveBox.moveIndex = 0
 	moveBox.moveType = Moves.moveList[move]["type"]
-	moveBox.resValue = Moves.moveList[move]["resVal"]
+	if Moves.moveList[move].has("resVal"):
+		moveBox.resValue = Moves.moveList[move]["resVal"]
 	moveBox.moves.append(move)
 	if moveBox.moveType == Moves.moveType.trick: moveBox.moves.append("Reload")
 	moveBox.get_node("Name").text = move

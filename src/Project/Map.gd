@@ -12,6 +12,7 @@ export (PackedScene) var Section
 
 onready var Moves = get_node("../Data/Moves")
 onready var Quests = get_node("../Data/Quests")
+onready var Enemies = get_node("../Data/Enemies")
 
 const INCREMENT = 92
 const KILLDISTANCE = 81 #lower kill distance means more points
@@ -36,6 +37,9 @@ var savedPoint
 var calledEvent
 var timeNode
 var favorNode
+
+const DIFFICULTYMODIFIER = -3
+var distanceTraveled = 0
 var time = 150
 var currentDay = 0
 var isDay = true
@@ -119,6 +123,8 @@ func activate_point(point):
 			grab_event(pool[randi() % pool.size()])
 
 func activate_battle(newOpponents = null):
+	if !newOpponents and distanceTraveled > 1:
+		newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + currentDay, isDay)
 	battleWindow.visible = true
 	battleWindow.welcome_back(newOpponents)
 
@@ -280,7 +286,7 @@ func organize_lines():
 			elif point.position.x < startIndex.position.x: startIndex = point
 			if !endIndex: endIndex = point
 			elif point.position.x >= endIndex.position.x: endIndex = point
-			point.pointType = pointTypes.event
+			point.pointType = pointTypes.battle ###
 			if point.pointType == pointTypes.event: make_quest(point)
 
 func make_quest(point):
@@ -352,6 +358,7 @@ func analyze_points(one, two):
 			two.lines.append(pointLine)
 
 func subtract_time(diff, refillAllMana = false):
+	distanceTraveled = diff
 	time -= diff
 	if refillAllMana: update_mana()
 	else: update_mana(diff)

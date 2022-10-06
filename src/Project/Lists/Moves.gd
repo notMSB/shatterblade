@@ -23,7 +23,7 @@ func _ready():
 	"Cleave": {"target": targetType.enemies, "damage": 5, "resVal": 30, "type": moveType.special},
 	"Dive Bomb": {"target": targetType.enemy, "damage": 15, "resVal": 20, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .2], "description": "User takes 20% of damage dealt back in recoil", "type": moveType.special},
 	"Pierce": {"target": targetType.enemyTargets, "damage": 4, "resVal": 25, "type": moveType.special},
-	"Poison Strike": {"target": targetType.enemy, "damage": 2, "resVal": 15, "status": "Poison", "value": 50, "quick": true, "type": moveType.special},
+	"Poison Strike": {"target": targetType.enemy, "damage": 2, "resVal": 15, "status": "Poison", "value": 5, "quick": true, "type": moveType.special},
 	"Power Attack": {"target": targetType.enemy, "damage": 12, "resVal": 20, "type": moveType.special},
 	"Take Down": {"target": targetType.enemy, "damage": 7, "resVal": 30, "status": "Stun", "value": 100, "type": moveType.special},
 	"Triple Hit": {"target": targetType.enemy, "damage": 3, "resVal": 30, "hits": 3, "type": moveType.special},
@@ -36,10 +36,10 @@ func _ready():
 	
 	"Constrict": {"target": targetType.enemy, "damage": 2, "resVal": 10, "effect": funcref(self, "give_status"), "args": ["moveUser", "Constricting", 1], "description": "Grabs target and strikes next turn if not removed", "type": moveType.magic},
 	"Frostfang": {"target": targetType.enemy, "damage": 10, "resVal": 20, "status": "Chill", "value": 50, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", .5, true], "description": "Multiplies target chill by 1.5 after the hit", "type": moveType.magic},
-	"Plague": {"target": targetType.enemies, "damaging": true, "resVal": 30, "status": "Poison", "value": 75, "type": moveType.magic},
-	"Venoshock": {"target": targetType.enemy, "damaging": true, "resVal": 10, "description": "Inflict 100 poison on an enemy. Shield 1 for every 20 poison that enemy has.", "type": moveType.magic},
+	"Plague": {"target": targetType.enemies, "damaging": true, "resVal": 30, "status": "Poison", "value": 10, "type": moveType.magic},
+	"Venoshock": {"target": targetType.enemy, "damaging": true, "resVal": 10, "description": "Inflict 5 poison on an enemy. Shield 1 for every poison that enemy has.", "type": moveType.magic},
 	
-	"Dodge": {"target": targetType.user, "resVal": 20, "status": "Dodge", "value": 1, "type": moveType.magic},
+	"Dodge": {"target": targetType.user, "resVal": 20, "status": "Dodgy", "value": 1, "type": moveType.magic},
 	"Growth": {"target": targetType.ally, "resVal": 10, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "strength", 5], "description": "Strength +5 for the battle", "type": moveType.magic},
 	"Hide": {"target": targetType.ally, "resVal": 5, "effect": funcref(self, "switch_intents"), "args": ["moveUser", "moveTarget"], "type": moveType.magic},
 	"Restore": {"target": targetType.ally, "resVal": 5, "description": "Remove 100 from all statuses of target ally.", "type": moveType.magic},
@@ -48,20 +48,24 @@ func _ready():
 	"Bonemerang": {"target": targetType.enemy, "damage": 3, "resVal": 1, "quick": true, "type": moveType.trick},
 	"Coldsteel": {"target": targetType.enemy, "damage": 5, "resVal": 2, "status": "Chill", "value": 50, "hits": 2, "type": moveType.trick},
 	"Crusher Claw": {"target": targetType.enemy, "damage": 6, "resVal": 2, "timing": timings.before, "effect": funcref(self, "add_hits"), "args": ["moveTarget:shield", 0, 2, false], "description": "Extra hit if the target has shields", "type": moveType.trick},
-	"Piercing Sting": {"target": targetType.enemy, "damage": 20, "resVal": 5, "status": "Poison", "value": 100, "type": moveType.trick},
+	"Piercing Sting": {"target": targetType.enemy, "damage": 20, "resVal": 5, "status": "Poison", "value": 10, "type": moveType.trick},
 	"Quick Attack": {"target": targetType.enemy, "damage": 3, "resVal": 5, "quick": true, "type": moveType.trick},
 	"Sucker Punch": {"target": targetType.enemy, "damage": 6, "resVal": 3, "effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 2], "description": "Extra hit if enemy targetType user", "type": moveType.trick},
 	
 	"Taunt": {"target": targetType.enemy, "status": "Provoke", "value": 100, "resVal": 2, "quick": true, "type": moveType.trick},
 	"Eye Poke": {"target": targetType.enemy, "resVal": 2, "description": "Inflict 100 stun if enemy is targeting the user.", "type": moveType.trick},
 	
-	"Reload": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "type": moveType.basic},
+	"Reload": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "type": moveType.trick},
 	
 	
 	"Double Slash": {"target": targetType.enemy, "damage": 4, "resVal": 1, "type": moveType.item},
 	
-	"Test Relic": {"type": moveType.relic, "resVal": 0, "unusable": true, "passive": ["Dodgy", 1], "price": 5},
-	"Another Relic": {"type": moveType.relic, "resVal": 0, "unusable": true, "passive": ["Dodgy", 1], "price": 5},
+	
+	"Coin": {"type": moveType.relic, "unusable": true, "unequippable": true ,"price": 1},
+	"Silver": {"type": moveType.relic, "unusable": true, "unequippable": true ,"price": 10},
+	
+	"Test Relic": {"type": moveType.relic, "unusable": true, "passive": ["Dodgy", 1], "price": 5},
+	"Another Relic": {"type": moveType.relic, "unusable": true, "passive": ["Dodgy", 1], "price": 5},
 	
 	"Channel Power": {"target": targetType.user, "resVal": 0, "channel": true, "quick": true, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "strength", 5], "description": "Attacks used this turn deal 5 extra damage.", "type": moveType.relic},
 	
@@ -87,9 +91,10 @@ func get_relics():
 	return relics
 
 func get_uses(moveName):
-	if !moveList.has(moveName) or moveList[moveName]["type"] <= moveType.relic: return -1
-	if moveList[moveName]["type"] == moveType.item: return 1
+	if !moveList.has(moveName): return -1
 	if moveList[moveName].has("uses"): return moveList[moveName]["uses"]
+	if moveList[moveName]["type"] <= moveType.relic: return -1
+	if moveList[moveName]["type"] == moveType.item: return 1
 	if moveList[moveName].has("damage"): return DEFAULTUSESDAMAGE
 	return DEFAULTUSESOTHER
 
