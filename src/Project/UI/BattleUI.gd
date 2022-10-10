@@ -115,8 +115,9 @@ func set_trackers(display, boxes, classType):
 
 func toggle_trackers(toggle):
 	for display in playerHolder.get_children():
-		for tracker in display.get_node("Trackers").get_children():
-			tracker.visible = toggle
+		if display.get_node_or_null("Trackers"):
+			for tracker in display.get_node("Trackers").get_children():
+				tracker.visible = toggle
 
 func check_box_count(count, display, firstMargin, lastMargin, barType):
 	if count.size() > 0:
@@ -159,7 +160,7 @@ func toggle_buttons(toggle, units = []):
 		if units.size() == 1 and usedHolder == playerHolder:
 			usedHolder.get_child(units[0].get_index()).get_node("Button").visible = true
 		else:
-			for child in usedHolder.get_children():
+			for child in usedHolder.get_children(): #known to toggle on too many buttons if not in map mode
 				child.get_node("Button").visible = true
 		targetsVisible = true
 	else:

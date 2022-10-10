@@ -13,15 +13,16 @@ export (PackedScene) var Section
 onready var Moves = get_node("../Data/Moves")
 onready var Quests = get_node("../Data/Quests")
 onready var Enemies = get_node("../Data/Enemies")
+onready var Boons = get_node("../Data/Boons")
 
 const INCREMENT = 92
 const KILLDISTANCE = 81 #lower kill distance means more points
 const MAXDISTANCE = 200
-const FUZZ = 45 #should never be more than half of the increment
+const FUZZ = 35 #should never be more than half of the increment
 const CORNER_CHECK = 20
 const DISTANCE_TIME_MULT = .05
 
-const MOVESPACES = 5
+var MOVESPACES = 4
 const NIGHTLENGTH = 50
 const TOTALSECTIONS = 3
 
@@ -59,6 +60,8 @@ func _ready():
 	add_child(timeNode)
 	favorNode = Favor.instance()
 	add_child(favorNode)
+	Boons.Map = self
+	MOVESPACES += Boons.call_boon("prep_inventory")
 	if global.storedParty.size() > 0: 
 		for i in global.storedParty.size():
 			while global.storedParty[i].moves.size() < MOVESPACES:
@@ -248,6 +251,9 @@ func clean_up():
 	for point in $HolderHolder/PointHolder.get_children():
 		point.sectionNum = floor(point.position.x / divider)
 		point.set_name(str(point.sectionNum, " | ", point.clicksFromStart))
+		if point.clicksFromStart == null and point.visible: 
+			print("hiding null point")
+			point.visible = false
 	set_label(endIndex, "End", true)
 	if !canEnd: 
 		print("disaster")
@@ -377,6 +383,7 @@ func advance_day():
 	set_sections()
 
 func update_favor(amount):
+	print(favorNode)
 	favorNode.get_node("Amount").text = String(amount)
 
 func update_mana(gain = null):

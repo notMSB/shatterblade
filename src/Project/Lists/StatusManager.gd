@@ -22,9 +22,9 @@ var statusList = {
 	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 2]},
 	"Blocking": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.5]},
 	
-	"Venomous": {"activation": statusActivations.usingAttack, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 75]},
-	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "adjust_damage"), "args": ["damage", 1]},
-	"Counter": {"activation": statusActivations.gettingHit, "effect": funcref(self, "counter_attack"), "args": ["unit", "attacker", 5]},
+	"Venomous": {"activation": statusActivations.usingAttack, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 5]},
+	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "adjust_damage"), "args": ["damage", -1]},
+	"Thorns": {"activation": statusActivations.gettingHit, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5]},
 	"Constricting": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "constrict_attack"), "args": ["unit", "intent"], "targetlock": true, "hittable": true},
 }
 
@@ -136,8 +136,8 @@ func value_damage(unit, value, multiplier = 1):
 	unit.take_damage(value * multiplier)
 	return unit.currentHealth
 
-func counter_attack(user, target, value):
-	target.take_damage(user.strength - target.defense + value)
+func counter_attack(target, value):
+	target.take_damage(value)
 
 func regenerate(unit, healing):
 	unit.heal(healing)

@@ -33,8 +33,9 @@ var info
 var hits
 
 var battleDone = true
+var rewardUnit
 
-var opponents = []
+var opponents = ["Rat"]
 
 var targetsVisible = false
 
@@ -81,16 +82,18 @@ func _ready(): #Generate units and add to turn order
 		$Units.add_child(createdUnit)
 	for unit in $Units.get_children():
 		$BattleUI.setup_display(unit, opponents.size())
-		if !unit.isPlayer: #Set enemy intents
-			set_intent(unit)
-		if unit.isPlayer: 
-			unit.update_strength()
-		if unit.passives.size() > 0:
-			for passive in unit.passives:
-				StatusManager.add_status(unit, passive, unit.passives[passive])
 	
-	if !battleDone: 
-		Boons.start_battle(get_partyHealth())
+	if !battleDone:
+		Boons.call_boon("start_battle", [get_partyHealth()])
+		for unit in $Units.get_children():
+			if !unit.isPlayer: #Set enemy intents
+				set_intent(unit)
+			if unit.isPlayer: 
+				unit.update_strength()
+			if unit.passives.size() > 0:
+				for passive in unit.passives:
+					print(passive)
+					StatusManager.add_status(unit, passive, unit.passives[passive])
 		play_turn(false)
 
 func create_enemies():
@@ -121,6 +124,8 @@ func welcome_back(newOpponents = null): #reusing an existing battle scene for a 
 	$BattleUI.toggle_trackers(true)
 	$BattleUI.enemyCount = 0
 	battleDone = false
+	rewardUnit = null
+	Boons.call_boon("start_battle", [get_partyHealth()])
 	for unit in $Units.get_children():
 		if !unit.isPlayer:
 			unit.cease_to_exist()
@@ -129,7 +134,6 @@ func welcome_back(newOpponents = null): #reusing an existing battle scene for a 
 	turnIndex = -1
 	if newOpponents: opponents = newOpponents
 	create_enemies()
-	Boons.start_battle(get_partyHealth())
 	play_turn(false)
 
 func set_ui(unit, setPassives = false):
@@ -154,31 +158,35 @@ func get_partyHealth():
 	return total
 
 func play_turn(resetShield = true):
+	if battleDone:
+		return done(Enemies.enemyList[rewardUnit.identity]["rewards"][0])
 	turnIndex = (turnIndex + 1) % $Units.get_child_count() #Advance to next unit
 	currentUnit = $Units.get_child(turnIndex)
-	
 	if turnIndex == 0: #Start of turn, take player actions
 		if get_parent().mapMode: get_node("../Map").subtract_time(1)
+		
 		for unit in $Units.get_children():
 			StatusManager.countdown_turns(unit, true)
 			if resetShield: 
 					unit.shield = 0
 					unit.update_hp()
 			if unit.isPlayer:
-				StatusManager.evaluate_statuses(currentUnit, StatusManager.statusActivations.beforeTurn)
+				StatusManager.evaluate_statuses(unit, StatusManager.statusActivations.beforeTurn)
 				unit.update_resource(apIncrement, Moves.moveType.special, true)
 				unit.update_resource(unit.maxEnergy, Moves.moveType.trick, true)
 				for display in $BattleUI.playerHolder.get_children():
 					if display.get_node_or_null("MoveBoxes"):
 						$BattleUI.toggle_moveboxes(display.get_node("MoveBoxes"), true)
+		Boons.call_boon("start_turn")
 		yield(self, "turn_taken")
-		if battleDone: return
+		#if battleDone: return play_turn()
 	if currentUnit.isPlayer: #skip along
 		StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
 	else: #Enemy turn
 		if currentUnit.currentHealth > 0: #if you're dead stop doing moves
 			StatusManager.evaluate_statuses(currentUnit, StatusManager.statusActivations.beforeTurn)
+			Boons.call_boon("post_status_eval", [currentUnit])
 			if currentUnit.currentHealth > 0: #poison could kill
 				moveUser = currentUnit
 				moveTarget = currentUnit.storedTarget
@@ -275,7 +283,7 @@ func go_button_press():
 		moveUser = moveData[2]
 		moveTarget = moveData[3]
 		yield(execute_move(), "completed")
-		if battleDone: return executionOrder.clear()
+		if battleDone: break
 	executionOrder.clear()
 	emit_signal("turn_taken")
 
@@ -310,8 +318,9 @@ func checkChannel(unit): #Channels can only be used as the first action of a tur
 			return true
 	return false
 
-func execute_move():	
+func execute_move():
 	#Set up for multi target moves
+	var hitBonus = 0
 	var targets = []
 	if chosenMove["target"] == targetType.enemies:
 		targets = get_team(!moveUser.isPlayer, true)
@@ -329,6 +338,7 @@ func execute_move():
 			return
 	
 	if moveUser.isPlayer:
+		hitBonus = Boons.call_boon("before_move", [moveUser])
 		moveUser.storedTarget = moveTarget
 		if chosenMove["type"] > Moves.moveType.relic and !chosenMove.has("cycle"): usedMoveBox.reduce_uses(1) #durability does not go down for reloads and does not exist for basics/relics
 		if chosenMove["type"] == Moves.moveType.trick or chosenMove.has("cycle"):
@@ -341,8 +351,10 @@ func execute_move():
 		hits = get_indexed(chosenMove["hits"])
 		if typeof(hits) == TYPE_ARRAY: hits = hits.size() #One hit for every item in an array. Yes
 	else: hits = chosenMove["hits"]
+	hits+= hitBonus
 	var i = 0
 	while i < hits: #repeat for every hit, while loop enables it to be modified on the fly by move effects from outside this file
+		if targets.size() == 1 and targets[0].currentHealth <= 0: break
 		for target in targets: #repeat for every target	
 			if chosenMove.has("timing") and chosenMove["timing"] == Moves.timings.before: #Some moves activate effects before the damage
 				activate_effect()
@@ -372,8 +384,22 @@ func execute_move():
 				activate_effect()
 		yield(get_tree().create_timer(.5), "timeout")
 		i+=1
-	if moveUser.isPlayer: Boons.check_move(usedMoveBox, moveTarget.currentHealth)
+	if moveUser.isPlayer: #overkill only returns nonzero for a specific boon and level
+		var overkill = Boons.call_boon("check_move", [usedMoveBox, moveTarget.currentHealth, moveUser])
+		if overkill > 0:
+			var nextTarget = get_next_team_unit(moveTarget)
+			if nextTarget: nextTarget.take_damage(overkill)
+		
 
+func get_next_team_unit(unit): #gets the next player or enemy from an existing player or enemy's position
+	var unitIndex = (unit.get_index() + 1) % $Units.get_child_count()
+	var checkUnit
+	while unitIndex != unit.get_index(): #should stop by returning a unit but will always drop after a runthrough
+		checkUnit = $Units.get_child(unitIndex)
+		if checkUnit.isPlayer == unit.isPlayer and checkUnit.currentHealth > 0: #needs to be on the same team and alive
+			return checkUnit
+		unitIndex = (unitIndex + 1) % $Units.get_child_count()
+	return false #can't find anything valid
 
 func activate_effect():
 	if chosenMove.has("effect") and chosenMove.has("args"):
@@ -393,7 +419,8 @@ func activate_effect():
 func evaluate_completion(deadUnit):
 	if deadEnemies >= enemyNum:
 		battleDone = true
-		done(Enemies.enemyList[deadUnit.identity]["rewards"][0])
+		rewardUnit = deadUnit
+		print("Battle Ready To Complete")
 
 func done(reward):
 	$BattleUI.toggle_trackers(false)
@@ -401,7 +428,7 @@ func done(reward):
 		return get_tree().reload_current_scene()
 	else: #Map
 		var map = get_node("../Map")
-		Boons.end_battle(get_partyHealth())
+		Boons.call_boon("end_battle", [get_partyHealth()])
 		for i in global.storedParty.size():
 			set_ui(global.storedParty[i])
 			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], map.inventoryWindow.DEFAULTCOLOR)

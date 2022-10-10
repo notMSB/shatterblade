@@ -46,7 +46,7 @@ enum iModes {default, craft, trade, offer}
 var mode = iModes.craft
 
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
-	if Boons.chosen == Boons.v.j: MOVESPACES += 1
+	MOVESPACES += Boons.call_boon("prep_inventory")
 	if !Trading.assigned: Trading.assign_component_values()
 	if global.itemDict.empty():
 		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["Test Relic", "Coin", "Coin", "Coin"]}

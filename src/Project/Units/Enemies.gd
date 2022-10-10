@@ -10,7 +10,7 @@ onready var enemyList = {
 		"rewards": ["wing"], "locations": [l.night], "difficulty": 1},
 	"Bird": {"stats": [20], "specials": ["Dive Bomb", "Triple Hit"], 
 		"rewards": ["talon"], "locations": [l.day], "difficulty": 3},
-	"Flower": {"stats": [15], "passives": {"Counter": 1}, "specials": ["Growth"], 
+	"Flower": {"stats": [15], "passives": {"Thorns": 1}, "specials": ["Growth"], 
 		"rewards": ["sap"], "locations": [l.dungeon], "difficulty": 1},
 	"Rat": {"stats": [10], "passives": {"Dodgy": 1}, "specials": ["Plague"], 
 		"rewards": ["fur"], "locations": [l.day], "difficulty": 1},
@@ -24,13 +24,13 @@ onready var enemyList = {
 		"rewards": ["fang"], "locations": [l.night], "difficulty": 2},
 }
 
-func generate_encounter(rating, isDay):
+func generate_encounter(rating, isDay, validEnemies = []): #dungeon will bring its own list of valid enemies
 	var location = l.day if isDay else l.night
-	var validEnemies = []
 	var encounter = []
-	for enemy in enemyList:
-		if enemyList[enemy]["locations"].has(location):
-			validEnemies.append(enemy)
+	if validEnemies.empty(): #for non-dungeons, make list of valid enemies based on time of day
+		for enemy in enemyList:
+			if enemyList[enemy]["locations"].has(location):
+				validEnemies.append(enemy)
 	if rating > MAXENCOUNTERSIZE * strongestEnemy: rating = MAXENCOUNTERSIZE * strongestEnemy
 	while rating > 0:
 		if validEnemies.size() > 1: validEnemies = evaluate_list(validEnemies, rating, MAXENCOUNTERSIZE - encounter.size())
