@@ -62,20 +62,38 @@ func set_boxes(boxes):
 	var boxName
 	for box in boxes:
 		boxName = box.get_node("Name").text
-		if Moves.moveList.has(boxName):
-			box_move(box, boxName)
+		box_move(box, boxName)
 
 func box_move(moveBox, move, isUseless = false):
-	moveBox.moves.clear()
-	moveBox.moveIndex = 0
-	moveBox.moveType = Moves.moveList[move]["type"]
-	if Moves.moveList[move].has("resVal"):
-		moveBox.resValue = Moves.moveList[move]["resVal"]
-	moveBox.moves.append(move)
-	if moveBox.moveType == Moves.moveType.trick: moveBox.moves.append("Reload")
-	moveBox.get_node("Name").text = move
-	moveBox.get_node("Info").text = ""
-	if isUseless: moveBox.set_uses(-1)
+	if Moves.moveList.has(move):
+		moveBox.moves.clear()
+		moveBox.moveIndex = 0
+		moveBox.moveType = Moves.moveList[move]["type"]
+		if Moves.moveList[move].has("resVal"):
+			moveBox.resValue = Moves.moveList[move]["resVal"]
+		moveBox.moves.append(move)
+		if moveBox.moveType == Moves.moveType.trick: moveBox.moves.append("Reload")
+		moveBox.get_node("Name").text = move
+		moveBox.get_node("Info").text = ""
+		if isUseless: moveBox.set_uses(-1)
+		sprite_move(moveBox, move)
+	else:
+		sprite_move(moveBox, move, false)
+
+func sprite_move(box, boxName, isMove = true):
+	var sprite = box.get_node("Sprite")
+	var cRect = box.get_node("ColorRect")
+	var spritePath
+	if isMove: spritePath = str("res://src/Assets/Icons/Moves/", boxName, ".png")
+	else: spritePath = str("res://src/Assets/Icons/Components/", boxName, ".png")
+	var tempFile = File.new()
+	if(tempFile.file_exists(spritePath)):
+		sprite.texture = load(spritePath)
+		sprite.visible = true
+		cRect.visible = false
+	else:
+		sprite.visible = false
+		cRect.visible = true
 
 func cleanup_moves(unit, boxColor = null): #makes all boxes perform the move they say that they are and sets passives from them
 	unit.moves.sort_custom(self, "sort_order") #Movebox resource bars appreciate sorted movelist

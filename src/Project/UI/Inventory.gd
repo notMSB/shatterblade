@@ -50,13 +50,13 @@ func _ready(): #Broken with relics as a standalone scene, but works when the Map
 	if !Trading.assigned: Trading.assign_component_values()
 	if global.itemDict.empty():
 		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["Test Relic", "Coin", "Coin", "Coin"]}
+	dHolder = $HolderHolder/DisplayHolder
 	make_grid()
 	make_actionboxes(CRAFTBOXES, iModes.craft)
 	make_actionboxes(TRADERINVSIZE, iModes.trade)
 	make_actionboxes(1, iModes.offer)
 	set_mode()
 	if !get_parent().mapMode and global.storedParty.size() > 0: 
-		dHolder = $HolderHolder/DisplayHolder
 		for i in global.storedParty.size():
 			while global.storedParty[i].moves.size() < MOVESPACES:
 				global.storedParty[i].moves.append("X")
@@ -148,6 +148,7 @@ func make_inventorybox(boxName):
 	box.get_node("Info").text = String(Trading.get_item_value(boxName))
 	incrementBoxCount()
 	box.set_uses(Moves.get_uses(boxName))
+	dHolder.box_move(box, boxName)
 	return box
 	
 func incrementBoxCount():
@@ -183,7 +184,8 @@ func make_actionboxes(boxCount, boxMode):
 
 func select_box(box = null):
 	box.get_parent().selectedBox = box
-	box.get_node("ColorRect").color = Color(.5,.1,.5,1)
+	box.get_node("ColorRect").color = Color(.5,.1,.5,.3)
+	box.get_node("ColorRect").visible = true
 	check_swap(box)
 
 func deselect_box(box):
@@ -266,6 +268,7 @@ func check_crafts(craftBox, otherBox):
 			craftingRestriction = Crafting.break_down(boxName)
 	if didSwap:
 		var productName = productBox.get_node("Name")
+		dHolder.box_move(productBox, productName)
 		if productName.text != "X":
 			productName.text = "X" #Reset the field in case something was already there from prior
 			productBox.get_node("ColorRect").color = DEFAULTCOLOR
@@ -375,8 +378,7 @@ func xCheck(): #returns an empty inventory space, todo: scenario for full invent
 			return iBox
 
 func clear_box(box):
-	box.get_node("Name").text = "X" 
-	box.get_node("Info").text = ""
+	dHolder.box_move(box, "X")
 	box.set_uses(-1)
 	identify_product(box)
 

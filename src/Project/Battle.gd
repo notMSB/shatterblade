@@ -92,7 +92,6 @@ func _ready(): #Generate units and add to turn order
 				unit.update_strength()
 			if unit.passives.size() > 0:
 				for passive in unit.passives:
-					print(passive)
 					StatusManager.add_status(unit, passive, unit.passives[passive])
 		play_turn(false)
 
@@ -352,9 +351,12 @@ func execute_move():
 		if typeof(hits) == TYPE_ARRAY: hits = hits.size() #One hit for every item in an array. Yes
 	else: hits = chosenMove["hits"]
 	hits+= hitBonus
+	var bounceHits = true if chosenMove.has("bounce") else false
 	var i = 0
 	while i < hits: #repeat for every hit, while loop enables it to be modified on the fly by move effects from outside this file
 		if targets.size() == 1 and targets[0].currentHealth <= 0: break
+		if bounceHits and i > 0: 
+			targets = [get_next_team_unit(targets[0])]
 		for target in targets: #repeat for every target	
 			if chosenMove.has("timing") and chosenMove["timing"] == Moves.timings.before: #Some moves activate effects before the damage
 				activate_effect()
