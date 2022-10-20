@@ -5,6 +5,7 @@ onready var CheckScene = $"../../../"
 const REPAIRVALUE = .5
 
 var user
+var isCursed = false
 var moves = []
 var moveIndex = 0
 var moveType
@@ -16,6 +17,7 @@ var savedTargetName = ""
 var boxModeScene
 var maxUses = 0
 var currentUses = maxUses
+var timesUsed = 0 #times used in current battle
 
 func updateInfo(targetName = null):
 	if targetName:
@@ -46,10 +48,13 @@ func set_uses(var newMax = null):
 		maxUses = newMax
 		currentUses = newMax
 		$Uses.max_value = newMax
+	else: #keeping the bar updated through swaps
+		$Uses.max_value = maxUses
 	$Uses.visible = true if maxUses > 0 else false
 	if visible: 
 		$Uses.value = currentUses
 		$Uses/Text.text = str(currentUses, "/", maxUses)
+		$Uses.rect_position.y = 7 if get_parent().name == "MoveBoxes" and get_index() <= 1 else 25
 
 func _on_Button_pressed():
 	boxModeScene = set_mode_scene()
@@ -59,6 +64,6 @@ func _on_Button_pressed():
 		else:
 			boxModeScene.cut_from_order(self)
 	elif boxModeScene.name == "Inventory": #inventory
-		boxModeScene.select_box(self)
+		if !(isCursed and get_parent().name == "MoveBoxes"): boxModeScene.select_box(self)
 	else: #map scene
 		pass

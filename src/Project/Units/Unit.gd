@@ -5,6 +5,8 @@ onready var Battle = get_node("../../")
 var isPlayer
 var maxHealth
 
+var startingStrength = 0
+var tempStrength = 0
 var strength = 0
 var speed = 0
 var defense = 0
@@ -62,10 +64,13 @@ func update_hp():
 		else:
 			ui.get_node("BattleElements/HP").text += "[" + String(shield) + "]"
 
-func update_strength():
+func update_strength(resetTemp = false):
+	if resetTemp: tempStrength = 0
 	if ui != null:
 		if isPlayer:
-			ui.get_node("BattleElements/Strength").text = "+" + String(strength)
+			var strengthText = "+" + String(strength + tempStrength)
+			if tempStrength > 0: strengthText += " (" + String(tempStrength) + ")"
+			ui.get_node("BattleElements/Strength").text = strengthText
 
 func update_info(text):
 	if ui.get_node_or_null("Info") != null:

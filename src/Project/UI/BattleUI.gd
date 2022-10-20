@@ -43,8 +43,10 @@ func setup_display(unit, totalEnemies):
 
 func prepare_box(box):
 	var move = box.moves[box.moveIndex]
+	var discountVal
 	if Moves.moveList[move].has("resVal"):
-		box.resValue = Moves.moveList[move]["resVal"]
+		discountVal = box.user.apply_discount(move)
+		box.resValue = Moves.moveList[move]["resVal"] - discountVal
 	box.get_node("Name").text = move
 
 func advance_box_move(box): #For boxes with multiple moves
@@ -60,7 +62,7 @@ func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false, disableCha
 			move = box.moves[box.moveIndex]
 			var moveData = Moves.moveList[move]
 			#Channels are disabled if the unit already has an action in the queue, broken equipment and unusables are always disabled
-			if toggle and !(disableChannels and moveData.has("channel")) and box.currentUses != 0 and !moveData.has("unusable"): 
+			if toggle and !(disableChannels and moveData.has("channel")) and box.currentUses != 0 and !moveData.has("unusable") and !(box.timesUsed > 0 and moveData.has("uselimit")): 
 				toggle_single(box, true)
 			else:
 				toggle_single(box, false)
@@ -104,7 +106,7 @@ func set_trackers(display, boxes, classType):
 	
 	for box in boxes.get_children():
 		if box.visible:
-			if box.moveType == Moves.moveType.basic or box.moveType == Moves.moveType.relic: continue
+			if box.get_index() <= 1: continue #skip relic slots
 			boxCount.append(box)
 			if firstMargin:
 				lastMargin = box.position.x
@@ -169,7 +171,7 @@ func toggle_buttons(toggle, units = []):
 		for child in $DisplayHolder.get_children():
 			child.get_node("Button").visible = false
 
-func set_description(moveName, move):
+func set_description(moveName, move, user):
 	$Description.visible = true
 	var desc = moveName
 	if move["target"] == Battle.targetType.enemy: desc += "\n" + "Single Enemy"
@@ -179,7 +181,7 @@ func set_description(moveName, move):
 	elif move["target"] == Battle.targetType.allies: desc += "\n" + "All Allies"
 	elif move["target"] == Battle.targetType.user: desc += "\n" + "Self"
 	if move.has("quick"): desc += "\n Quick Action "
-	if move.has("resVal"): desc += "\n Cost: " + String(move["resVal"])
+	if move.has("resVal"): desc += "\n Cost: " + String(move["resVal"] - user.apply_discount(moveName))
 	if move.has("damage"): desc += "\n Base Damage: " + String(move["damage"]) + " + " + String(Battle.currentUnit.strength)
 	if move.has("healing"): desc += "\n Healing: " + String(move["healing"])
 	if move.has("hits"): desc += "\n Repeats: " + String(move["hits"])

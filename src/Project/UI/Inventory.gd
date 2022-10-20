@@ -46,10 +46,10 @@ enum iModes {default, craft, trade, offer}
 var mode = iModes.craft
 
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
+	if global.itemDict.empty():
+		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["War Horn", "Osmosis Device", "Power Glove", "Cape", "Silver"]}
 	MOVESPACES += Boons.call_boon("prep_inventory")
 	if !Trading.assigned: Trading.assign_component_values()
-	if global.itemDict.empty():
-		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["Test Relic", "Coin", "Coin", "Coin"]}
 	dHolder = $HolderHolder/DisplayHolder
 	make_grid()
 	make_actionboxes(CRAFTBOXES, iModes.craft)
@@ -147,8 +147,8 @@ func make_inventorybox(boxName):
 	box.get_node("Name").text = boxName
 	box.get_node("Info").text = String(Trading.get_item_value(boxName))
 	incrementBoxCount()
-	box.set_uses(Moves.get_uses(boxName))
 	dHolder.box_move(box, boxName)
+	box.set_uses(Moves.get_uses(boxName))
 	return box
 	
 func incrementBoxCount():
@@ -189,7 +189,7 @@ func select_box(box = null):
 	check_swap(box)
 
 func deselect_box(box):
-	if box: 
+	if box:
 		identify_product(box)
 		box.get_parent().selectedBox = null
 	#else: print("no box")
@@ -202,6 +202,7 @@ func deselect_multi(boxes):
 func check_swap(selectedBox):
 	if !otherSelection:
 		otherSelection = selectedBox
+	elif otherSelection == selectedBox: deselect_multi([selectedBox])
 	else:
 		if mode == iModes.offer:
 			var canOffer = false
@@ -224,30 +225,32 @@ func check_swap(selectedBox):
 func player_inv_check(playerBox, otherBox): #returns true/false depending on if it swaps or not
 	var checkName = otherBox.get_node("Name").text
 	var playerName = playerBox.get_node("Name").text
+	var playerClass = global.storedParty[playerBox.get_node("../../").get_index()].allowedType #Grandpa ia a PlayerProfile, its index matches the global index
 	if Crafting.c.get(checkName) == null: #can't move in crafting material
 		if Moves.moveList[checkName].has("unequippable"): 
 			deselect_multi([playerBox, otherBox])
 			return false
-		var playerType = Moves.moveList[playerName]["type"]
+		#var playerType = Moves.moveList[playerName]["type"]
 		var checkType = Moves.moveList[checkName]["type"]
+		var playerSlot = Moves.moveList[playerName]["slot"]
+		var checkSlot = Moves.moveList[checkName]["slot"]
 		#swapping into the attack/defend boxes, cannot swap an X from other players but can from inventory
-		if ((playerType == Moves.moveType.relic or playerType == Moves.moveType.basic) 
-		and (checkType == Moves.moveType.relic or checkType == Moves.moveType.basic or (checkType == Moves.moveType.none and otherBox.get_parent().name != "MoveBoxes"))):
-			swap_boxes(playerBox, otherBox, true) #restore attack/defend on boxes if necessary
-			return true
-		
-		#swapping into player's class inventory boxes
-		var playerClass = global.storedParty[playerBox.get_node("../../").get_index()].allowedType #Grandpa ia a PlayerProfile, its index matches the global index
-		if checkType == playerClass or checkType == Moves.moveType.none or checkType == Moves.moveType.item: #The correct move type, an item, or an empty spot can be swapped
-			swap_boxes(playerBox, otherBox)
-			return true
+		if playerSlot == Moves.equipType.relic:
+			if checkSlot == Moves.equipType.relic or (checkSlot == Moves.equipType.any and otherBox.get_parent().name != "MoveBoxes"):
+				if checkType < Moves.moveType.item or checkType == playerClass:
+					swap_boxes(playerBox, otherBox, true) #restore attack/defend on boxes if necessary
+					return true
+		else: #swapping into player's class inventory boxes
+			if (checkType == playerClass or checkType == Moves.moveType.none or checkType == Moves.moveType.item) and checkSlot != Moves.equipType.relic: #The correct move type, an item, or an empty spot can be swapped
+				swap_boxes(playerBox, otherBox)
+				return true
 	deselect_multi([playerBox, otherBox])
 	return false
 
 func isValidMove(boxName):
 	if Moves.moveList.has(boxName):
 		var checkType = Moves.moveList[boxName]["type"]
-		if checkType > Moves.moveType.relic:
+		if checkType > Moves.moveType.basic:
 			return true
 	return false
 
@@ -321,10 +324,12 @@ func swap_boxes(one, two, check = false):
 	var temp = [one.get_node("Name").text, one.maxUses, one.currentUses]
 	flip_values(one, [two.get_node("Name").text, two.maxUses, two.currentUses])
 	flip_values(two, temp)
+	one.set_uses() #set the uses so the bar is updated appropriately
+	two.set_uses()
 	dHolder.set_boxes([one, two])
+	if check: restore_basics([one, two])
 	deselect_multi([one, two])
 	if tHolder.visible: assess_trade_value()
-	if check: restore_basics([one, two])
 
 func flip_values(box, values):
 	box.get_node("Name").text = values[0]
@@ -333,16 +338,23 @@ func flip_values(box, values):
 	box.set_uses()
 
 func restore_basics(boxes): #puts attack/defend back on non-relic boxes and remove them from inventory box
+	var moveInfo
 	for box in boxes:
+		moveInfo = Moves.moveList[box.get_node("Name").text]
 		if box.get_parent().name == "MoveBoxes": #player box
-			if Moves.moveList[box.get_node("Name").text]["type"] <= Moves.moveType.basic: #X or attack/defend
+			if (box.get_index() <= 1 #X or attack/defend
+			and (moveInfo["type"] == Moves.moveType.basic or moveInfo["slot"] == Moves.equipType.any)): 
 				if box.get_index() == 0: #attack
-					box.get_node("Name").text = "Attack"
+					dHolder.box_move(box, "Attack")
 				else: #defend
-					box.get_node("Name").text = "Defend"
+					dHolder.box_move(box, "Defend")
+			elif moveInfo.has("morph"):
+				dHolder.box_move(box, moveInfo["morph"][box.get_index()])
 		else: #inventory box
 			if Moves.moveList[box.get_node("Name").text]["type"] == Moves.moveType.basic:
-				box.get_node("Name").text = "X"
+				dHolder.box_move(box, "X")
+			elif moveInfo.has("morph") and moveInfo["morph"].size() >= 2:
+				dHolder.box_move(box, moveInfo["morph"][2])
 
 func assess_trade_value():
 	var newStock = []
@@ -356,18 +368,21 @@ func assess_trade_value():
 func identify_product(box): #updates box color and trade value
 	var skipValue = false
 	var boxName = box.get_node("Name").text
-	if Moves.moveList.has(boxName):
+	if Moves.moveList.has(boxName) and !box.get_node("Sprite").visible:
 		var productType = Moves.moveList[boxName]["type"]
 		box.moveType = productType
 		if productType == Moves.moveType.special: box.get_node("ColorRect").color = Color(.9,.3,.3,1) #R
 		elif productType == Moves.moveType.trick: box.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
 		elif productType == Moves.moveType.magic: box.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
 		elif productType == Moves.moveType.item:  box.get_node("ColorRect").color = Color(.9,.7, 0,1) #Y
-		elif productType == Moves.moveType.relic: box.get_node("ColorRect").color = DEFAULTCOLOR #relics need a color
-		else: #attack/defend/X/other
+		else: #X/other
 			box.get_node("ColorRect").color = DEFAULTCOLOR
 			skipValue = true
-	else: box.get_node("ColorRect").color = DEFAULTCOLOR #component
+	else: 
+		if box.get_node("Sprite").visible:
+			box.get_node("ColorRect").visible = false
+		else:
+			box.get_node("ColorRect").color = DEFAULTCOLOR
 	box.get_node("Info").text = "0" if skipValue else String(Trading.get_item_value(boxName))
 
 func xCheck(): #returns an empty inventory space, todo: scenario for full inventory
@@ -412,18 +427,28 @@ func exit(): #Save inventory and leave
 	var moveName
 	var moveData
 	var checkType
+	var checkSlot
 	for i in global.storedParty.size():
 		unit = global.storedParty[i]
+		unit.startingStrength = 0
 		unit.moves.clear()
 		unit.passives.clear()
+		unit.discounts.clear()
 		for box in dHolder.get_child(i).get_node("MoveBoxes").get_children(): #Accessing the moveboxes
 			moveName = box.get_node("Name").text
 			moveData = Moves.moveList[moveName]
 			checkType = moveData["type"]
-			if checkType != Moves.moveType.relic and checkType != Moves.moveType.basic:
+			checkSlot = moveData["type"]
+			if checkSlot != Moves.equipType.relic and checkType != Moves.moveType.basic:
 				unit.moves.append(moveName)
 			if moveData.has("passive"):
+				print(moveName)
 				unit.passives[moveData["passive"][0]] = moveData["passive"][1]
+				print(unit.passives)
+			if moveData.has("discount"):
+				unit.set_discount(moveData["discount"])
+			if moveData.has("strength"):
+				unit.startingStrength += moveData["strength"]
 	for item in global.itemDict:
 		global.itemDict[item] = 0
 	global.itemDict[MOVEHOLDER] = [] #Redoing the moveholder with potential new moves

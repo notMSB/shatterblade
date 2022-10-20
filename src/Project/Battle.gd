@@ -19,6 +19,7 @@ const STUNCODE = -1
 signal turn_taken
 
 var turnIndex = -1
+var turnCount = 0
 
 var currentUnit
 var menuNode
@@ -89,7 +90,7 @@ func _ready(): #Generate units and add to turn order
 			if !unit.isPlayer: #Set enemy intents
 				set_intent(unit)
 			if unit.isPlayer: 
-				unit.update_strength()
+				unit.update_strength(true)
 			if unit.passives.size() > 0:
 				for passive in unit.passives:
 					StatusManager.add_status(unit, passive, unit.passives[passive])
@@ -120,6 +121,7 @@ func create_enemies():
 	enemyNum = opponents.size()
 
 func welcome_back(newOpponents = null): #reusing an existing battle scene for a new battle
+	turnCount = 0
 	$BattleUI.toggle_trackers(true)
 	$BattleUI.enemyCount = 0
 	battleDone = false
@@ -136,13 +138,13 @@ func welcome_back(newOpponents = null): #reusing an existing battle scene for a 
 	play_turn(false)
 
 func set_ui(unit, setPassives = false):
-	unit.strength = 0
+	unit.strength = unit.startingStrength
 	unit.ap = 0
 	unit.energy = unit.maxEnergy
 	unit.statuses.clear()
 	StatusManager.initialize_statuses(unit)
 	unit.update_box_bars()
-	unit.update_strength()
+	unit.update_strength(true)
 	unit.shield = 0
 	unit.update_hp()
 	if setPassives and unit.passives.size() > 0:
@@ -163,8 +165,9 @@ func play_turn(resetShield = true):
 	currentUnit = $Units.get_child(turnIndex)
 	if turnIndex == 0: #Start of turn, take player actions
 		if get_parent().mapMode: get_node("../Map").subtract_time(1)
-		
+		turnCount+=1
 		for unit in $Units.get_children():
+			unit.update_strength(true)
 			StatusManager.countdown_turns(unit, true)
 			if resetShield: 
 					unit.shield = 0
@@ -207,7 +210,7 @@ func set_intent(unit, target = false):
 	var actionInfo = Moves.moveList[unit.storedAction]
 	var actionDamage
 	if actionInfo.has("damage"):
-		actionDamage = actionInfo["damage"] + unit.strength
+		actionDamage = actionInfo["damage"] + unit.strength + unit.tempStrength
 		if actionInfo.has("hits"):
 			actionDamage = str(actionDamage, "x", actionInfo["hits"])
 	#if actionInfo["target"] == targetType.ally:
@@ -223,8 +226,14 @@ func set_intent(unit, target = false):
 			pass
 		elif !target: #Random target
 			var targets
+			var extraTargets = []
 			if actionInfo["target"] == targetType.enemy:
 				targets = get_team(true, true)
+				for target in targets:
+					if StatusManager.find_status(target, "Provoke"):
+						extraTargets.append(target) #get another one in there
+						extraTargets.append(target) #and another, why not
+				targets.append_array(extraTargets)
 			else: #Ally
 				targets = get_team(false, true)
 			unit.storedTarget = targets[randi() % targets.size()]
@@ -249,7 +258,7 @@ func evaluate_targets(move, user, box):
 	usedMoveBox = box
 	chosenMove = Moves.moveList[move]
 	moveName = move
-	$BattleUI.set_description(move, chosenMove)
+	$BattleUI.set_description(move, chosenMove, user)
 	moveUser = user
 	if chosenMove["target"] <= targetType.enemyTargets: #If an enemy is targeted
 		$BattleUI.toggle_buttons(true, get_team(false))
@@ -267,7 +276,7 @@ func target_chosen(index):
 	usedMoveBox.usageOrder = executionOrder.size()
 	if chosenMove["target"] != targetType.none: $BattleUI.choose_movebox(usedMoveBox, moveTarget)
 	else: $BattleUI.choose_movebox(usedMoveBox) #Choosing a box subtracts a resource, run a toggle afterwards
-	moveUser.update_resource(chosenMove["resVal"], chosenMove["type"], false)
+	moveUser.update_resource(usedMoveBox.resValue, chosenMove["type"], false)
 	$BattleUI.toggle_moveboxes(usedMoveBox.get_parent(), chosenMove.has("quick"), true, true) #If quick, check the resources. Otherwise, turn off boxes as appropriate
 	$BattleUI.toggle_buttons(false)
 	$GoButton.visible = true
@@ -300,7 +309,7 @@ func cut_from_order(box):
 	executionOrder.erase(foundAction) #Erased from order
 	
 	if foundAction[e.move].has("resVal"): #Refund resources spent from that action
-		foundAction[e.user].update_resource(foundAction[e.move]["resVal"], foundAction[e.move]["type"], true)
+		foundAction[e.user].update_resource(box.resValue, foundAction[e.move]["type"], true)
 	#Restoring UI involving quick actions: If a quick is cut, toggle only that. For non-quick, toggle everything on except for committed quicks
 	if !foundAction[e.move].has("quick"): #non-quick case, cutting a committed action while retaining any chosen quicks
 		box.buttonMode = true #Needed to properly reset it in the toggle 
@@ -339,7 +348,19 @@ func execute_move():
 	if moveUser.isPlayer:
 		hitBonus = Boons.call_boon("before_move", [moveUser])
 		moveUser.storedTarget = moveTarget
-		if chosenMove["type"] > Moves.moveType.relic and !chosenMove.has("cycle"): usedMoveBox.reduce_uses(1) #durability does not go down for reloads and does not exist for basics/relics
+		usedMoveBox.timesUsed += 1
+		if chosenMove["type"] > Moves.moveType.basic and !chosenMove.has("cycle"): #durability does not go down for reloads and moves without a classtype
+			if StatusManager.find_status(moveUser, "Durability Redirect"): #This whole nest is dedicated to the stabilizer
+				for box in moveUser.boxHolder.get_children():
+					if box.maxUses > 0 and !box.buttonMode: #buttonMode clause only relevant for multiple stabilizers on same character (why)
+						if box.get_index() > 1: usedMoveBox.reduce_uses(1) #if it gets past the relic slots it can't be used
+						if box.currentUses > 0:
+							box.reduce_uses(1)
+							break
+						else: #if it's broken mid-turn
+							continue
+			else:
+				usedMoveBox.reduce_uses(1)
 		if chosenMove["type"] == Moves.moveType.trick or chosenMove.has("cycle"):
 			$BattleUI.advance_box_move(usedMoveBox)
 	
@@ -361,7 +382,7 @@ func execute_move():
 			if chosenMove.has("timing") and chosenMove["timing"] == Moves.timings.before: #Some moves activate effects before the damage
 				activate_effect()
 			if chosenMove.has("damage"): #Get base damage, evaluate target status to final damage, deal said damage, update UI
-				damageCalc = chosenMove["damage"] + moveUser.strength - moveTarget.defense
+				damageCalc = chosenMove["damage"] + moveUser.strength + moveUser.tempStrength - moveTarget.defense
 				var tempDamage
 				#One status check for the user's attack modifiers and another for the target's defense modifiers
 				tempDamage = StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.usingAttack, [damageCalc])
@@ -387,6 +408,8 @@ func execute_move():
 		yield(get_tree().create_timer(.5), "timeout")
 		i+=1
 	if moveUser.isPlayer: #overkill only returns nonzero for a specific boon and level
+		if moveTarget.currentHealth <= 0:
+			StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.gettingKill, [damageCalc]) 
 		var overkill = Boons.call_boon("check_move", [usedMoveBox, moveTarget.currentHealth, moveUser])
 		if overkill > 0:
 			var nextTarget = get_next_team_unit(moveTarget)

@@ -22,7 +22,6 @@ const FUZZ = 35 #should never be more than half of the increment
 const CORNER_CHECK = 20
 const DISTANCE_TIME_MULT = .05
 
-var MOVESPACES = 4
 const NIGHTLENGTH = 50
 const TOTALSECTIONS = 3
 
@@ -61,10 +60,10 @@ func _ready():
 	favorNode = Favor.instance()
 	add_child(favorNode)
 	Boons.Map = self
-	MOVESPACES += Boons.call_boon("prep_inventory")
+	setup_inventory()
 	if global.storedParty.size() > 0: 
 		for i in global.storedParty.size():
-			while global.storedParty[i].moves.size() < MOVESPACES:
+			while global.storedParty[i].moves.size() < inventoryWindow.MOVESPACES:
 				global.storedParty[i].moves.append("X")
 			global.storedParty[i].ui = $HolderHolder/DisplayHolder.setup_player(global.storedParty[i], i)
 			global.storedParty[i].update_hp()
@@ -82,7 +81,7 @@ func _ready():
 		display.set_battle()
 		for tracker in display.get_node("Trackers").get_children():
 			tracker.visible = false
-	setup_inventory()
+	
 
 func setup_inventory():
 	inventoryWindow = Inventory.instance()

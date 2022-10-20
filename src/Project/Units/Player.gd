@@ -12,6 +12,7 @@ var boxHolder
 var allowedType
 var types
 var title
+var discounts = {} #probably only works with reload for now
 
 func _ready():
 	isPlayer = true
@@ -32,9 +33,10 @@ func update_resource(resValue, type, isGain: bool):
 		else: charges[resValue] -=1
 	update_box_bars()
 
-func update_box_bars():
+func update_box_bars(): #this one needs a refactor at some point
 	var prevBox = boxHolder.get_children()[0]
 	for box in boxHolder.get_children():
+		if !box.trackerBar: continue
 		if box.moveType != prevBox.moveType or (box.moveType == types.magic and box.resValue != prevBox.resValue):
 			if box.moveType == types.special:
 				box.trackerBar.value = ap
@@ -50,6 +52,19 @@ func update_box_bars():
 				#box.trackerBar.get_child(0).text = str(charges[box.resValue], "/", maxCharges[box.resValue])
 				pass
 			prevBox = box
+
+func set_discount(discountArray):
+	var discountedMove = discountArray[0]
+	var discountAmount = discountArray[1]
+	if discounts.has(discountedMove):
+		discounts[discountedMove] += discountAmount
+	else:
+		discounts[discountedMove] = discountAmount
+
+func apply_discount(move):
+	if discounts.has(move):
+		return discounts[move]
+	return 0
 
 func update_bar(bar, value, limit):
 	bar.get_child(0).text = str(value, "/", limit)

@@ -6,7 +6,6 @@
 [ext_resource path="res://src/Project/UI/BoxHolder.gd" type="Script" id=4]
 
 [sub_resource type="DynamicFont" id=1]
-size = 20
 font_data = ExtResource( 3 )
 
 [sub_resource type="DynamicFont" id=2]
@@ -98,16 +97,19 @@ margin_top = 0.188301
 margin_right = 3.74953
 margin_bottom = 24.1883
 custom_fonts/font = SubResource( 1 )
+valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Strength" type="Label" parent="BattleElements"]
-margin_left = 2.7495
+margin_left = -4.2505
 margin_top = 0.188301
-margin_right = 42.7495
+margin_right = 39.7495
 margin_bottom = 24.1883
 custom_fonts/font = SubResource( 1 )
+align = 2
+valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }

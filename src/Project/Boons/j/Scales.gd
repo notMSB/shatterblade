@@ -8,6 +8,8 @@ var boxesOK = true
 
 func prep_inventory():
 	print("scales prep inventory")
+	for unit in global.storedParty:
+		unit.moves.insert(0, "Rock")
 	return 1
 
 func start_battle(_startingHealth):

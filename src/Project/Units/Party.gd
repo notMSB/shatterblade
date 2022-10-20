@@ -60,8 +60,8 @@ func rando_moves(unit, number):
 	var list = Moves.moveList
 	var rando = [[],[]] #damaging, other
 	for move in list: #populate rando with viable moves
-		if list[move].has("type"): 
-			if list[move]["type"] == unit.allowedType and !list[move].has("cycle"): #cycle moves are not meant to be standalone moves
+		if list[move].has("type") and list[move].has("slot"): 
+			if list[move]["slot"] == Moves.equipType.gear and list[move]["type"] == unit.allowedType and !list[move].has("cycle"): #cycle moves are not meant to be standalone moves
 				if list[move].has("damage") or list[move].has("damaging"):
 					rando[0].append(move)
 				else:

@@ -7,8 +7,8 @@ const PATH = "res://src/Project/Boons/"
 
 var Map #when the map loads in it sets itself to this
 
-var playerBoons = ["Lion"]
-var chosen = v.s
+var playerBoons = ["Scales" ,"Crown"]
+var chosen = v.j
 var favor = 0
 
 #At some point every boon will be its own node/script with functions activated from this one

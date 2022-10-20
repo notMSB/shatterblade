@@ -66,16 +66,18 @@ func set_boxes(boxes):
 
 func box_move(moveBox, move, isUseless = false):
 	if Moves.moveList.has(move):
+		var moveData = Moves.moveList[move]
 		moveBox.moves.clear()
 		moveBox.moveIndex = 0
-		moveBox.moveType = Moves.moveList[move]["type"]
-		if Moves.moveList[move].has("resVal"):
-			moveBox.resValue = Moves.moveList[move]["resVal"]
+		moveBox.moveType = moveData["type"]
+		if moveData.has("resVal"): moveBox.resValue = moveData["resVal"]
 		moveBox.moves.append(move)
+		if moveData.has("cycle"): moveBox.moves.append_array(moveData["cycle"])
 		if moveBox.moveType == Moves.moveType.trick: moveBox.moves.append("Reload")
 		moveBox.get_node("Name").text = move
 		moveBox.get_node("Info").text = ""
 		if isUseless: moveBox.set_uses(-1)
+		moveBox.isCursed = true if moveData.has("cursed") else false
 		sprite_move(moveBox, move)
 	else:
 		sprite_move(moveBox, move, false)
@@ -96,7 +98,7 @@ func sprite_move(box, boxName, isMove = true):
 		cRect.visible = true
 
 func cleanup_moves(unit, boxColor = null): #makes all boxes perform the move they say that they are and sets passives from them
-	unit.moves.sort_custom(self, "sort_order") #Movebox resource bars appreciate sorted movelist
+	#unit.moves.sort_custom(self, "sort_order") #Movebox resource bars appreciate sorted movelist
 	var move
 	var box
 	for i in unit.moves.size() + DEFAULTMOVES:
@@ -112,6 +114,7 @@ func cleanup_moves(unit, boxColor = null): #makes all boxes perform the move the
 func manage_and_color_boxes(unit, boxColor = null): #Puts all of a unit's boxes in map mode and kills spent items
 	var move
 	for box in unit.boxHolder.get_children():
+		box.timesUsed = 0
 		move = box.moves[0]
 		if Moves.moveList[move]["type"] == Moves.moveType.item and box.currentUses == 0: #kill
 			box_move(box, "X", true)

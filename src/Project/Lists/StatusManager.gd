@@ -4,7 +4,7 @@ onready var Battle
 
 #Statuses are stored using a 2D array which is set by activation condition
 #When a condition occurs, functions are run if that condition's array has 1 or more items in it
-enum statusActivations {beforeTurn, gettingHit, usingAttack, passive}
+enum statusActivations {beforeTurn, gettingHit, usingAttack, gettingKill, passive}
 
 const THRESHOLD = 100
 const COUNTDOWNVAL = 50
@@ -17,10 +17,14 @@ var statusList = {
 	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.002, "value"]},
 	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -0.002, "value"]},
 	"Stun": {"activation": statusActivations.beforeTurn, "threshold": true, "system": true, "effect": funcref(self, "stunned")},
-	"Provoke": {"activation": statusActivations.passive, "system": true},
+	
+	"Provoke": {"activation": statusActivations.passive},
 	
 	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 2]},
 	"Blocking": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.5]},
+	"Durability Redirect": {"activation": statusActivations.passive, "system": false},
+	"Movecost Refund": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["usedMoveBox", "unit"]},
+	"Gain Mana": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["damage", "unit"]},
 	
 	"Venomous": {"activation": statusActivations.usingAttack, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 5]},
 	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "adjust_damage"), "args": ["damage", -1]},
@@ -103,7 +107,7 @@ func evaluate_statuses(unit, type, args = []):
 				var newArgs = []
 				if statusInfo.has("args"):
 					for argument in statusInfo["args"]:
-						if String(argument) == "damage": newArgs.append(info)
+						if String(argument) == "damage" or String(argument) == "usedMoveBox": newArgs.append(info)
 						elif String(argument) == "unit": newArgs.append(unit)
 						elif String(argument) == "target": newArgs.append(Battle.moveTarget)
 						elif String(argument) == "attacker": newArgs.append(Battle.moveUser)
@@ -127,6 +131,9 @@ func adjust_damage(damage, adjustment, value = 1):
 	var multiplier = 1 if adjustment >= 0 else -1
 	var damageMod = floor(damage * value * abs(adjustment)) #abs needed since floor/ceil round negative numbers oppositely
 	return damage + (damageMod * multiplier)
+
+func refund_resource(refundVal, user):
+	user.update_resource(refundVal, user.types.magic, true)
 
 func percentage_damage(unit, value, damage):
 	unit.take_damage(unit.maxHealth * value * damage)
