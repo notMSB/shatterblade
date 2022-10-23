@@ -50,25 +50,29 @@ func prepare_box(box):
 	box.get_node("Name").text = move
 
 func advance_box_move(box): #For boxes with multiple moves
+	box.timesEnabled = 0
 	box.moveIndex = (box.moveIndex + 1) % box.moves.size()
 	prepare_box(box)
 	if box.moveIndex > 0:
-		box.get_node("Info").text = box.moves[box.moveIndex - 1]
+		box.get_node("Info").text = box.moves[box.moveIndex - 1] if Moves.moveList[box.moves[0]].type == Moves.moveType.trick else ""
 
-func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false, disableChannels: bool = false): #keepMoves as true means only boxes that aren't already committed are enabled
+func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false, disableChannels: bool = false, turnStart = false): #keepMoves as true means only boxes that aren't already committed are enabled
 	var move
 	for box in boxes.get_children():
 		if !keepMoves or (keepMoves and box.buttonMode):
 			move = box.moves[box.moveIndex]
 			var moveData = Moves.moveList[move]
+			#print(str(move, box.timesEnabled))
 			#Channels are disabled if the unit already has an action in the queue, broken equipment and unusables are always disabled
-			if toggle and !(disableChannels and moveData.has("channel")) and box.currentUses != 0 and !moveData.has("unusable") and !(box.timesUsed > 0 and moveData.has("uselimit")): 
-				toggle_single(box, true)
+			if (toggle and !(disableChannels and moveData.has("channel")) and box.currentUses != 0 and !moveData.has("unusable")
+			and !(box.timesUsed > 0 and moveData.has("uselimit")) and !(box.timesEnabled > 0 and moveData.has("turnlimit"))): 
+				toggle_single(box, true, turnStart)
 			else:
-				toggle_single(box, false)
+				toggle_single(box, false, turnStart)
 
-func toggle_single(box, toggle): #true for purple false for black
+func toggle_single(box, toggle, turnStart = false): #true for purple false for black
 	if toggle:
+		if turnStart: box.timesEnabled += 1
 		if box.moveType != Moves.moveType.item and box.trackerBar and box.trackerBar.value < box.resValue: #Check the resources before enabling a box
 			box.get_node("ColorRect").color = Color(.53,.3,.3,1)
 			toggle = false #needed to disable the button

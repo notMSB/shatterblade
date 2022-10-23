@@ -73,7 +73,8 @@ func box_move(moveBox, move, isUseless = false):
 		if moveData.has("resVal"): moveBox.resValue = moveData["resVal"]
 		moveBox.moves.append(move)
 		if moveData.has("cycle"): moveBox.moves.append_array(moveData["cycle"])
-		if moveBox.moveType == Moves.moveType.trick: moveBox.moves.append("Reload")
+		elif moveBox.moveType == Moves.moveType.trick: #tricks that do not have reload on them will have a different cycle in the data
+			moveBox.moves.append("Reload")
 		moveBox.get_node("Name").text = move
 		moveBox.get_node("Info").text = ""
 		if isUseless: moveBox.set_uses(-1)
@@ -113,14 +114,18 @@ func cleanup_moves(unit, boxColor = null): #makes all boxes perform the move the
 
 func manage_and_color_boxes(unit, boxColor = null): #Puts all of a unit's boxes in map mode and kills spent items
 	var move
+	var moveData
 	for box in unit.boxHolder.get_children():
-		box.timesUsed = 0
 		move = box.moves[0]
-		if Moves.moveList[move]["type"] == Moves.moveType.item and box.currentUses == 0: #kill
+		moveData = Moves.moveList[move]
+		if (moveData["type"] == Moves.moveType.item and box.currentUses == 0) or moveData.has("fleeting"): #kill
 			box_move(box, "X", true)
-		elif Moves.moveList[move]["type"] == Moves.moveType.trick:
-			box_move(box, move) #Needed to make sure multimove equipment resets
+		elif moveData["type"] == Moves.moveType.trick:
+			if box.moveIndex == 1 and box.moves[1] == "Catch" and box.timesEnabled > 0: box_move(box, "X", true) #temp
+			else: box_move(box, move) #Needed to make sure multimove equipment resets
 		box.get_node("Info").text = ""
+		box.timesUsed = 0
+		box.timesEnabled = 0
 		if boxColor: box.get_node("ColorRect").color = boxColor
 
 func sort_order(a, b):

@@ -4,27 +4,27 @@ extends Node2D
 enum c {wing, fang, talon, sap, venom, fur, blade, bone, wood}
 
 var products = {
-	c.wing: {c.wing: "X", c.fang: "Vampire", c.talon: "Dive Bomb", c.sap: "Dodge",
+	c.wing: {c.wing: "Speed Potion", c.fang: "Vampire", c.talon: "Dive Bomb", c.sap: "Dodge",
 			c.venom: "Venoshock", c.fur: "Hide", c.blade: "Triple Hit", c.bone: "Flex",
 			c.wood: "X"},
 	
-	c.fang: {c.fang: "X", c.talon: "Take Down", c.sap: "Constrict", c.venom: "Poison Strike",
+	c.fang: {c.fang: "Throwing Knife", c.talon: "Take Down", c.sap: "Constrict", c.venom: "Poison Strike",
 			c.fur: "Cleave", c.blade: "Power Attack", c.bone: "Frostfang", c.wood:"X"},
 	
-	c.talon: {c.talon: "X", c.sap: "Eye Poke", c.venom: "Taunt", c.fur: "Quick Attack",
+	c.talon: {c.talon: "Brass Knuckles", c.sap: "Eye Poke", c.venom: "Taunt", c.fur: "Quick Attack",
 			c.blade: "Crusher Claw", c.bone: "Turtle Up", c.wood:"X"},
 	
-	c.sap: {c.sap: "X", c.venom: "Growth", c.fur: "Protect", c.blade: "Pierce",
+	c.sap: {c.sap: "Health Potion", c.venom: "Growth", c.fur: "Protect", c.blade: "Pierce",
 			c.bone: "Bonemerang", c.wood:"X"},
 	
-	c.venom: {c.venom: "X", c.fur: "Restore", c.blade: "Piercing Sting", c.bone: "Plague",
+	c.venom: {c.venom: "Poison Potion", c.fur: "Restore", c.blade: "Piercing Sting", c.bone: "Plague",
 			c.wood: "X"},
 	
-	c.fur: {c.fur: "X", c.blade: "Sucker Punch", c.bone: "Careful Strike", c.wood: "X"},
+	c.fur: {c.fur: "Leather Buckler", c.blade: "Sucker Punch", c.bone: "Careful Strike", c.wood: "X"},
 	
-	c.blade: {c.blade: "Double Slash", c.bone: "Coldsteel", c.wood: "Channel Power"},
+	c.blade: {c.blade: "Storm of Steel", c.bone: "Coldsteel", c.wood: "Channel Power"},
 	
-	c.bone: {c.bone: "X", c.wood: "X"},
+	c.bone: {c.bone: "Bone Zone", c.wood: "X"},
 	
 	c.wood: {c.wood: "X"}
 }

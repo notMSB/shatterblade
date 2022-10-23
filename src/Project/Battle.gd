@@ -14,7 +14,6 @@ var enemyNum = 1
 var deadEnemies = 0
 
 const apIncrement = 20
-const STUNCODE = -1
 
 signal turn_taken
 
@@ -168,7 +167,7 @@ func play_turn(resetShield = true):
 		turnCount+=1
 		for unit in $Units.get_children():
 			unit.update_strength(true)
-			StatusManager.countdown_turns(unit, true)
+			unit.isStunned = false
 			if resetShield: 
 					unit.shield = 0
 					unit.update_hp()
@@ -176,12 +175,14 @@ func play_turn(resetShield = true):
 				StatusManager.evaluate_statuses(unit, StatusManager.statusActivations.beforeTurn)
 				unit.update_resource(apIncrement, Moves.moveType.special, true)
 				unit.update_resource(unit.maxEnergy, Moves.moveType.trick, true)
-				for display in $BattleUI.playerHolder.get_children():
-					if display.get_node_or_null("MoveBoxes"):
-						$BattleUI.toggle_moveboxes(display.get_node("MoveBoxes"), true)
+				if !unit.isStunned:
+					$BattleUI.toggle_moveboxes(unit.boxHolder, true, false, false, true)
+				else:
+					$BattleUI.toggle_moveboxes(unit.boxHolder, false, false, false, true)
+			StatusManager.countdown_turns(unit, true)
 		Boons.call_boon("start_turn")
 		yield(self, "turn_taken")
-		#if battleDone: return play_turn()
+		#print("might be able to eval status here")
 	if currentUnit.isPlayer: #skip along
 		StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
@@ -189,7 +190,7 @@ func play_turn(resetShield = true):
 		if currentUnit.currentHealth > 0: #if you're dead stop doing moves
 			StatusManager.evaluate_statuses(currentUnit, StatusManager.statusActivations.beforeTurn)
 			Boons.call_boon("post_status_eval", [currentUnit])
-			if currentUnit.currentHealth > 0: #poison could kill
+			if currentUnit.currentHealth > 0 and !currentUnit.isStunned: #poison could kill
 				moveUser = currentUnit
 				moveTarget = currentUnit.storedTarget
 				moveName = currentUnit.storedAction
@@ -260,6 +261,7 @@ func evaluate_targets(move, user, box):
 	moveName = move
 	$BattleUI.set_description(move, chosenMove, user)
 	moveUser = user
+	$BattleUI.toggle_buttons(false)
 	if chosenMove["target"] <= targetType.enemyTargets: #If an enemy is targeted
 		$BattleUI.toggle_buttons(true, get_team(false))
 	elif chosenMove["target"] <= targetType.allies: #If an ally is targeted
@@ -349,7 +351,7 @@ func execute_move():
 		hitBonus = Boons.call_boon("before_move", [moveUser])
 		moveUser.storedTarget = moveTarget
 		usedMoveBox.timesUsed += 1
-		if chosenMove["type"] > Moves.moveType.basic and !chosenMove.has("cycle"): #durability does not go down for reloads and moves without a classtype
+		if chosenMove["type"] > Moves.moveType.basic and chosenMove["target"] != targetType.none: #durability does not go down for reloads and moves without a classtype
 			if StatusManager.find_status(moveUser, "Durability Redirect"): #This whole nest is dedicated to the stabilizer
 				for box in moveUser.boxHolder.get_children():
 					if box.maxUses > 0 and !box.buttonMode: #buttonMode clause only relevant for multiple stabilizers on same character (why)
@@ -401,8 +403,9 @@ func execute_move():
 					StatusManager.add_status(target, chosenMove["status"])
 				if chosenMove["status"] == "Provoke": #intent changing status is unique
 					for cond in target.statuses[StatusManager.statusActivations.passive]:
-						if cond["name"] == "Provoke" and cond["value"] >= StatusManager.THRESHOLD:
+						if cond["name"] == "Provoke" and cond["value"] >= 1:
 							set_intent(target, moveUser) #just taunt for now
+							StatusManager.remove_status(target, "Provoke")
 			if !chosenMove.has("timing") or chosenMove["timing"] == Moves.timings.after: #Default timing is after damage
 				activate_effect()
 		yield(get_tree().create_timer(.5), "timeout")
@@ -414,7 +417,7 @@ func execute_move():
 		if overkill > 0:
 			var nextTarget = get_next_team_unit(moveTarget)
 			if nextTarget: nextTarget.take_damage(overkill)
-		
+	#if hits == 0: yield(get_tree().create_timer(.25), "timeout") #needed to prevent a crash
 
 func get_next_team_unit(unit): #gets the next player or enemy from an existing player or enemy's position
 	var unitIndex = (unit.get_index() + 1) % $Units.get_child_count()

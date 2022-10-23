@@ -6,7 +6,6 @@ onready var Battle
 #When a condition occurs, functions are run if that condition's array has 1 or more items in it
 enum statusActivations {beforeTurn, gettingHit, usingAttack, gettingKill, passive}
 
-const THRESHOLD = 100
 const COUNTDOWNVAL = 50
 
 #If system is true, uses points system. If false, uses turns system. If system is absent, lasts forever. Points/Turns are applied by moves.
@@ -16,7 +15,7 @@ var statusList = {
 	"Poison": {"activation": statusActivations.beforeTurn, "countdownhalf": true , "system": true, "effect": funcref(self, "value_damage"), "args": ["unit", "value",]},
 	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.002, "value"]},
 	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -0.002, "value"]},
-	"Stun": {"activation": statusActivations.beforeTurn, "threshold": true, "system": true, "effect": funcref(self, "stunned")},
+	"Stun": {"activation": statusActivations.beforeTurn, "system": false, "effect": funcref(self, "stunned"), "args": ["unit"]},
 	
 	"Provoke": {"activation": statusActivations.passive},
 	
@@ -53,9 +52,7 @@ func countdown_turns(unit, turnStart):
 			var status = statusList[cond["name"]]
 			if status.has("system"): #Pass if there is no countdown system
 				if !turnStart and status["system"]: #Points subtract at turn end
-					if status.has("threshold"):
-						cond["value"] -= THRESHOLD
-					elif status.has("countdownhalf"):
+					if status.has("countdownhalf"):
 						cond["value"] -= ceil(cond["value"] *.5)
 					else:
 						cond["value"] -= COUNTDOWNVAL
@@ -100,10 +97,6 @@ func evaluate_statuses(unit, type, args = []):
 		for cond in list:
 			var statusInfo = statusList[cond["name"]]
 			if statusInfo.has("effect"):
-				if statusInfo.has("system") and statusInfo["system"]: #If using points system
-					if statusInfo.has("threshold") and cond["value"] < THRESHOLD: #Points system statuses do not take effect if points value is below the threshold
-						#print("skipping")
-						continue
 				var newArgs = []
 				if statusInfo.has("args"):
 					for argument in statusInfo["args"]:
@@ -153,5 +146,6 @@ func regenerate(unit, healing):
 func constrict_attack(attacker, target):
 	target.take_damage(attacker.strength)
 
-func stunned():
-	return Battle.STUNCODE
+func stunned(unit):
+	unit.isStunned = true
+	return -1 #placeholder

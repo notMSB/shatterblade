@@ -47,7 +47,7 @@ var mode = iModes.craft
 
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
 	if global.itemDict.empty():
-		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["War Horn", "Osmosis Device", "Power Glove", "Cape", "Silver"]}
+		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["War Horn", "Bone Zone", "Power Glove", "Cape", "Silver"]}
 	MOVESPACES += Boons.call_boon("prep_inventory")
 	if !Trading.assigned: Trading.assign_component_values()
 	dHolder = $HolderHolder/DisplayHolder

@@ -53,13 +53,14 @@ func update_box_bars(): #this one needs a refactor at some point
 				pass
 			prevBox = box
 
-func set_discount(discountArray):
-	var discountedMove = discountArray[0]
-	var discountAmount = discountArray[1]
-	if discounts.has(discountedMove):
-		discounts[discountedMove] += discountAmount
-	else:
-		discounts[discountedMove] = discountAmount
+func set_discount(discounts2D):
+	for discountArray in discounts2D:
+		var discountedMove = discountArray[0]
+		var discountAmount = discountArray[1]
+		if discounts.has(discountedMove):
+			discounts[discountedMove] += discountAmount
+		else:
+			discounts[discountedMove] = discountAmount
 
 func apply_discount(move):
 	if discounts.has(move):

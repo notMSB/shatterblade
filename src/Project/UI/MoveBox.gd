@@ -5,19 +5,25 @@ onready var CheckScene = $"../../../"
 const REPAIRVALUE = .5
 
 var user
+
 var isCursed = false
+
 var moves = []
 var moveIndex = 0
 var moveType
 var resValue = 0
+
 var usageOrder
 var trackerBar
 var buttonMode = true
 var savedTargetName = ""
+
 var boxModeScene
+
 var maxUses = 0
 var currentUses = maxUses
 var timesUsed = 0 #times used in current battle
+var timesEnabled = 0
 
 func updateInfo(targetName = null):
 	if targetName:
