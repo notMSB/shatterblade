@@ -6,16 +6,16 @@ const MAXENCOUNTERSIZE = 4
 var strongestEnemy = 3
 
 onready var enemyList = {
-	"Bat": {"stats": [15], "passives": {"Dodgy": 1}, "specials": ["Vampire"], 
-		"rewards": ["wing"], "locations": [l.night], "difficulty": 1},
+	"Bat": {"stats": [8], "passives": {"Dodgy": 1}, "specials": ["Vampire"], 
+		"rewards": ["wing"], "locations": [l.day], "difficulty": 1},
 	"Bird": {"stats": [20], "specials": ["Dive Bomb", "Triple Hit"], 
 		"rewards": ["talon"], "locations": [l.day], "difficulty": 3},
 	"Flower": {"stats": [15], "passives": {"Thorns": 1}, "specials": ["Growth"], 
 		"rewards": ["sap"], "locations": [l.dungeon], "difficulty": 1},
-	"Rat": {"stats": [10], "passives": {"Dodgy": 1}, "specials": ["Plague"], 
-		"rewards": ["fur"], "locations": [l.day], "difficulty": 1},
+	"Rat": {"stats": [11], "passives": {"Dodgy": 1}, "specials": ["Plague"], 
+		"rewards": ["fur"], "locations": [l.night], "difficulty": 1},
 	"Scorpion": {"stats": [25], "specials": ["Piercing Sting", "Crusher Claw"], 
-		"rewards": ["blade"], "locations": [l.dungeon], "difficulty": 1},
+		"rewards": ["blade"], "locations": [l.dungeon], "difficulty": 2},
 	"Skeleton": {"stats": [30], "specials": ["Power Attack", "Coldsteel"], 
 		"rewards": ["bone"], "locations": [l.night], "difficulty": 3},
 	"Snake": {"stats": [15], "passives": {"Venomous": 0}, "specials": ["Constrict"], 
@@ -24,16 +24,27 @@ onready var enemyList = {
 		"rewards": ["fang"], "locations": [l.night], "difficulty": 2},
 }
 
-func generate_encounter(rating, isDay, validEnemies = []): #dungeon will bring its own list of valid enemies
+func get_dungeon_mascot():
+	var dungeonEnemies = []
+	for enemy in enemyList:
+		if enemyList[enemy]["locations"].has(l.dungeon):
+			dungeonEnemies.append(enemy)
+	return dungeonEnemies[randi() % dungeonEnemies.size()]
+
+func generate_encounter(rating, isDay, dungeonEnemy = null): #dungeon will bring its own list of valid enemies
 	var location = l.day if isDay else l.night
 	var encounter = []
-	if validEnemies.empty(): #for non-dungeons, make list of valid enemies based on time of day
-		for enemy in enemyList:
-			if enemyList[enemy]["locations"].has(location):
+	var validEnemies = []
+	if dungeonEnemy: validEnemies.append(dungeonEnemy)
+	for enemy in enemyList:
+		if enemyList[enemy]["locations"].has(location):
+			if !(dungeonEnemy and enemyList[enemy]["difficulty"] == enemyList[dungeonEnemy]["difficulty"]):
 				validEnemies.append(enemy)
-	if rating > MAXENCOUNTERSIZE * strongestEnemy: rating = MAXENCOUNTERSIZE * strongestEnemy
+	if rating < 1: rating = 1
+	elif rating > MAXENCOUNTERSIZE * strongestEnemy: rating = MAXENCOUNTERSIZE * strongestEnemy
 	while rating > 0:
 		if validEnemies.size() > 1: validEnemies = evaluate_list(validEnemies, rating, MAXENCOUNTERSIZE - encounter.size())
+		#print(validEnemies)
 		var nextEnemy = validEnemies[randi() % validEnemies.size()]
 		encounter.append(nextEnemy)
 		rating -= enemyList[nextEnemy]["difficulty"]

@@ -1,10 +1,14 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://src/Project/Dungeon.gd" type="Script" id=1]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=2]
 
 [sub_resource type="DynamicFont" id=1]
 size = 34
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 20
 font_data = ExtResource( 2 )
 
 [node name="Dungeon" type="Node2D"]
@@ -28,15 +32,36 @@ __meta__ = {
 [node name="Exit" type="Button" parent="."]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 600.0
-margin_top = 448.0
+margin_top = 380.0
 margin_right = 708.0
-margin_bottom = 516.0
+margin_bottom = 448.0
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
 custom_fonts/font = SubResource( 1 )
 text = "Exit"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Description" type="Label" parent="."]
+margin_top = 19.0
+margin_right = 1277.0
+margin_bottom = 124.0
+custom_fonts/font = SubResource( 3 )
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="Description"]
+modulate = Color( 0, 0, 0, 1 )
+show_behind_parent = true
+margin_left = 1.0
+margin_top = -6.0
+margin_right = 1280.0
+margin_bottom = 103.0
 __meta__ = {
 "_edit_use_anchors_": false
 }

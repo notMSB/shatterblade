@@ -5,10 +5,12 @@ var isActive = false
 var pointType = 0
 var clicksFromStart
 var info = {}
-var sectionNum
+var sectionNum = 0
 var pointQuest = null
+var usedSmith = false #for tiles with a repair on them
+var traderStock = null
 
-onready var Map = get_node("../../../")
+onready var Map = get_node("/root/Game/Map")
 
 func toggle_activation(active, skip = false):
 	if active: 
@@ -48,7 +50,11 @@ func set_name(text):
 	$Name.text = str(text)
 
 func _on_Button_pressed():
-	if !Map.get_node("Events").visible and self != Map.activePoint:
+	Map.activePoint.toggle_activation(false) #toggle off map's active node
+	toggle_activation(true) #this is now the map's active node
+	if true:
+		return #done
+	elif !Map.get_node("Events").visible and self != Map.activePoint:
 		var movementLine
 		for line in lines:
 			movementLine = check_neighbor(line, true) #exclude dungeon lines
@@ -63,9 +69,17 @@ func _on_Button_pressed():
 				return #done
 
 func _on_Button_mouse_entered():
+	if sectionNum != Map.currentDay: pass
+	elif pointType == Map.pointTypes.event and pointQuest:
+		if !Map.isDay: Map.set_description("battle")
+		var desc = str(pointQuest["description"], "\n", pointQuest["objective"])
+		if pointQuest["reward"] == "service": desc += "\n" + pointQuest["prize"]
+		Map.set_description(desc, false)
+	else: Map.set_description(Map.pointTypes.keys()[pointType], false)
 	if !isActive: #the lines are already on if it's active
 		toggle_lines(true)
 
 func _on_Button_mouse_exited():
+	Map.set_description("")
 	if !isActive: #cannot turn off lines of the active node
 		toggle_lines(false)

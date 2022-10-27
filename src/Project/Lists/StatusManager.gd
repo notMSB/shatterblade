@@ -12,9 +12,9 @@ const COUNTDOWNVAL = 50
 var statusList = {
 	"Regen": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "regenerate"), "args": ["unit", 1]},
 	
-	"Poison": {"activation": statusActivations.beforeTurn, "countdownhalf": true , "system": true, "effect": funcref(self, "value_damage"), "args": ["unit", "value",]},
-	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.002, "value"]},
-	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -0.002, "value"]},
+	"Poison": {"activation": statusActivations.beforeTurn, "system": true, "effect": funcref(self, "value_damage"), "args": ["unit", "value",]},
+	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -0.01, "value"]},
+	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.01, "value"]},
 	"Stun": {"activation": statusActivations.beforeTurn, "system": false, "effect": funcref(self, "stunned"), "args": ["unit"]},
 	
 	"Provoke": {"activation": statusActivations.passive},
@@ -25,7 +25,7 @@ var statusList = {
 	"Movecost Refund": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["usedMoveBox", "unit"]},
 	"Gain Mana": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["damage", "unit"]},
 	
-	"Venomous": {"activation": statusActivations.usingAttack, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 5]},
+	"Venomous": {"activation": statusActivations.usingAttack, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 2]},
 	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "adjust_damage"), "args": ["damage", -1]},
 	"Thorns": {"activation": statusActivations.gettingHit, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5]},
 	"Constricting": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "constrict_attack"), "args": ["unit", "intent"], "targetlock": true, "hittable": true},
@@ -52,10 +52,8 @@ func countdown_turns(unit, turnStart):
 			var status = statusList[cond["name"]]
 			if status.has("system"): #Pass if there is no countdown system
 				if !turnStart and status["system"]: #Points subtract at turn end
-					if status.has("countdownhalf"):
-						cond["value"] -= ceil(cond["value"] *.5)
-					else:
-						cond["value"] -= COUNTDOWNVAL
+					if cond["value"] < 10: cond["value"] = 0
+					else: cond["value"] -= ceil(cond["value"] *.5)
 				elif turnStart and !status["system"] : #Turns subtract at turn start
 					cond["value"] -= 1
 				if cond["value"] <= 0:
@@ -123,7 +121,7 @@ func evaluate_statuses(unit, type, args = []):
 func adjust_damage(damage, adjustment, value = 1):
 	var multiplier = 1 if adjustment >= 0 else -1
 	var damageMod = floor(damage * value * abs(adjustment)) #abs needed since floor/ceil round negative numbers oppositely
-	return damage + (damageMod * multiplier)
+	return max(0, damage + (damageMod * multiplier))
 
 func refund_resource(refundVal, user):
 	user.update_resource(refundVal, user.types.magic, true)

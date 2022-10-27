@@ -34,10 +34,10 @@ func set_mode_scene(): #returns battle, inventory, or map
 	if CheckScene.name == "DisplayHolder": 
 		CheckScene = CheckScene.get_node("../../")
 	if CheckScene.name == "Map":
-		if CheckScene.battleWindow.visible == true:
-			return CheckScene.battleWindow
-		elif CheckScene.inventoryWindow.visible == true:
+		if CheckScene.inventoryWindow.visible == true:
 			return CheckScene.inventoryWindow
+		elif CheckScene.battleWindow.visible == true:
+			return CheckScene.battleWindow
 	return CheckScene
 
 func reduce_uses(amount):
@@ -64,12 +64,13 @@ func set_uses(var newMax = null):
 
 func _on_Button_pressed():
 	boxModeScene = set_mode_scene()
-	if boxModeScene.name == "Battle":
+	if boxModeScene.name == "Inventory": #inventory
+		if !(isCursed and get_parent().name == "MoveBoxes"): boxModeScene.select_box(self)
+	elif boxModeScene.name == "Battle":
+		boxModeScene.set_description($Name.text)
 		if buttonMode:
 			boxModeScene.evaluate_targets(moves[moveIndex], user, self)
 		else:
 			boxModeScene.cut_from_order(self)
-	elif boxModeScene.name == "Inventory": #inventory
-		if !(isCursed and get_parent().name == "MoveBoxes"): boxModeScene.select_box(self)
 	else: #map scene
-		pass
+		boxModeScene.set_description($Name.text)

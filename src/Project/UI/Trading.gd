@@ -8,6 +8,7 @@ var assigned = false
 var selectedBox
 var values = {}
 var stock = []
+const RELICDEFAULTPRICE = 7
 const DEFAULTVALUE = 5
 
 func assign_component_values():
@@ -26,20 +27,25 @@ func assign_component_values():
 				values[reward] = max(1, values[reward] - 3)
 	assigned = true
 
-func get_item_value(itemName):
-	if typeof(itemName) == TYPE_INT or itemName == "X":
-		return 0
-	elif Crafting.c.has(itemName):
+func get_item_value(itemName, box = null):
+	var value = 0
+	if Crafting.c.has(itemName):
 		return values[itemName]
+	if typeof(itemName) == TYPE_INT or itemName == "X" or Moves.moveList[itemName]["type"] == Moves.moveType.basic:
+		return 0
 	elif Moves.moveList[itemName].has("price"):
-		return Moves.moveList[itemName]["price"]
+		value = Moves.moveList[itemName]["price"]
+	elif Moves.moveList[itemName]["slot"] == Moves.equipType.relic:
+		value = RELICDEFAULTPRICE
 	else:
 		var items = Crafting.break_down(itemName)
-		return get_item_value(items[0]) + get_item_value(items[1])
+		value = get_item_value(items[0]) + get_item_value(items[1])
+	if box and box.maxUses > 1: #damaged item eval
+		value = max(ceil(value * box.currentUses / box.maxUses), 1) #subject to change, but currently broken weapons shouldn't have a value of 0
+	return value
 
 func get_inventory_value(inventory):
 	var finalValue = 0
 	for item in inventory:
 		finalValue += get_item_value(item)
-	print(finalValue)
 	return finalValue

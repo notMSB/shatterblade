@@ -5,15 +5,18 @@ onready var Trading = get_node("../Trading")
 onready var Enemies = get_node("../Enemies")
 onready var Crafting = get_node("../Crafting")
 
-const RARECOST = 5
+const RARECOST = 3
 const LABORMIN = 5
 const LABORMAX = 21
-const UNIQUETYPES = 2
+const UNIQUETYPES = 3
 const UNIQUEREWARDS = 1
 
-enum t {fetch, labor, hunt, weapon_request, rescue, none} #type
-enum r {relic, gear, rare_component, service} #reward
-enum s {trade, craft} #service
+enum t {fetch, labor, weapon_request, hunt, rescue, none} #type
+enum r {relic, gear, none, service} #reward
+enum s {trade, repair} #service
+const SERVICES = 2
+var servicesMade = 0
+
 var relics = []
 var cheapComponents = []
 var rareComponents = []
@@ -27,17 +30,30 @@ func _ready():
 
 func generate_quest():
 	var newQuest = {}
-	newQuest["type"] = rando_item(t, UNIQUETYPES)
-	newQuest["reward"] = rando_item(r, UNIQUEREWARDS)
+	if servicesMade >= SERVICES:
+		newQuest["reward"] = rando_item(r, UNIQUEREWARDS)  
+	else:
+		newQuest["reward"] = "service"
+	if newQuest["reward"] == "none":
+		newQuest["type"] = "hunt"
+	else:
+		newQuest["type"] = rando_item(t, UNIQUETYPES)
 	var typeFunc = funcref(self, str("generate_", newQuest["type"])) #funcref usage cuts down on if statements now and in the future
-	var rewardFunc = funcref(self, str("rando_", newQuest["reward"]))
 	newQuest["objective"] = typeFunc.call_func()
-	newQuest["prize"] = rewardFunc.call_func()
+	if newQuest["reward"] == "service":
+		newQuest["prize"] = s.keys()[servicesMade]
+		servicesMade += 1
+	elif newQuest["reward"] == "none":
+		newQuest["prize"] = ""
+	else:
+		var rewardFunc = funcref(self, str("rando_", newQuest["reward"]))
+		newQuest["prize"] = rewardFunc.call_func()
 	return newQuest
 
 func sort_components():
 	for item in Trading.values:
-		if Trading.values[item] >= RARECOST: rareComponents.append(item) 
+		if Trading.values[item] == 5: continue #temp
+		elif Trading.values[item] >= RARECOST: rareComponents.append(item) 
 		else: cheapComponents.append(item)
 
 func generate_fetch():
@@ -49,7 +65,9 @@ func generate_labor():
 func generate_hunt():
 	var targets = []
 	for enemy in Enemies.enemyList:
-		if Enemies.enemyList[enemy]["locations"].has(Enemies.l.night): targets.append(enemy)
+		var enemyData = Enemies.enemyList[enemy]
+		if (enemyData["locations"].has(Enemies.l.night) and enemyData["difficulty"] > 1) or enemyData["locations"].has(Enemies.l.dungeon): 
+			targets.append(enemy)
 	return rando_item(targets)
 
 func generate_weapon_request(): #random weapon of a certain class

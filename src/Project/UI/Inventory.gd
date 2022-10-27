@@ -15,6 +15,8 @@ const DEFAULTCOLOR = Color(.53,.3,.3,1)
 const MOVEHOLDER = "moves"
 var MOVESPACES = 4
 
+var descriptionNode
+
 onready var iHolder = $HolderHolder/InventoryHolder
 onready var cHolder = $HolderHolder/CraftboxHolder
 onready var tHolder = $HolderHolder/TradeHolder
@@ -34,20 +36,22 @@ var currentInvSize = 0
 
 var craftingRestriction = null
 
-const TRADERINVSIZE = 8
+const TRADERINVSIZE = 12
 var initialTraderValue
 var currentTraderValue
 
-enum oTypes {component, weapon}
+enum oTypes {component, weapon, any}
+var offerMode = oModes.reward
 var offerType
 var offerNeed
 
 enum iModes {default, craft, trade, offer}
+enum oModes {remove, repair, reward}
 var mode = iModes.craft
 
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
 	if global.itemDict.empty():
-		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 3, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["War Horn", "Bone Zone", "Power Glove", "Cape", "Silver"]}
+		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 6, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["War Horn", "Bone Zone", "Power Glove", "Cape", "Silver"]}
 	MOVESPACES += Boons.call_boon("prep_inventory")
 	if !Trading.assigned: Trading.assign_component_values()
 	dHolder = $HolderHolder/DisplayHolder
@@ -67,6 +71,11 @@ func _ready(): #Broken with relics as a standalone scene, but works when the Map
 				identify_product(box)
 	else:
 		dHolder = get_node_or_null("../Map/HolderHolder/DisplayHolder")
+	if !get_parent().mapMode:
+		descriptionNode = $Description
+	else:
+		descriptionNode = get_node("../Map/Description")
+	$Description.visible = !get_parent().mapMode
 
 func welcome_back(newMode):
 	mode = newMode
@@ -75,13 +84,31 @@ func welcome_back(newMode):
 		for box in global.storedParty[i].boxHolder.get_children():
 			box.visible = true
 			identify_product(box)
+	get_node("../Map/InventoryButton").visible = false
+	name_exitButton()
 	visible = true
+
+func name_exitButton():
+	if mode == iModes.offer:
+		if offerMode == oModes.reward: $ExitButton.text = "Offer"
+		elif offerMode == oModes.repair: $ExitButton.text = "Repair"
+		else: $ExitButton.text = "Toss"
+	else: $ExitButton.text = "Exit"
 
 func shuffle_trade_stock():
 	var restock = []
-	for i in global.storedParty.size():
-		restock.append(rando_component())
-		restock.append(rando_move(i))
+	if !get_node("../Map").activePoint.traderStock:
+		var maxItems = tHolder.get_child_count()
+		for i in global.storedParty.size():
+			restock.append(rando_move(i))
+		restock.append(rando_relic())
+		restock.append(rando_item())
+		restock.append(rando_item())
+		while restock.size() < maxItems:
+			restock.append("Coin")
+			restock.append(rando_component())
+	else:
+		restock = get_node("../Map").activePoint.traderStock
 	Trading.stock = restock
 	restock_trade()
 
@@ -94,16 +121,29 @@ func restock_trade():
 
 func rando_component():
 	var keys = Crafting.c.keys()
+	if keys.has("wood"): keys.erase("wood") #temp
 	return keys[randi() % keys.size()]
+
+func rando_item():
+	var list = Moves.moveList
+	var rando = []
+	for move in list: #populate rando with viable moves
+		if  list[move].has("type") and list[move]["type"] == Moves.moveType.item:
+			rando.append(move)
+	return rando[randi() % rando.size()]
 
 func rando_move(index):
 	var list = Moves.moveList
 	var rando = []
 	for move in list: #populate rando with viable moves
-		if list[move].has("type"): 
-			if list[move]["type"] == global.storedParty[index].allowedType:
+		if (!list[move].has("slot") or list[move]["slot"] == Moves.equipType.gear) and list[move].has("type"):
+			if list[move]["type"] == global.storedParty[index].allowedType and list[move]["target"] != Moves.targetType.none: #reload/catch
 				rando.append(move)
 	return rando[randi() % rando.size()]
+
+func rando_relic():
+	var relics = Moves.get_relics()
+	return relics[randi() % relics.size()]
 
 func set_mode():
 	cHolder.visible = true if mode == iModes.craft else false
@@ -119,8 +159,8 @@ func set_mode():
 
 func toggle_trade_visibility(toggle):
 	tHolder.visible = toggle
-	if toggle: toggle_action_button(true, "Reset")
-	else: toggle_action_button(false)
+	#if toggle: toggle_action_button(true, "Reset")
+	toggle_action_button(false)
 	$Initial.visible = toggle
 	$Current.visible = toggle
 
@@ -176,7 +216,7 @@ func make_actionboxes(boxCount, boxMode):
 				box.get_node("Button").visible = false
 				productBox = box
 		elif boxMode == iModes.trade: 
-			box.position.x = XSTART + (i * XINCREMENT)
+			box.position.x = XSTART - 160 + (i * XINCREMENT)
 			box.get_node("Name").text = Trading.stock[i] if Trading.stock.size() > i else "X"
 			identify_product(box)
 		else: #offer
@@ -185,6 +225,7 @@ func make_actionboxes(boxCount, boxMode):
 func select_box(box = null):
 	box.get_parent().selectedBox = box
 	box.get_node("ColorRect").color = Color(.5,.1,.5,.3)
+	set_description(box.get_node("Name").text)
 	box.get_node("ColorRect").visible = true
 	check_swap(box)
 
@@ -195,6 +236,7 @@ func deselect_box(box):
 	#else: print("no box")
 
 func deselect_multi(boxes):
+	set_description("X")
 	for box in boxes:
 		deselect_box(box)
 	otherSelection = null
@@ -206,9 +248,14 @@ func check_swap(selectedBox):
 	else:
 		if mode == iModes.offer:
 			var canOffer = false
-			if selectedBox.get_parent() == oHolder: canOffer = check_offering(otherSelection)
-			elif otherSelection.get_parent() == oHolder: canOffer = check_offering(selectedBox)
-			if !canOffer: 
+			var checkingOffering = false
+			if selectedBox.get_parent() == oHolder: 
+				checkingOffering = true
+				canOffer = check_offering(otherSelection)
+			elif otherSelection.get_parent() == oHolder:
+				checkingOffering = true
+				canOffer = check_offering(selectedBox)
+			if !canOffer and checkingOffering:
 				deselect_multi([selectedBox, otherSelection])
 				return
 		elif mode == iModes.craft:
@@ -271,7 +318,7 @@ func check_crafts(craftBox, otherBox):
 			craftingRestriction = Crafting.break_down(boxName)
 	if didSwap:
 		var productName = productBox.get_node("Name")
-		dHolder.box_move(productBox, productName)
+		dHolder.box_move(productBox, productName.text)
 		if productName.text != "X":
 			productName.text = "X" #Reset the field in case something was already there from prior
 			productBox.get_node("ColorRect").color = DEFAULTCOLOR
@@ -304,17 +351,23 @@ func check_crafts(craftBox, otherBox):
 		deselect_multi([craftBox, otherBox])
 
 func check_offering(offeringBox):
-	if offeringBox.get_node("Name").text == "X": return true
+	var oName = offeringBox.get_node("Name").text
+	if oName == "X": return true
 	elif offerType == oTypes.component:
-		if offeringBox.get_node("Name").text != offerNeed:
+		if oName != offerNeed:
 			return false
 	elif offerType == oTypes.weapon:
-		var boxName = offeringBox.get_node("Name").text
-		if Moves.moveList.has(boxName):
-			if Moves.moveList[boxName]["type"] != Moves.moveType.get(offerNeed):
+		if Moves.moveList.has(oName):
+			if Moves.moveList[oName]["type"] != Moves.moveType.get(offerNeed):
 				return false
-	toggle_action_button(true, "Offer")
+	else: #anything that isn't cursed
+		if Moves.moveList.has(oName) and Moves.moveList[oName].has("cursed"):
+			return false
+	#toggle_action_button(true, "Offer")
 	return true
+
+func set_description(boxMoveName):
+	descriptionNode.text = Moves.get_description(boxMoveName)
 
 func toggle_action_button(toggle, buttonText = ""):
 	$ActionButton.visible = toggle
@@ -364,9 +417,14 @@ func assess_trade_value():
 	currentTraderValue = Trading.get_inventory_value(newStock)
 	$Current.text = String(currentTraderValue)
 	$ExitButton.visible = true if currentTraderValue >= initialTraderValue else false
+	$ExitButton.visible = check_for_curses(newStock)
+
+func check_for_curses(stock):
+	for item in stock:
+		if Moves.moveList.has(item) and Moves.moveList[item].has("cursed"): return false
+	return true
 
 func identify_product(box): #updates box color and trade value
-	var skipValue = false
 	var boxName = box.get_node("Name").text
 	if Moves.moveList.has(boxName) and !box.get_node("Sprite").visible:
 		var productType = Moves.moveList[boxName]["type"]
@@ -377,13 +435,14 @@ func identify_product(box): #updates box color and trade value
 		elif productType == Moves.moveType.item:  box.get_node("ColorRect").color = Color(.9,.7, 0,1) #Y
 		else: #X/other
 			box.get_node("ColorRect").color = DEFAULTCOLOR
-			skipValue = true
 	else: 
 		if box.get_node("Sprite").visible:
 			box.get_node("ColorRect").visible = false
 		else:
 			box.get_node("ColorRect").color = DEFAULTCOLOR
-	box.get_node("Info").text = "0" if skipValue else String(Trading.get_item_value(boxName))
+	var boxInfo = box.get_node("Info")
+	boxInfo.text = String(Trading.get_item_value(boxName, box))
+	boxInfo.visible = false if boxInfo.text == "0" else true
 
 func xCheck(): #returns an empty inventory space, todo: scenario for full inventory
 	var iName
@@ -391,6 +450,7 @@ func xCheck(): #returns an empty inventory space, todo: scenario for full invent
 		iName = iBox.get_node("Name").text
 		if iName == "X":
 			return iBox
+	return null
 
 func clear_box(box):
 	dHolder.box_move(box, "X")
@@ -405,12 +465,27 @@ func confirm_craft():
 			clear_box(cBox)
 	toggle_action_button(false)
 
-func add_item(itemName, newUses = false): #todo: case for full inventory
+func add_item(itemName, newUses = false, openWindow = false): #todo: case for full inventory
 	var openBox = xCheck()
-	openBox.get_node("Name").text = itemName #Put product in there
-	identify_product(openBox)
-	if newUses: openBox.set_uses(Moves.get_uses(itemName))
-	update_itemDict(itemName)
+	if openBox and !openWindow: #normal use case
+		openBox.get_node("Name").text = itemName #Put product in there
+		identify_product(openBox)
+		if newUses: openBox.set_uses(Moves.get_uses(itemName))
+		update_itemDict(itemName)
+	else:
+		if !openBox: #full inventory
+			activate_offer(itemName)
+		else: #openWindow, used before some battles
+			welcome_back(iModes.craft)
+			dHolder.box_move(openBox, itemName)
+
+func activate_offer(itemName = null):
+	var box = oHolder.get_child(0)
+	offerType = oTypes.any
+	offerMode = oModes.remove
+	welcome_back(iModes.offer)
+	if itemName: dHolder.box_move(box, itemName)
+	else: dHolder.box_move(box, "X")
 
 func update_itemDict(itemName):
 	currentInvSize += 1
@@ -423,6 +498,19 @@ func update_itemDict(itemName):
 			global.itemDict[MOVEHOLDER].append(itemName)
 
 func exit(): #Save inventory and leave
+	if mode == iModes.offer and oHolder.get_child(0).get_node("Name").text != "X":
+		var oBox = oHolder.get_child(0)
+		if offerMode == oModes.reward: get_node("../Map/Events").give_reward()
+		elif offerMode == oModes.repair:
+			add_item(oBox.get_node("Name").text, true)
+		elif get_node("../Map").currentTemple:
+			get_node("../Map").currentTemple.offer_made(oBox)
+		clear_box(oBox)
+	elif mode == iModes.trade:
+		var tStock = []
+		for box in tHolder.get_children():
+			tStock.append(box.get_node("Name").text)
+		get_node("../Map").activePoint.traderStock = tStock
 	var unit
 	var moveName
 	var moveData
@@ -466,6 +554,8 @@ func done():
 		for i in global.storedParty.size():
 			dHolder.manage_and_color_boxes(global.storedParty[i])
 		visible = false
+		get_node("../Map/InventoryButton").visible = true
+		get_node("../Map").check_delay()
 
 func reset_trade():
 	return get_tree().reload_current_scene()
@@ -473,6 +563,7 @@ func reset_trade():
 func _on_ActionButton_pressed():
 	if mode == iModes.craft:
 		confirm_craft()
+	#below is inaccessible for now
 	elif mode == iModes.trade:
 		reset_trade()
 	elif mode == iModes.offer:

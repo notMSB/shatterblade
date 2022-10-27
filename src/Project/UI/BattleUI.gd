@@ -156,9 +156,7 @@ func link_boxes(tracker, boxCount, firstMargin, lastMargin, barType):
 
 func clear_menus():
 	$Description.text = ""
-	$Description.visible = false
-
-
+	#$Description.visible = false
 
 func toggle_buttons(toggle, units = []):
 	if toggle:
@@ -174,23 +172,3 @@ func toggle_buttons(toggle, units = []):
 			child.get_node("Button").visible = false
 		for child in $DisplayHolder.get_children():
 			child.get_node("Button").visible = false
-
-func set_description(moveName, move, user):
-	$Description.visible = true
-	var desc = moveName
-	if move["target"] == Battle.targetType.enemy: desc += "\n" + "Single Enemy"
-	elif move["target"] == Battle.targetType.enemies: desc += "\n" + "All Enemies"
-	elif move["target"] == Battle.targetType.enemyTargets: desc += "\n" + "Same Target Enemies"
-	elif move["target"] == Battle.targetType.ally: desc += "\n" + "Single Ally"
-	elif move["target"] == Battle.targetType.allies: desc += "\n" + "All Allies"
-	elif move["target"] == Battle.targetType.user: desc += "\n" + "Self"
-	if move.has("quick"): desc += "\n Quick Action "
-	if move.has("resVal"): desc += "\n Cost: " + String(move["resVal"] - user.apply_discount(moveName))
-	if move.has("damage"): desc += "\n Base Damage: " + String(move["damage"]) + " + " + String(Battle.currentUnit.strength)
-	if move.has("healing"): desc += "\n Healing: " + String(move["healing"])
-	if move.has("hits"): desc += "\n Repeats: " + String(move["hits"])
-	if move.has("status"):
-		desc += "\n Status: " + move["status"]
-		if move.has("value"): desc += " " + String(move["value"])
-	if move.has("description"): desc += "\n " + String(move["description"])
-	$Description.text = desc

@@ -23,6 +23,8 @@ var turnCount = 0
 var currentUnit
 var menuNode
 
+var descriptionNode
+
 var chosenMove
 var moveName
 var moveUser
@@ -94,6 +96,11 @@ func _ready(): #Generate units and add to turn order
 				for passive in unit.passives:
 					StatusManager.add_status(unit, passive, unit.passives[passive])
 		play_turn(false)
+	if !get_parent().mapMode:
+		descriptionNode = $BattleUI/Description
+	else:
+		descriptionNode = get_node("../Map/Description")
+	$BattleUI/Description.visible = !get_parent().mapMode
 
 func create_enemies():
 	var createdUnit
@@ -157,18 +164,18 @@ func get_partyHealth():
 		total += unit.currentHealth
 	return total
 
-func play_turn(resetShield = true):
+func play_turn(notFirstTurn = true):
 	if battleDone:
 		return done(Enemies.enemyList[rewardUnit.identity]["rewards"][0])
 	turnIndex = (turnIndex + 1) % $Units.get_child_count() #Advance to next unit
 	currentUnit = $Units.get_child(turnIndex)
 	if turnIndex == 0: #Start of turn, take player actions
-		if get_parent().mapMode: get_node("../Map").subtract_time(1)
+		if notFirstTurn and get_parent().mapMode: get_node("../Map").subtract_time(1)
 		turnCount+=1
 		for unit in $Units.get_children():
 			unit.update_strength(true)
 			unit.isStunned = false
-			if resetShield: 
+			if notFirstTurn: 
 					unit.shield = 0
 					unit.update_hp()
 			if unit.isPlayer:
@@ -259,7 +266,7 @@ func evaluate_targets(move, user, box):
 	usedMoveBox = box
 	chosenMove = Moves.moveList[move]
 	moveName = move
-	$BattleUI.set_description(move, chosenMove, user)
+	#$BattleUI.set_description(move, chosenMove, user)
 	moveUser = user
 	$BattleUI.toggle_buttons(false)
 	if chosenMove["target"] <= targetType.enemyTargets: #If an enemy is targeted
@@ -271,6 +278,9 @@ func evaluate_targets(move, user, box):
 	elif chosenMove["target"] == targetType.none: #No target, instant confirm (coded as self)
 		target_chosen(user.get_index())
 	
+
+func set_description(boxMoveName):
+	descriptionNode.text = Moves.get_description(boxMoveName)
 
 func target_chosen(index):
 	moveTarget = $Units.get_child(index)
@@ -461,35 +471,6 @@ func done(reward):
 			set_ui(global.storedParty[i])
 			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], map.inventoryWindow.DEFAULTCOLOR)
 		map.inventoryWindow.add_item(reward)
+		map.get_node("InventoryButton").visible = true
 		visible = false
 		$BattleUI.toggle_movebox_buttons(true)
-
-func generate_rewards():
-	var rewards = Enemies.enemyList[opponents[randi() % opponents.size()]]["rewards"] #Random enemy from the opponents list gives rewards
-	var categories = [[0],[0]] #0 loot 1 learn
-	var finalRewards = []
-	
-	for reward in rewards: #Need a loop for total weight and to set up one reward for each category
-		if reward.has("loot"):
-			categories[0].append(reward)
-			categories[0][0] += reward["weight"]
-		else:
-			categories[1].append(reward)
-			categories[1][0] += reward["weight"]
-			
-	for category in categories:
-		var rewardValue = randi() % category[0]
-		if category.size() == 2: #it works
-			finalRewards.append(category[1])
-		else:
-			category.remove(0) #just having a good time out here really
-			for reward in category:
-				rewardValue -= reward["weight"]
-				if rewardValue <= 0:
-					finalRewards.append(reward)
-					break
-					
-	#print(finalRewards)
-	
-	
-	

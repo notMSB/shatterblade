@@ -16,9 +16,14 @@ var exitLocation
 var enteredFromOrigin
 var originPoint
 var exitPoint
+var mascot = null
 
 func setup(dLine): #dungeon line, links the two points
-	totalPoints = ceil(dLine.points[0].distance_to(dLine.points[1]) * Map.DISTANCE_TIME_MULT) - 1
+	if !mascot: 
+		mascot = Map.Enemies.get_dungeon_mascot()
+		$Description.text = str(mascot, " Dungeon")
+	totalPoints = ceil(dLine.points[0].distance_to(dLine.points[1]) * Map.DISTANCE_TIME_MULT)
+	print(totalPoints)
 	make_points(Vector2(XSTART, YPOS))
 
 func make_points(nextPos, prevPoint = false):
@@ -26,7 +31,9 @@ func make_points(nextPos, prevPoint = false):
 	$Points.add_child(point)
 	point.position = nextPos
 	nextPos.x += INCREMENT
-	if prevPoint: make_line(prevPoint, point)
+	if prevPoint: 
+		make_line(prevPoint, point)
+		if prevPoint != originPoint: prevPoint.pointType = Map.pointTypes.battle
 	else: 
 		originPoint = point
 	if (nextPos.x-XSTART) / INCREMENT < totalPoints:
@@ -62,6 +69,7 @@ func evaluate_exit(point):
 func enter():
 	determine_side()
 	visible = true
+	Map.currentDungeon = self
 	Map.get_node("HolderHolder/SectionHolder").visible = false
 
 func switch_save(newSave): #If a player fully traversed the dungeon, switch the overworld's save point to the other side
@@ -76,6 +84,6 @@ func _on_Exit_pressed():
 		if enteredFromOrigin: switch_save(exitLocation)
 		exitPoint.toggle_activation(false)
 	Map.savedPoint.toggle_activation(true, false) #Activate the overworld point, change false to true to skip activating the event
-	Map.currentDungeon = false
+	Map.currentDungeon = null
 	visible = false
 	Map.get_node("HolderHolder/SectionHolder").visible = true

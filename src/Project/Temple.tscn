@@ -1,0 +1,79 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://src/Project/Temple.gd" type="Script" id=1]
+[ext_resource path="res://src/Project/UI/BoonSelect.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=3]
+
+[sub_resource type="DynamicFont" id=1]
+size = 34
+font_data = ExtResource( 3 )
+
+[node name="Temple" type="Node2D"]
+visible = false
+script = ExtResource( 1 )
+BoonSelect = ExtResource( 2 )
+
+[node name="BG" type="ColorRect" parent="."]
+modulate = Color( 0.733333, 1, 0, 1 )
+margin_left = 1.0
+margin_top = -9.0
+margin_right = 1280.0
+margin_bottom = 452.0
+color = Color( 0.27451, 0.254902, 0.898039, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HealButton" type="Button" parent="."]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 1072.0
+margin_top = 268.0
+margin_right = 1180.0
+margin_bottom = 336.0
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "Heal"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="OfferButton" type="Button" parent="."]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 100.0
+margin_top = 268.0
+margin_right = 208.0
+margin_bottom = 336.0
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "Offer"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ExitButton" type="Button" parent="."]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 587.0
+margin_top = 339.0
+margin_right = 695.0
+margin_bottom = 407.0
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "Exit"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Holder" type="Node2D" parent="."]
+
+[connection signal="pressed" from="HealButton" to="." method="_on_HealButton_pressed"]
+[connection signal="pressed" from="OfferButton" to="." method="_on_OfferButton_pressed"]
+[connection signal="pressed" from="ExitButton" to="." method="_on_ExitButton_pressed"]

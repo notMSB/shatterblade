@@ -8,6 +8,7 @@ export (PackedScene) var Battle
 export (PackedScene) var Inventory
 export (PackedScene) var ChoiceUI
 export (PackedScene) var Dungeon
+export (PackedScene) var Temple
 export (PackedScene) var Section
 
 onready var Moves = get_node("../Data/Moves")
@@ -15,15 +16,15 @@ onready var Quests = get_node("../Data/Quests")
 onready var Enemies = get_node("../Data/Enemies")
 onready var Boons = get_node("../Data/Boons")
 
-const INCREMENT = 92
-const KILLDISTANCE = 81 #lower kill distance means more points
+const INCREMENT = 90
+const KILLDISTANCE = 70 #lower kill distance means more points
 const MAXDISTANCE = 200
-const FUZZ = 35 #should never be more than half of the increment
+const FUZZ = 45 #should never be more than half of the increment
 const CORNER_CHECK = 20
 const DISTANCE_TIME_MULT = .05
 
 const NIGHTLENGTH = 50
-const TOTALSECTIONS = 3
+const TOTALSECTIONS = 2
 
 var bottomRight
 var columnNum
@@ -39,19 +40,25 @@ var timeNode
 var favorNode
 
 const DIFFICULTYMODIFIER = -3
+const DUNGEONDIFFICULTY = 3
 var distanceTraveled = 0
 var time = 150
 var currentDay = 0
 var isDay = true
-var currentDungeon = false
+var currentDungeon = null
+var currentTemple = null
+
+var delayBattle = null
 
 var battleWindow
 var inventoryWindow
-enum pointTypes {none, start, battle, event, quest, visited, town, dungeon} #Points to the left of "visited" turn off after being activated
+enum pointTypes {none, start, battle, event, quest, visited, town, dungeon, trader, temple, end} #Points to the left of "visited" turn off after being activated
 
 var canEnd = false
 var checkedLines = []
 var nextCheck = []
+var regens = 0
+const REGENLIMIT = 100
 
 func _ready():
 	randomize()
@@ -70,9 +77,11 @@ func _ready():
 		for display in $HolderHolder/DisplayHolder.get_children():
 			display.get_node("Name").text = Moves.get_classname(global.storedParty[display.get_index()].allowedType)
 	bottomRight = Vector2($ReferenceRect.margin_right, $ReferenceRect.margin_bottom)
-	timeNode.position.y += bottomRight.y + 50
-	favorNode.position.y += bottomRight.y + 50
+	timeNode.position.y += bottomRight.y + 20
+	timeNode.position.x += 15
+	favorNode.position.y += bottomRight.y + 5
 	favorNode.position.x += bottomRight.x - 150
+	set_boon_text()
 	columnNum = int(ceil(bottomRight.x/INCREMENT) - 1) #ceil-1 instead of floor prevents strangeness with exact divisions
 	#print(columnNum)
 	make_points(Vector2(INCREMENT,INCREMENT*.5))
@@ -81,7 +90,14 @@ func _ready():
 		display.set_battle()
 		for tracker in display.get_node("Trackers").get_children():
 			tracker.visible = false
-	
+	get_parent().move_child(battleWindow, inventoryWindow.get_index())
+
+func set_boon_text():
+	favorNode.get_node("Virtue").text = Boons.set_text()
+
+func set_description(descriptor, forBox = true):
+	if forBox: $Description.text = Moves.get_description(descriptor)
+	else: $Description.text = String(descriptor)
 
 func setup_inventory():
 	inventoryWindow = Inventory.instance()
@@ -94,6 +110,7 @@ func setup_battle():
 	battleWindow.visible = false
 
 func activate_inventory(mode = null):
+	$InventoryButton.visible = false
 	if mode:
 		inventoryWindow.welcome_back(mode)
 	else:
@@ -101,14 +118,26 @@ func activate_inventory(mode = null):
 
 func activate_point(point):
 	var type = point.pointType
-	if type == pointTypes.start:
+	if type == pointTypes.none:
+		pass
+	elif type == pointTypes.start:
 		print("Start")
-	elif type == pointTypes.battle:
-		activate_battle()
+	elif type == pointTypes.end: #todo: event asking if you want to end (and eventually a boss here)
+		print("End")
+		regen_map()
 	elif type == pointTypes.dungeon:
 		grab_event("Dungeon")
 	elif type == pointTypes.town:
-		grab_event("Town")
+		var townValue = 1 if isDay else 1 #towns should only be open on their day or the night before it
+		townValue += currentDay
+		if townValue == point.sectionNum: grab_event("Town")
+		else: pass #todo: event saying town is closed
+	elif type == pointTypes.trader:
+		grab_event("Store")
+	elif type == pointTypes.temple:
+		grab_event("Temple")
+	elif type == pointTypes.battle or !isDay or point.sectionNum > currentDay: #no events at night
+		activate_battle()
 	elif type == pointTypes.event:
 		if point.pointQuest:
 			$Events/EventDescription.text = str(point.pointQuest["description"], "\nfor\n", point.pointQuest["prize"])
@@ -124,11 +153,23 @@ func activate_point(point):
 					if list[option]["time"] >= $Events.timings.overworld: pool.append(option)
 			grab_event(pool[randi() % pool.size()])
 
+func check_delay():
+	if delayBattle:
+		var temp = delayBattle
+		delayBattle = null
+		activate_battle(temp)
+
 func activate_battle(newOpponents = null):
-	if !newOpponents and distanceTraveled > 1:
-		newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + currentDay, isDay)
-	battleWindow.visible = true
-	battleWindow.welcome_back(newOpponents)
+	if inventoryWindow.visible:
+		delayBattle = newOpponents
+	else:
+		$InventoryButton.visible = false
+		if currentDungeon:
+			newOpponents = Enemies.generate_encounter(DUNGEONDIFFICULTY + currentDay, false, currentDungeon.mascot)
+		elif !newOpponents and distanceTraveled > 1:
+			newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + currentDay, isDay)
+		battleWindow.visible = true
+		battleWindow.welcome_back(newOpponents)
 
 func grab_event(eventName): #used for premade events, generated events have their own system
 	calledEvent = eventName
@@ -141,6 +182,8 @@ func run_event(event):
 	var cond
 	var function
 	$Events.visible = true
+	for option in $Events/Choices.get_children():
+			option.queue_free()
 	for i in event["choices"].size():
 		if event.has("conditions") and typeof(event["conditions"][i]) == TYPE_ARRAY: #assess the condition
 			cond = event["conditions"][i]
@@ -152,11 +195,12 @@ func run_event(event):
 		yIncrement += choice.get_node("Button").rect_size.y
 		choice.get_node("Info").text = event["choices"][i]
 
-func finish_event():
-	for option in $Events/Choices.get_children():
-		option.queue_free()
-	$Events.visible = false
-	calledEvent = null #clearing this out is needed because it's checked to process event outcomes
+func finish_event(checkName):
+	if calledEvent == checkName:
+		for option in $Events/Choices.get_children():
+			option.queue_free()
+		$Events.visible = false
+		calledEvent = null #clearing this out is needed because it's checked to process event outcomes
 
 func make_points(nextPos):
 	var currentPoint = Point.instance()
@@ -203,7 +247,9 @@ func place_dungeons(possibleDungeons, borderPoints): #dungeons start in one sect
 	var dungeonLine
 	var entrySection
 	for border in possibleDungeons:
-		if border.empty(): return print("dungeon shortage")
+		if border.empty(): 
+			regen_map()
+			return print("dungeon shortage")
 		var newDungeon = Dungeon.instance()
 		$HolderHolder/DungeonHolder.add_child(newDungeon)
 		dungeonLine = border[randi() % border.size()]
@@ -221,6 +267,15 @@ func place_dungeons(possibleDungeons, borderPoints): #dungeons start in one sect
 		dungeonLine.dungeonize()
 		newDungeon.setup(dungeonLine)
 		place_town(newDungeon.exitLocation, borderPoints[entrySection])
+	classify_remaining_points()
+
+func place_temple(point):
+	var newTemple = Temple.instance()
+	point.set_name("Temple")
+	$HolderHolder/TempleHolder.add_child(newTemple)
+	newTemple.setup()
+	point.pointType = pointTypes.temple
+	point.info["templeIndex"] = point.sectionNum - 1
 
 func place_town(exitPoint, borderPoints): #towns are adjacent to dungeon exits and in the same section, if possible they are also on the border. ties broken by closeness to center
 	var checkPoint
@@ -233,7 +288,9 @@ func place_town(exitPoint, borderPoints): #towns are adjacent to dungeon exits a
 		if borderPoints.has(checkPoint): townSpots.append(checkPoint)
 		elif checkPoint.sectionNum == exitPoint.sectionNum: backupSpots.append(checkPoint)
 	if townSpots.empty(): 
-		if backupSpots.empty(): return print("no spots for town")
+		if backupSpots.empty(): 
+			regen_map()
+			return print("no spots for town")
 		print("backup spots")
 		townSpots = backupSpots
 	for i in townSpots.size():
@@ -254,27 +311,49 @@ func clean_up():
 			print("hiding null point")
 			point.visible = false
 	set_label(endIndex, "End", true)
+	endIndex.pointType = pointTypes.end
 	if !canEnd: 
 		print("disaster")
+		regen_map()
 	else: 
 		find_border_points()
 		#categorize_points()
 
+func regen_map():
+	print("---------------- New Map ----------------")
+	startIndex = null
+	endIndex = null
+	for holder in $HolderHolder.get_children():
+		if holder != $HolderHolder/DisplayHolder: #this one can stay
+			for child in holder.get_children():
+				holder.remove_child(child)
+				child.queue_free()
+	regens += 1
+	if regens < REGENLIMIT: make_points(Vector2(INCREMENT,INCREMENT*.5))
+	else: print("Bad map gen settings")
+
 func add_sections(divider):
 	var newSection
 	var sectionBG
+	var addedSections = []
 	for i in TOTALSECTIONS:
 		newSection = Section.instance()
 		$HolderHolder/SectionHolder.add_child(newSection)
+		addedSections.append(newSection)
 		sectionBG = newSection.get_node("BG")
 		sectionBG.margin_left = i * divider
 		sectionBG.margin_right = sectionBG.margin_left + divider
-	set_sections()
+	set_sections(addedSections)
 
-func set_sections():
+func set_sections(addedSections = null):
 	var sHolder = $HolderHolder/SectionHolder
-	for i in $HolderHolder/SectionHolder.get_child_count():
-		sHolder.get_child(i).visible = false if currentDay == i else true
+	if addedSections:
+		for i in addedSections.size():
+			addedSections[i].visible = false if currentDay == i else true
+	else:
+		for i in TOTALSECTIONS:
+			sHolder.get_child(i).visible = false if currentDay == i else true
+			print(sHolder.get_child(i).visible)
 
 func set_label(point, label, distance = false):
 	if distance: point.set_name(str(label, " ", point.clicksFromStart))
@@ -286,13 +365,38 @@ func organize_lines():
 		if !point.visible: #kill lines involving invisible points
 			for line in point.lines:
 				line.free()
-		else: #set start and end index among visible points, give points events
+		else: #set start and end index among visible points
 			if !startIndex: startIndex = point
 			elif point.position.x < startIndex.position.x: startIndex = point
 			if !endIndex: endIndex = point
 			elif point.position.x >= endIndex.position.x: endIndex = point
-			point.pointType = pointTypes.battle ###
-			if point.pointType == pointTypes.event: make_quest(point)
+
+func classify_remaining_points():
+	var remainingPoints = []
+	for point in $HolderHolder/PointHolder.get_children():
+		if point.visible and point.pointType == pointTypes.none:
+			remainingPoints.append(point)
+		
+	for i in TOTALSECTIONS:
+		var sectionPoints = []
+		for point in remainingPoints:
+			if point.sectionNum == i:
+				sectionPoints.append(point)
+		if sectionPoints.empty(): regen_map() #needs to be a really messed up mapgen for this, but if it happens it crashes
+		if i > 0:
+			var randoPoint = sectionPoints[randi() % sectionPoints.size()]
+			place_temple(randoPoint)
+			sectionPoints.erase(randoPoint)
+		var battleCount = ceil(sectionPoints.size() * .6)
+		while battleCount > 0:
+			var randoPoint = sectionPoints[randi() % sectionPoints.size()]
+			randoPoint.pointType = pointTypes.battle
+			sectionPoints.erase(randoPoint)
+			battleCount -= 1
+		sectionPoints.shuffle() #first 2 in the list get to be service rewards, so list needs to be randomized
+		for eventPoint in sectionPoints:
+			eventPoint.pointType = pointTypes.event
+			make_quest(eventPoint)
 
 func make_quest(point):
 	point.pointQuest = $Events.generate_event(Quests.generate_quest())

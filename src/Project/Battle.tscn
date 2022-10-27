@@ -32,7 +32,7 @@ Enemy = ExtResource( 9 )
 margin_left = 1.0
 margin_top = -5.0
 margin_right = 1284.0
-margin_bottom = 559.0
+margin_bottom = 443.0
 color = Color( 0.168627, 0.141176, 0.141176, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -41,9 +41,9 @@ __meta__ = {
 [node name="BattleBG" type="ColorRect" parent="."]
 modulate = Color( 0.733333, 1, 0, 1 )
 margin_left = 1.0
-margin_top = 72.0
+margin_top = -3.0
 margin_right = 1280.0
-margin_bottom = 560.0
+margin_bottom = 454.0
 color = Color( 0.168627, 0.141176, 0.141176, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -51,10 +51,10 @@ __meta__ = {
 
 [node name="GoButton" type="Button" parent="."]
 modulate = Color( 0.415686, 0, 0, 1 )
-margin_left = 587.376
-margin_top = 484.149
-margin_right = 695.376
-margin_bottom = 552.149
+margin_left = 586.0
+margin_top = 385.0
+margin_right = 694.0
+margin_bottom = 453.0
 text = "GO"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -83,8 +83,7 @@ __meta__ = {
 }
 
 [node name="Description" type="Label" parent="BattleUI"]
-margin_left = 948.0
-margin_top = 427.0
+margin_top = 455.0
 margin_right = 1277.0
 margin_bottom = 560.0
 custom_fonts/font = SubResource( 2 )
@@ -96,8 +95,10 @@ __meta__ = {
 [node name="ColorRect" type="ColorRect" parent="BattleUI/Description"]
 modulate = Color( 0, 0, 0, 1 )
 show_behind_parent = true
-margin_right = 335.355
-margin_bottom = 132.485
+margin_left = 1.0
+margin_top = -6.0
+margin_right = 1280.0
+margin_bottom = 103.0
 __meta__ = {
 "_edit_use_anchors_": false
 }

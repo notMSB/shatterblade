@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://src/Project/UI/Inventory.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/UI/BoxHolder.gd" type="Script" id=4]
@@ -14,6 +14,10 @@ font_data = ExtResource( 6 )
 [sub_resource type="DynamicFont" id=2]
 font_data = ExtResource( 6 )
 
+[sub_resource type="DynamicFont" id=3]
+size = 20
+font_data = ExtResource( 6 )
+
 [node name="Inventory" type="Node2D"]
 script = ExtResource( 1 )
 MoveBox = ExtResource( 9 )
@@ -23,7 +27,7 @@ modulate = Color( 0.733333, 1, 0, 1 )
 margin_left = 1.0
 margin_top = -9.0
 margin_right = 1280.0
-margin_bottom = 560.0
+margin_bottom = 452.0
 color = Color( 0.27451, 0.254902, 0.898039, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -31,10 +35,10 @@ __meta__ = {
 
 [node name="ActionButton" type="Button" parent="."]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
-margin_left = 587.0
-margin_top = 483.0
-margin_right = 695.0
-margin_bottom = 551.0
+margin_left = 586.0
+margin_top = 385.0
+margin_right = 694.0
+margin_bottom = 453.0
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
@@ -99,6 +103,27 @@ margin_right = 739.798
 margin_bottom = 57.4101
 custom_fonts/font = SubResource( 2 )
 align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Description" type="Label" parent="."]
+margin_top = 455.0
+margin_right = 1277.0
+margin_bottom = 560.0
+custom_fonts/font = SubResource( 3 )
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="Description"]
+modulate = Color( 0, 0, 0, 1 )
+show_behind_parent = true
+margin_left = 1.0
+margin_top = -6.0
+margin_right = 1280.0
+margin_bottom = 103.0
 __meta__ = {
 "_edit_use_anchors_": false
 }

@@ -81,6 +81,7 @@ func box_move(moveBox, move, isUseless = false):
 		moveBox.isCursed = true if moveData.has("cursed") else false
 		sprite_move(moveBox, move)
 	else:
+		moveBox.get_node("Name").text = move
 		sprite_move(moveBox, move, false)
 
 func sprite_move(box, boxName, isMove = true):
