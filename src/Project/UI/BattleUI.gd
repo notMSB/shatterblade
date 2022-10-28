@@ -62,30 +62,31 @@ func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false, disableCha
 		if !keepMoves or (keepMoves and box.buttonMode):
 			move = box.moves[box.moveIndex]
 			var moveData = Moves.moveList[move]
-			#print(str(move, box.timesEnabled))
+			#print(str(move, ": ",box.timesEnabled))
 			#Channels are disabled if the unit already has an action in the queue, broken equipment and unusables are always disabled
+			if turnStart: box.timesEnabled += 1
 			if (toggle and !(disableChannels and moveData.has("channel")) and box.currentUses != 0 and !moveData.has("unusable")
-			and !(box.timesUsed > 0 and moveData.has("uselimit")) and !(box.timesEnabled > 0 and moveData.has("turnlimit"))): 
-				toggle_single(box, true, turnStart)
+			and !(box.timesUsed > 0 and moveData.has("uselimit")) and !(box.timesEnabled > 1 and moveData.has("turnlimit"))): 
+				toggle_single(box, true)
 			else:
-				toggle_single(box, false, turnStart)
+				toggle_single(box, false)
 
-func toggle_single(box, toggle, turnStart = false): #true for purple false for black
+func toggle_single(box, toggle): #toggle true for purple, false for black
 	if toggle:
-		if turnStart: box.timesEnabled += 1
 		if box.moveType != Moves.moveType.item and box.trackerBar and box.trackerBar.value < box.resValue: #Check the resources before enabling a box
-			box.get_node("ColorRect").color = Color(.53,.3,.3,1)
+			box.change_rect_color(Color(.53,.3,.3,1))
+			box.get_node("ColorRect").visible = true
 			toggle = false #needed to disable the button
 		else: #box can be enabled
-			box.get_node("ColorRect").color = Color(.5,.1,.5,1)
+			box.change_rect_color(Color(.5,.1,.5,1))
 			box.buttonMode = true
 	else: #completely disable a box
-		box.get_node("ColorRect").color = Color(0,0,0,1)
+		box.change_rect_color(Color(0,0,0,1))
 	box.get_node("Button").visible = toggle
 	if box.moveIndex == 0: box.get_node("Info").text = "" #Prevents reloading from wiping text
 
 func choose_movebox(box, target = null): #happens when move and target are selected, turns movebox orange
-	box.get_node("ColorRect").color = Color(1,.6,.2,1)
+	box.change_rect_color(Color(1,.6,.2,1))
 	box.buttonMode = false
 	box.get_node("Button").visible = true
 	if target: box.updateInfo(target.name)

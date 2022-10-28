@@ -8,6 +8,7 @@ onready var Game = get_parent()
 
 func _on_Party_pressed():
 	add_scene(Party)
+	visible = true
 
 func _on_Inventory_pressed():
 	add_scene(Inventory)

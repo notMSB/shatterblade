@@ -18,7 +18,7 @@ onready var Boons = get_node("../Data/Boons")
 
 const INCREMENT = 90
 const KILLDISTANCE = 70 #lower kill distance means more points
-const MAXDISTANCE = 200
+const MAXDISTANCE = 199
 const FUZZ = 45 #should never be more than half of the increment
 const CORNER_CHECK = 20
 const DISTANCE_TIME_MULT = .05
@@ -39,11 +39,15 @@ var calledEvent
 var timeNode
 var favorNode
 
-const DIFFICULTYMODIFIER = -3
-const DUNGEONDIFFICULTY = 3
+const DIFFICULTYMODIFIER = -4
+const DUNGEONDIFFICULTY = [2, 3, 3, 4]
+const DAYTIME = 150
 var distanceTraveled = 0
-var time = 150
+var time = DAYTIME
 var currentDay = 0
+var currentArea = 0
+const AREADIFFICULTYMOD = 3
+const DAYDIFFICULTYMOD = 1
 var isDay = true
 var currentDungeon = null
 var currentTemple = null
@@ -91,6 +95,9 @@ func _ready():
 		for tracker in display.get_node("Trackers").get_children():
 			tracker.visible = false
 	get_parent().move_child(battleWindow, inventoryWindow.get_index())
+	var Party = get_parent().get_node_or_null("Party")
+	if Party: get_parent().move_child(Party, get_index())
+	set_time_text()
 
 func set_boon_text():
 	favorNode.get_node("Virtue").text = Boons.set_text()
@@ -124,11 +131,11 @@ func activate_point(point):
 		print("Start")
 	elif type == pointTypes.end: #todo: event asking if you want to end (and eventually a boss here)
 		print("End")
-		regen_map()
+		regen_map(true)
 	elif type == pointTypes.dungeon:
 		grab_event("Dungeon")
 	elif type == pointTypes.town:
-		var townValue = 1 if isDay else 1 #towns should only be open on their day or the night before it
+		var townValue = 0 if isDay else 1 #towns should only be open on their day or the night before it
 		townValue += currentDay
 		if townValue == point.sectionNum: grab_event("Town")
 		else: pass #todo: event saying town is closed
@@ -165,11 +172,16 @@ func activate_battle(newOpponents = null):
 	else:
 		$InventoryButton.visible = false
 		if currentDungeon:
-			newOpponents = Enemies.generate_encounter(DUNGEONDIFFICULTY + currentDay, false, currentDungeon.mascot)
+			var dungeonRando = DUNGEONDIFFICULTY[randi() % DUNGEONDIFFICULTY.size()]
+			newOpponents = Enemies.generate_encounter(dungeonRando + get_difficulty_mod(), false, currentDungeon.mascot)
 		elif !newOpponents and distanceTraveled > 1:
-			newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + currentDay, isDay)
+			newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + get_difficulty_mod(), isDay)
 		battleWindow.visible = true
 		battleWindow.welcome_back(newOpponents)
+
+func get_difficulty_mod():
+	var nightMod = 0 if isDay else 1
+	return DAYDIFFICULTYMOD * currentDay + AREADIFFICULTYMOD * currentArea + nightMod
 
 func grab_event(eventName): #used for premade events, generated events have their own system
 	calledEvent = eventName
@@ -319,8 +331,18 @@ func clean_up():
 		find_border_points()
 		#categorize_points()
 
-func regen_map():
+func regen_map(newMember = false):
 	print("---------------- New Map ----------------")
+	if newMember:
+		currentArea += 1
+		if global.storedParty.size() < 4:
+			var Party = get_parent().get_node_or_null("Party")
+			if Party:
+				Party.visible = true
+				Party.create_options(Party.OPTIONS)
+		else:
+			return get_tree().change_scene("res://src/Project/Win.tscn")
+			#you win !
 	startIndex = null
 	endIndex = null
 	for holder in $HolderHolder.get_children():
@@ -329,8 +351,28 @@ func regen_map():
 				holder.remove_child(child)
 				child.queue_free()
 	regens += 1
-	if regens < REGENLIMIT: make_points(Vector2(INCREMENT,INCREMENT*.5))
+	if regens < REGENLIMIT: 
+		make_points(Vector2(INCREMENT,INCREMENT*.5))
+		advance_day(true)
+		time = DAYTIME
+		set_time_text()
 	else: print("Bad map gen settings")
+
+func add_new_member():
+	var unit = global.storedParty[-1]
+	unit.Battle = battleWindow
+	unit._ready()
+	while unit.moves.size() < inventoryWindow.MOVESPACES:
+		unit.moves.append("X")
+	unit.ui = $HolderHolder/DisplayHolder.setup_player(unit, global.storedParty.size()-1)
+	unit.update_hp()
+	unit.ui.get_node("Name").text = Moves.get_classname(global.storedParty[unit.ui.get_index()].allowedType)
+	battleWindow.partyNum += 1
+	battleWindow.setup_player(global.storedParty.size()-1, true)
+	unit.ui.set_battle()
+	#for tracker in unit.ui.get_node("Trackers").get_children():
+	#	tracker.visible = false
+	Boons.call_boon("new_member", [inventoryWindow])
 
 func add_sections(divider):
 	var newSection
@@ -353,7 +395,6 @@ func set_sections(addedSections = null):
 	else:
 		for i in TOTALSECTIONS:
 			sHolder.get_child(i).visible = false if currentDay == i else true
-			print(sHolder.get_child(i).visible)
 
 func set_label(point, label, distance = false):
 	if distance: point.set_name(str(label, " ", point.clicksFromStart))
@@ -378,11 +419,14 @@ func classify_remaining_points():
 			remainingPoints.append(point)
 		
 	for i in TOTALSECTIONS:
+		Quests.servicesMade = 0
 		var sectionPoints = []
 		for point in remainingPoints:
 			if point.sectionNum == i:
 				sectionPoints.append(point)
-		if sectionPoints.empty(): regen_map() #needs to be a really messed up mapgen for this, but if it happens it crashes
+		if sectionPoints.empty(): 
+			regen_map() #needs to be a really messed up mapgen for this, but if it happens it crashes
+			return
 		if i > 0:
 			var randoPoint = sectionPoints[randi() % sectionPoints.size()]
 			place_temple(randoPoint)
@@ -472,21 +516,32 @@ func subtract_time(diff, refillAllMana = false):
 	if refillAllMana: update_mana()
 	else: update_mana(diff)
 	if time <= 0:
-		time = 150 + time
+		time = DAYTIME + time
 		advance_day()
-		timeNode.get_node("State").text = "Day"
 	elif time <= 50: 
 		isDay = false
-		timeNode.get_node("State").text = "Night"
+	set_time_text()
+
+func set_time_text():
+	timeNode.get_node("Area").text = "Area " + String(currentArea + 1)
+	if isDay: timeNode.get_node("State").text = "Day " + String(currentDay + 1)
+	else: timeNode.get_node("State").text = "Night"
 	timeNode.get_node("Hour").text = String(time)
 
-func advance_day():
+func eval_darkness(pointA, pointB):
+	if pointA.sectionNum != currentDay and pointB.sectionNum != currentDay and !currentDungeon:
+		for unit in global.storedParty:
+			unit.take_damage(currentArea+1)
+		battleWindow.evaluate_game_over()
+		battleWindow.evaluate_revives()
+
+func advance_day(reset = false):
 	isDay = true
-	currentDay += 1
+	if reset: currentDay = 0
+	else: currentDay += 1
 	set_sections()
 
 func update_favor(amount):
-	print(favorNode)
 	favorNode.get_node("Amount").text = String(amount)
 
 func update_mana(gain = null):

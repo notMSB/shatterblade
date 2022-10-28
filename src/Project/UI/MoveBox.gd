@@ -62,6 +62,11 @@ func set_uses(var newMax = null):
 		$Uses/Text.text = str(currentUses, "/", maxUses)
 		$Uses.rect_position.y = 7 if get_parent().name == "MoveBoxes" and get_index() <= 1 else 25
 
+func change_rect_color(color):
+	if $Sprite.visible: color.a = .5
+	$ColorRect.color = color
+	$ColorRect.visible = true
+
 func _on_Button_pressed():
 	boxModeScene = set_mode_scene()
 	if boxModeScene.name == "Inventory": #inventory

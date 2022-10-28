@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://src/Project/Units/Party.gd" type="Script" id=1]
+[ext_resource path="res://src/Project/UI/BoonSelect.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/Project/UI/ChoiceUI.tscn" type="PackedScene" id=5]
 [ext_resource path="res://src/Project/Units/Player.tscn" type="PackedScene" id=6]
 
@@ -8,5 +9,14 @@
 script = ExtResource( 1 )
 Player = ExtResource( 6 )
 ChoiceUI = ExtResource( 5 )
+BoonSelect = ExtResource( 2 )
+
+[node name="ColorRect" type="ColorRect" parent="."]
+margin_right = 1301.0
+margin_bottom = 726.0
+color = Color( 0.345098, 0.345098, 0.345098, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Choices" type="Node2D" parent="."]

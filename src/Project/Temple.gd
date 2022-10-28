@@ -52,14 +52,15 @@ func select_pressed(boonSelect):
 	var boonName = boonSelect.name
 	var upgrade = false
 	if boonSelect.clickCost and Boons.favor >= boonSelect.clickCost:
+		Boons.grant_favor(-1 * boonSelect.clickCost)
 		for i in Boons.playerBoons.size():
 			if Boons.playerBoons[i] == boonName:
 				Boons.get_node(boonName).level += 1
-				Boons.call_boon("level_up", [Map.inventoryWindow])
+				Boons.call_specific("level_up", [Map.inventoryWindow], boonName)
 				upgrade = true
 		if !upgrade:
 			Boons.create_boon(boonName)
-			Boons.call_boon("added_boon", [Map.inventoryWindow])
+			Boons.call_specific("added_boon", [Map.inventoryWindow], boonName)
 		get_price(boonSelect, boonName)
 		Map.set_boon_text()
 

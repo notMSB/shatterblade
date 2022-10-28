@@ -3,13 +3,14 @@ extends Node2D
 export (PackedScene) var MoveBox
 
 const XSTART = 360
-const YSTART = 125
+const YSTART = 200
+const CRAFTYSTART = 125
 
 const XINCREMENT = 80
 const YINCREMENT = 60
 
 const XMAX = 8
-const YMAX = 4
+const YMAX = 2
 const CRAFTBOXES = 3
 const DEFAULTCOLOR = Color(.53,.3,.3,1)
 const MOVEHOLDER = "moves"
@@ -51,7 +52,7 @@ var mode = iModes.craft
 
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
 	if global.itemDict.empty():
-		global.itemDict = {"fang": 2, "wing": 2, "talon": 3, "sap": 4, "venom": 6, "fur": 2, "blade": 2, "bone": 2, "wood": 1, "moves": ["War Horn", "Bone Zone", "Power Glove", "Cape", "Silver"]}
+		global.itemDict = {"moves": ["Health Potion", "Coin", "Coin"]}
 	MOVESPACES += Boons.call_boon("prep_inventory")
 	if !Trading.assigned: Trading.assign_component_values()
 	dHolder = $HolderHolder/DisplayHolder
@@ -101,12 +102,18 @@ func shuffle_trade_stock():
 		var maxItems = tHolder.get_child_count()
 		for i in global.storedParty.size():
 			restock.append(rando_move(i))
-		restock.append(rando_relic())
+		var relic = rando_relic() #todo: something about this
+		if relic != "Silver":
+			restock.append(relic)
+		relic = rando_relic()
+		if relic != "Silver":
+			restock.append(relic)
 		restock.append(rando_item())
 		restock.append(rando_item())
+		restock.append(rando_component())
+		restock.append(rando_component())
 		while restock.size() < maxItems:
 			restock.append("Coin")
-			restock.append(rando_component())
 	else:
 		restock = get_node("../Map").activePoint.traderStock
 	Trading.stock = restock
@@ -116,7 +123,11 @@ func restock_trade():
 	var box
 	for i in tHolder.get_child_count():
 		box = tHolder.get_child(i)
-		box.get_node("Name").text = Trading.stock[i] if Trading.stock.size() > i else "X"
+		if Trading.stock.size() > i:
+			dHolder.box_move(box, Trading.stock[i])
+			box.set_uses(Moves.get_uses(Trading.stock[i]))
+		else:
+			dHolder.box_move(box, "X")
 		identify_product(box)
 
 func rando_component():
@@ -209,7 +220,7 @@ func make_actionboxes(boxCount, boxMode):
 	for i in boxCount:
 		box = MoveBox.instance()
 		usedHolder.add_child(box)
-		box.position.y = YSTART*3.25
+		box.position.y = CRAFTYSTART*3.25
 		if boxMode == iModes.craft: 
 			box.position.x = XSTART*1.25 + (i*i*XINCREMENT) #different spacing for crafting/trading
 			if i == boxCount - 1: #The crafting product box shouldn't be clickable
@@ -217,7 +228,8 @@ func make_actionboxes(boxCount, boxMode):
 				productBox = box
 		elif boxMode == iModes.trade: 
 			box.position.x = XSTART - 160 + (i * XINCREMENT)
-			box.get_node("Name").text = Trading.stock[i] if Trading.stock.size() > i else "X"
+			if Trading.stock.size() > i: dHolder.box_move(box, Trading.stock[i])
+			else: dHolder.box_move(box, "X")
 			identify_product(box)
 		else: #offer
 			box.position.x = XSTART * 1.77
@@ -305,10 +317,10 @@ func isValidMove(boxName):
 func check_crafts(craftBox, otherBox):
 	var didSwap = false
 	var boxName = otherBox.get_node("Name").text
-	if Crafting.c.get(boxName): 
+	if Crafting.c.keys().has(boxName):
 		swap_boxes(craftBox, otherBox)
 		didSwap = true
-	if isValidMove(boxName) or boxName == "X":
+	elif isValidMove(boxName) or boxName == "X":
 		if otherBox.get_parent().name == "MoveBoxes":
 			didSwap = player_inv_check(otherBox, craftBox) #returns true/false and does a swap
 			craftingRestriction = Crafting.break_down(boxName)
@@ -318,7 +330,6 @@ func check_crafts(craftBox, otherBox):
 			craftingRestriction = Crafting.break_down(boxName)
 	if didSwap:
 		var productName = productBox.get_node("Name")
-		dHolder.box_move(productBox, productName.text)
 		if productName.text != "X":
 			productName.text = "X" #Reset the field in case something was already there from prior
 			productBox.get_node("ColorRect").color = DEFAULTCOLOR
@@ -342,11 +353,19 @@ func check_crafts(craftBox, otherBox):
 			else:
 				productName.text = Crafting.sort_then_combine(Crafting.c.get(components[0]), Crafting.c.get(components[1])) #Get result from table
 				#productName.text = product #Put result name in product box
+				dHolder.box_move(productBox, productName.text)
 				identify_product(productBox)
 				productBox.set_uses(Moves.get_uses(productName.text))
 				toggle_action_button(true, "Craft")
 		else: #replacing a valid box with an invalid one would yield this result
+			for i in components.size():
+				if isValidMove(components[i]):
+					craftingRestriction = Crafting.break_down(components[i])
+					break
+				else:
+					craftingRestriction = null
 			toggle_action_button(false)
+			clear_box(productBox)
 	else:
 		deselect_multi([craftBox, otherBox])
 
@@ -417,7 +436,7 @@ func assess_trade_value():
 	currentTraderValue = Trading.get_inventory_value(newStock)
 	$Current.text = String(currentTraderValue)
 	$ExitButton.visible = true if currentTraderValue >= initialTraderValue else false
-	$ExitButton.visible = check_for_curses(newStock)
+	if $ExitButton.visible: $ExitButton.visible = check_for_curses(newStock)
 
 func check_for_curses(stock):
 	for item in stock:
@@ -468,7 +487,7 @@ func confirm_craft():
 func add_item(itemName, newUses = false, openWindow = false): #todo: case for full inventory
 	var openBox = xCheck()
 	if openBox and !openWindow: #normal use case
-		openBox.get_node("Name").text = itemName #Put product in there
+		dHolder.box_move(openBox, itemName)
 		identify_product(openBox)
 		if newUses: openBox.set_uses(Moves.get_uses(itemName))
 		update_itemDict(itemName)

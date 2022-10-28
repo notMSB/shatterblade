@@ -102,10 +102,23 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="VirtueStatus" type="Label" parent="BattleElements"]
+margin_left = 19.0
+margin_top = -39.0
+margin_right = 38.0
+margin_bottom = -15.0
+custom_colors/font_color = Color( 0.847059, 0.870588, 0.133333, 1 )
+custom_fonts/font = SubResource( 1 )
+align = 2
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Strength" type="Label" parent="BattleElements"]
-margin_left = -4.2505
+margin_left = -5.2505
 margin_top = 0.188301
-margin_right = 39.7495
+margin_right = 38.7495
 margin_bottom = 24.1883
 custom_fonts/font = SubResource( 1 )
 align = 2

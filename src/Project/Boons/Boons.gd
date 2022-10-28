@@ -1,6 +1,6 @@
 extends Node2D
 
-enum v {none, j, s, t}
+enum v {j, s, t, none}
 const DEFAULTREWARD = 5
 
 const PATH = "res://src/Project/Boons/"
@@ -9,8 +9,8 @@ var Map #when the map loads in it sets itself to this
 
 var boonList
 var playerBoons = []
-var chosen = v.j
-var favor = 200
+var chosen = v.none
+var favor = 0
 
 #At some point every boon will be its own node/script with functions activated from this one
 
@@ -45,6 +45,18 @@ func call_boon(callName, args = []): #callName is a string representing a functi
 		subFunc = funcref(boon, callName)
 		if subFunc.is_valid(): checkVal = subFunc.call_funcv(args)
 		if checkVal != null: returnVal = checkVal
+	return returnVal if returnVal else 0
+
+func call_specific(callName, args = [], boonName = ""): #todo: reconcile this and above function
+	var subFunc
+	var checkVal
+	var returnVal
+	for boon in get_children():
+		if boon.name == boonName:
+			subFunc = funcref(boon, callName)
+			if subFunc.is_valid(): checkVal = subFunc.call_funcv(args)
+			if checkVal != null: returnVal = checkVal
+			break
 	return returnVal if returnVal else 0
 
 func set_text():

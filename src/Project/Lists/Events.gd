@@ -176,6 +176,7 @@ func rest():
 		Map.subtract_time(Map.NIGHTLENGTH, true)
 		for unit in global.storedParty:
 			unit.currentHealth = unit.maxHealth
+			unit.update_hp()
 	else:
 		pass
 

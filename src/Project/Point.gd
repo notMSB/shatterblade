@@ -50,26 +50,28 @@ func set_name(text):
 	$Name.text = str(text)
 
 func _on_Button_pressed():
-	Map.activePoint.toggle_activation(false) #toggle off map's active node
-	toggle_activation(true) #this is now the map's active node
-	if true:
-		return #done
-	elif !Map.get_node("Events").visible and self != Map.activePoint:
-		var movementLine
-		for line in lines:
-			movementLine = check_neighbor(line, true) #exclude dungeon lines
-			if movementLine: #the nodes are adjacent
-				if Map.currentDungeon: 
-					Map.currentDungeon.evaluate_exit(self)
-					Map.subtract_time(1)
-				else:
-					Map.subtract_time(ceil(movementLine.points[0].distance_to(movementLine.points[1]) * Map.DISTANCE_TIME_MULT))
-				Map.activePoint.toggle_activation(false) #toggle off map's active node
-				toggle_activation(true) #this is now the map's active node
-				return #done
+	if !Map.get_node("Events").visible:
+		if Map.activePoint == self:
+			Map.activePoint.toggle_activation(false)
+			toggle_activation(true)
+			return
+		else:
+			var movementLine
+			for line in lines:
+				movementLine = check_neighbor(line, true) #exclude dungeon lines
+				if movementLine: #the nodes are adjacent
+					if Map.currentDungeon: 
+						Map.currentDungeon.evaluate_exit(self)
+						Map.subtract_time(1)
+					else:
+						Map.subtract_time(ceil(movementLine.points[0].distance_to(movementLine.points[1]) * Map.DISTANCE_TIME_MULT))
+					Map.eval_darkness(Map.activePoint, self)
+					Map.activePoint.toggle_activation(false) #toggle off map's active node
+					toggle_activation(true) #this is now the map's active node
+					return #done
 
 func _on_Button_mouse_entered():
-	if sectionNum != Map.currentDay: pass
+	if sectionNum != Map.currentDay and !Map.currentDungeon: pass
 	elif pointType == Map.pointTypes.event and pointQuest:
 		if !Map.isDay: Map.set_description("battle")
 		var desc = str(pointQuest["description"], "\n", pointQuest["objective"])

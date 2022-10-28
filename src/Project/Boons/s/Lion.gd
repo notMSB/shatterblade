@@ -3,7 +3,7 @@ extends Node
 var Boons
 
 const REWARD = 5
-var level = 1
+var level = 0
 
 func start_battle(_startingHealth): #make thorns passive
 	for unit in global.storedParty:

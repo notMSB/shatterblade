@@ -51,6 +51,8 @@ func take_damage(damageVal):
 			if !isPlayer: 
 				Battle.deadEnemies += 1
 				Battle.evaluate_completion(self)
+			else:
+				Battle.evaluate_game_over()
 		return damageVal
 
 func heal(healVal):

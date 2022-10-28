@@ -30,6 +30,13 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Scales" type="Sprite" parent="."]
+visible = false
+modulate = Color( 0.85098, 1, 0, 1 )
+position = Vector2( 29.1352, 10.6001 )
+scale = Vector2( 0.172295, 0.172295 )
+texture = ExtResource( 3 )
+
 [node name="Name" type="Label" parent="."]
 margin_left = -38.2001
 margin_top = -19.1893

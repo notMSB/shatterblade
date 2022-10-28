@@ -49,7 +49,9 @@ func create_move(unit, playerCount, posIndex):
 			if move == "X": move = "Defend"
 			moveBox.position.y += PLAYERINCREMENT*.25
 	else: #set up other moves
-		move = unit.moves[posIndex - DEFAULTMOVES]
+		if unit.moves.size() < posIndex - DEFAULTMOVES + 1:
+			move = "X"
+		else: move = unit.moves[posIndex - DEFAULTMOVES]
 		moveBox.position.x = xPos - PLAYERINCREMENT*posIndex if playerCount % 2 == 0 else xPos + PLAYERINCREMENT*posIndex
 	if Moves.moveList[move].has("resVal"):
 		moveBox.resValue = Moves.moveList[move]["resVal"]
@@ -88,6 +90,11 @@ func sprite_move(box, boxName, isMove = true):
 	var sprite = box.get_node("Sprite")
 	var cRect = box.get_node("ColorRect")
 	var spritePath
+	if boxName[-1] == "+":
+		boxName.erase(boxName.length() - 1, 1)
+		box.get_node("Name").modulate = Color(1, 1, 0, 1)
+	else:
+		box.get_node("Name").modulate = Color(1, 1, 1, 1)
 	if isMove: spritePath = str("res://src/Assets/Icons/Moves/", boxName, ".png")
 	else: spritePath = str("res://src/Assets/Icons/Components/", boxName, ".png")
 	var tempFile = File.new()

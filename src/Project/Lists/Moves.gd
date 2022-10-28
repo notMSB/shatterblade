@@ -1,6 +1,6 @@
 extends Node2D
 
-const DEFAULTUSESDAMAGE = 4
+const DEFAULTUSESDAMAGE = 6
 const DEFAULTUSESOTHER = 8
 
 var Battle
@@ -13,7 +13,7 @@ enum targetType {enemy, enemies, enemyTargets, ally, allies, user, none}
 
 func _ready():
 	moveList = {
-	"Attack": {"target": targetType.enemy, "damage": 3, "resVal": 0, "slot": equipType.relic, "type": moveType.basic},
+	"Attack": {"target": targetType.enemy, "damage": 4, "resVal": 0, "slot": equipType.relic, "type": moveType.basic},
 	"Defend": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5], "description": "Adds 5 shield", "slot": equipType.relic, "type": moveType.basic},
 	
 	"Earthshaker": {"target": targetType.enemies, "damage": 10, "resVal": 60, "status": "Stun", "value": 1, "type": 1},
@@ -21,54 +21,54 @@ func _ready():
 	"Special Boy": {"target": targetType.enemy, "damage": 5, "resVal": 50, "hits": "moveUser:specials", "description": "One hit for every known special", "type": 1},
 	
 	
-	"Careful Strike": {"target": targetType.enemy, "damage": 3, "resVal": 20, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5], "description": "Deals danage and blocks", "slot": equipType.gear, "type": moveType.special},
-	"Cleave": {"target": targetType.enemies, "damage": 5, "resVal": 30, "slot": equipType.gear, "type": moveType.special},
-	"Dive Bomb": {"target": targetType.enemy, "damage": 15, "resVal": 20, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .2], "description": "User takes 20% of damage dealt back in recoil", "slot": equipType.gear, "type": moveType.special},
-	"Pierce": {"target": targetType.enemyTargets, "damage": 4, "resVal": 25, "slot": equipType.gear, "type": moveType.special},
-	"Poison Strike": {"target": targetType.enemy, "damage": 2, "resVal": 15, "status": "Poison", "value": 5, "quick": true, "slot": equipType.gear, "type": moveType.special},
-	"Power Attack": {"target": targetType.enemy, "damage": 12, "resVal": 20, "slot": equipType.gear, "type": moveType.special},
+	"Careful Strike": {"target": targetType.enemy, "damage": 8, "resVal": 20, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5], "description": "Deals danmge and then blocks for 5", "slot": equipType.gear, "type": moveType.special},
+	"Cleave": {"target": targetType.enemies, "damage": 12, "resVal": 30, "slot": equipType.gear, "type": moveType.special},
+	"Dive Bomb": {"target": targetType.enemy, "damage": 16, "resVal": 15, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .2], "description": "20% recoil", "slot": equipType.gear, "type": moveType.special},
+	"Pierce": {"target": targetType.enemyTargets, "damage": 10, "resVal": 15, "slot": equipType.gear, "type": moveType.special},
+	"Poison Strike": {"target": targetType.enemy, "damage": 1, "resVal": 15, "status": "Poison", "value": 4, "quick": true, "slot": equipType.gear, "type": moveType.special},
+	"Power Attack": {"target": targetType.enemy, "damage": 13, "resVal": 20, "slot": equipType.gear, "type": moveType.special},
 	"Take Down": {"target": targetType.enemy, "damage": 7, "resVal": 30, "status": "Stun", "value": 1, "slot": equipType.gear, "type": moveType.special},
-	"Triple Hit": {"target": targetType.enemy, "damage": 3, "resVal": 30, "hits": 3, "slot": equipType.gear, "type": moveType.special},
-	"Vampire": {"target": targetType.enemy, "damage": 5, "resVal": 30, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", -.2], "description": "User heals 10% of damage dealt", "slot": equipType.gear, "type": moveType.special},
+	"Triple Hit": {"target": targetType.enemy, "damage": 3, "resVal": 20, "hits": 3, "slot": equipType.gear, "type": moveType.special},
+	"Vampire": {"target": targetType.enemy, "damage": 5, "resVal": 15, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", -.2], "description": "20% lifesteal", "slot": equipType.gear, "type": moveType.special},
 	
 	"Flex": {"target": targetType.user, "resVal": 25, "status": "Double Damage", "value": 1, "quick": true, "slot": equipType.gear, "type": moveType.special},
-	"Protect": {"target": targetType.ally, "resVal": 10, "effect": funcref(self, "switch_intents"), "args": ["moveTarget", "moveUser"], "quick": true, "slot": equipType.gear, "type": moveType.special},
-	"Turtle Up": {"target": targetType.user, "resVal": 20, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5, funcref(self, "get_enemy_targeters")], "description": "Shields more for each enemy targeting the user", "slot": equipType.gear, "type": moveType.special},
+	"Protect": {"target": targetType.ally, "resVal": 5, "effect": funcref(self, "switch_intents"), "args": ["moveTarget", "moveUser"], "quick": true, "slot": equipType.gear, "type": moveType.special, "description": "Enemy attacks intended for target change to user"},
+	"Turtle Up": {"target": targetType.user, "resVal": 15, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5, funcref(self, "get_enemy_targeters")], "description": "Shields more for each enemy targeting the user", "slot": equipType.gear, "type": moveType.special},
 	
 	
 	"Constrict": {"target": targetType.enemy, "damage": 5, "resVal": 20, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Stun", funcref(self, "is_unit_poisoned")], "description": "Stuns target if they are poisoned", "slot": equipType.gear, "type": moveType.magic},
 	"Frostfang": {"target": targetType.enemy, "damage": 10, "resVal": 20, "status": "Chill", "value": 50, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", .5, true], "description": "Multiplies target chill by 1.5 after the hit", "slot": equipType.gear, "type": moveType.magic},
-	"Plague": {"target": targetType.enemies, "damaging": true, "resVal": 30, "status": "Poison", "value": 5, "slot": equipType.gear, "type": moveType.magic},
-	"Venoshock": {"target": targetType.enemy, "damaging": true, "resVal": 10, "status": "Poison", "value": 5, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", funcref(self, "get_target_poison")],"description": "Inflict 5 poison on an enemy. Shield 1 for every poison that enemy has.", "slot": equipType.gear, "type": moveType.magic},
+	"Plague": {"target": targetType.enemies, "damaging": true, "resVal": 30, "status": "Poison", "value": 4, "slot": equipType.gear, "type": moveType.magic, "uses": 6},
+	"Venoshock": {"target": targetType.enemy, "damaging": true, "resVal": 10, "status": "Poison", "value": 5, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", funcref(self, "get_unit_poison")],"description": "Inflict 5 poison on an enemy. Shield 1 for every poison that enemy has.", "slot": equipType.gear, "type": moveType.magic},
 	
 	"Dodge": {"target": targetType.user, "resVal": 20, "status": "Dodgy", "value": 1, "slot": equipType.gear, "type": moveType.magic},
-	"Growth": {"target": targetType.ally, "resVal": 10, "effect": funcref(self, "change_attribute"), "args": ["moveTarget", "strength", 5], "description": "Strength +5 for the battle", "slot": equipType.gear, "type": moveType.magic},
-	"Hide": {"target": targetType.ally, "resVal": 5, "effect": funcref(self, "switch_intents"), "args": ["moveUser", "moveTarget"], "slot": equipType.gear, "type": moveType.magic},
-	"Restore": {"target": targetType.ally, "resVal": 5, "healing": 5, "slot": equipType.gear, "type": moveType.magic},
+	"Growth": {"target": targetType.ally, "resVal": 10, "effect": funcref(self, "change_attribute"), "args": ["moveTarget", "strength", 3], "description": "Once per battle, ally strength +3", "slot": equipType.gear, "type": moveType.magic, "uselimit": 1},
+	"Hide": {"target": targetType.ally, "resVal": 5, "effect": funcref(self, "switch_intents"), "args": ["moveUser", "moveTarget"], "slot": equipType.gear, "type": moveType.magic, "quick": true, "description": "Enemy attacks intended for user change to target"},
+	"Restore": {"target": targetType.ally, "resVal": 5, "healing": 5, "slot": equipType.gear, "type": moveType.magic, "quick": true},
 	
 	
-	"Coldsteel": {"target": targetType.enemy, "damage": 5, "resVal": 2, "status": "Chill", "value": 50, "hits": 2, "slot": equipType.gear, "type": moveType.trick},
-	"Crusher Claw": {"target": targetType.enemy, "damage": 6, "resVal": 2, "timing": timings.before, "effect": funcref(self, "add_hits"), "args": ["moveTarget:shield", 0, 2, false], "description": "Extra hit if the target has shields", "slot": equipType.gear, "type": moveType.trick},
-	"Piercing Sting": {"target": targetType.enemy, "damage": 10, "resVal": 5, "status": "Poison", "value": 5, "slot": equipType.gear, "type": moveType.trick},
-	"Quick Attack": {"target": targetType.enemy, "damage": 3, "resVal": 5, "quick": true, "slot": equipType.gear, "type": moveType.trick},
-	"Sucker Punch": {"target": targetType.enemy, "damage": 6, "resVal": 3, "effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 2], "description": "Extra hit if enemy targets user", "slot": equipType.gear, "type": moveType.trick},
-	"Bonemerang": {"target": targetType.enemy, "damage": 4, "resVal": 1, "quick": true, "cycle": ["Catch"], "slot": equipType.gear, "type": moveType.trick, "uses": 12},
+	"Coldsteel": {"target": targetType.enemy, "damage": 5, "resVal": 3, "status": "Chill", "value": 25, "hits": 2, "slot": equipType.gear, "type": moveType.trick},
+	"Crusher Claw": {"target": targetType.enemy, "damage": 8, "resVal": 2, "timing": timings.before, "effect": funcref(self, "crusher_claw"), "args": ["moveTarget", 1], "description": "Double hits if the target has shields or dodge", "slot": equipType.gear, "type": moveType.trick},
+	"Piercing Sting": {"target": targetType.enemy, "damage": 11, "resVal": 5, "status": "Poison", "value": 6, "slot": equipType.gear, "type": moveType.trick, "uses": 4},
+	"Quick Attack": {"target": targetType.enemy, "damage": 6, "resVal": 2, "quick": true, "slot": equipType.gear, "type": moveType.trick},
+	"Sucker Punch": {"target": targetType.enemy, "damage": 7, "resVal": 3, "effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 1], "description": "Double hits if enemy targets user", "slot": equipType.gear, "type": moveType.trick},
+	"Bonemerang": {"target": targetType.enemy, "damage": 4, "resVal": 1, "quick": true, "cycle": ["Catch"], "slot": equipType.gear, "type": moveType.trick, "uses": 12, "description": "Must be caught or else it is lost"},
 	
 	"Taunt": {"target": targetType.enemy, "status": "Provoke", "value": 1, "resVal": 2, "quick": true, "slot": equipType.gear, "type": moveType.trick},
 	"Eye Poke": {"target": targetType.enemy,"resVal": 2, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Stun", funcref(self, "is_enemy_targeting_user")], "description": "Inflict stun if enemy is targeting the user.", "slot": equipType.gear, "type": moveType.trick},
 	
 	"Reload": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "slot": equipType.none, "type": moveType.trick},
-	"Catch": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "slot": equipType.none, "type": moveType.trick, "turnlimit": 1},
+	"Catch": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "slot": equipType.none, "type": moveType.trick, "turnlimit": 1, "description": "Use it or lose it."},
 	
 	"Speed Potion": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "give_status"), "args": ["moveUser", "Dodgy", funcref(self, "get_enemy_targeters")], "description": "Gives 1 dodge for every enemy targeting user", "slot": equipType.gear, "type": moveType.item},
-	"Throwing Knife": {"target": targetType.enemy, "damage": 8, "resVal": 0, "slot": equipType.gear, "type": moveType.item, "uses": 2},
+	"Throwing Knife": {"target": targetType.enemy, "damage": 8, "resVal": 0, "slot": equipType.gear, "type": moveType.item, "uses": 4, "quick": true},
 	"Brass Knuckles": {"target": targetType.enemy, "status": "Stun", "value": 1, "resVal": 0, "slot": equipType.gear, "type": moveType.item},
 	"Health Potion": {"target": targetType.ally, "resVal": 0, "healing": 20, "slot": equipType.gear, "type": moveType.item},
 	"Poison Potion": {"target": targetType.enemy, "resVal": 0, "status": "Poison", "value": 10, "slot": equipType.gear, "type": moveType.item},
-	"Leather Buckler": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 15], "description": "Adds 15 shield", "slot": equipType.gear, "type": moveType.item},
+	"Leather Buckler": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 10], "description": "Adds 10 shield", "slot": equipType.gear, "type": moveType.item, "quick": true},
 	"Storm of Steel": {"target": targetType.enemy, "damage": 2, "resVal": 0, "slot": equipType.gear, "type": moveType.item, "hits": 12, "barrage": true},
-	"Bone Zone": {"target": targetType.user, "resVal": 0, "quick": true ,"effect": funcref(self, "fill_boxes"), "args": ["moveUser", "Bone Attack"], "description": "bones", "slot": equipType.gear, "type": moveType.item},
-	"Bone Attack": {"slot": equipType.none, "resVal": 0 ,"type": moveType.none, "uselimit": 1, "fleeting": true, "target": targetType.enemy, "damage": 7, "quick": true},
+	"Bone Zone": {"target": targetType.user, "resVal": 0, "quick": true ,"effect": funcref(self, "fill_boxes"), "args": ["moveUser", "Bone Attack"], "description": "bones", "slot": equipType.gear, "type": moveType.item, "uses": 1},
+	"Bone Attack": {"slot": equipType.none, "resVal": 0 ,"type": moveType.none, "uselimit": 1, "fleeting": true, "target": targetType.enemy, "damage": 7, "quick": true, "uses": 1},
 	
 	"Rock": {"slot": equipType.none, "type": moveType.none, "resVal": 0,"uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 1, "quick": true, "cursed": true},
 	"Rock+": {"slot": equipType.none, "type": moveType.none, "resVal": 0,"uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 3, "quick": true, "cursed": true},
@@ -76,25 +76,25 @@ func _ready():
 	"Stick+": {"slot": equipType.none, "type": moveType.none, "uselimit": 1, "cycle": true, "target": targetType.enemy, "damage": 10, "cursed": true},
 	
 	"Coin": {"slot": equipType.none, "type": moveType.none, "unusable": true, "unequippable": true ,"price": 1},
-	"Silver": {"slot": equipType.none, "type": moveType.none, "unusable": true, "unequippable": true ,"price": 10},
+	"Silver": {"slot": equipType.none, "type": moveType.none, "unusable": true, "unequippable": true ,"price": 10, "obtainable": true, "rarity": rarities.uncommon},
 	
-	"Bracers": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "strength": 1, "price": 5},
+	"Bracers": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "strength": 1, "price": 5, "description": "+1 strength"},
 	"Cape": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "passive": ["Dodgy", 1], "price": 5},
-	"Stabilizer": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.rare, "uses": 5, "target": targetType.user, "resVal": 0, "status": "Durability Redirect", "value": 1, "quick": true},
-	"Cloak of Visibility": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "passive": ["Provoke", 0], "price": 5},
+	"Stabilizer": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.rare, "uses": 5, "target": targetType.user, "resVal": 0, "status": "Durability Redirect", "value": 1, "quick": true, "description": "When used, soaks all spent durability for the turn"},
+	"Cloak of Visibility": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "passive": ["Provoke", 0], "description": "Enemies are more likely to target the wearer"},
 	
-	"Power Glove": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.uncommon, "morph": ["Attack+", "Defend+"]},
-	"Attack+": {"slot": equipType.relic, "type": moveType.none, "morph": ["Attack+", "Defend+", "Power Glove"], "target": targetType.enemy, "damage": 6, "resVal": 0, "price": 0},
+	"Power Glove": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.uncommon, "morph": ["Attack+", "Defend+"], "description": "Upgrades the basic moveslot it's placed in"},
+	"Attack+": {"slot": equipType.relic, "type": moveType.none, "morph": ["Attack+", "Defend+", "Power Glove"], "target": targetType.enemy, "damage": 8, "resVal": 0, "price": 0},
 	"Defend+": {"slot": equipType.relic, "type": moveType.none, "morph": ["Attack+", "Defend+", "Power Glove"], "target": targetType.user, "resVal": 0, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 10], "description": "Adds 10 shield", "price": 0},
 	
-	"War Horn": {"target": targetType.user, "rarity": rarities.uncommon, "resVal": 0, "channel": true, "quick": true, "uselimit": 1, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "tempStrength", 2, "turnCount"], "description": "Attacks used this turn deal extra damage which increases every turn.", "slot": equipType.relic, "type": moveType.special},
-	"Osmosis Device": {"slot": equipType.relic, "type": moveType.magic, "rarity": rarities.uncommon, "unusable": true, "passive": ["Gain Mana", 1]},
+	"War Horn": {"target": targetType.user, "rarity": rarities.uncommon, "resVal": 0, "channel": true, "quick": true, "uselimit": 1, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "tempStrength", 1, "turnCount"], "description": "Attacks used this turn deal extra damage, which increases every turn.", "slot": equipType.relic, "type": moveType.special},
+	"Osmosis Device": {"slot": equipType.relic, "type": moveType.magic, "rarity": rarities.uncommon, "unusable": true, "passive": ["Gain Mana", 1], "description": "Kills restore mana"},
 	"Power Loader": {"slot": equipType.relic, "type": moveType.trick, "rarity": rarities.uncommon, "unusable": true, "discount": [["Reload", 1], ["Catch", 1]], "description": "Reloads cost 1 less."},
 	
-	"Crown": {"slot": equipType.relic, "type": moveType.none, "cursed": true, "resVal": 0, "channel": true, "damage": 10, "target": targetType.enemy, "uselimit": 1, "price": 0},
+	"Crown": {"slot": equipType.relic, "type": moveType.none, "cursed": true, "resVal": 0, "channel": true, "damage": 10, "target": targetType.enemy, "uselimit": 1, "price": 0, "description": "definitely not cursed"},
 	"Crown+": {"slot": equipType.relic, "type": moveType.none, "cursed": true, "resVal": 0, "channel": true, "damage": 10, "target": targetType.enemies, "uselimit": 1, "price": 0},
 	
-	"X": {"slot": equipType.any, "type": moveType.none, "resVal": 999} #temp
+	"X": {"slot": equipType.any, "type": moveType.none, "resVal": 999, "uses": 0} #temp
 }
 
 func get_classname(type):
@@ -112,7 +112,7 @@ func get_relics():
 	var weight
 	for move in moveList:
 		moveData = moveList[move]
-		if moveData.has("slot") and moveData["slot"] == equipType.relic:
+		if (moveData.has("slot") and moveData["slot"] == equipType.relic) or moveData.has("obtainable"):
 			if moveData.has("rarity"):
 				weight = moveData["rarity"]
 			else: weight = 0
@@ -125,8 +125,8 @@ func get_uses(moveName):
 	if moveList[moveName].has("uses"): return moveList[moveName]["uses"]
 	if moveList[moveName]["type"] <= moveType.basic: return -1
 	if moveList[moveName]["slot"] == equipType.relic: return -1
-	if moveList[moveName]["type"] == moveType.item: return 1
-	if moveList[moveName].has("damage"): return DEFAULTUSESDAMAGE
+	if moveList[moveName]["type"] == moveType.item: return 2
+	if moveList[moveName].has("damage") or moveList[moveName].has("damaging"): return DEFAULTUSESDAMAGE
 	return DEFAULTUSESOTHER
 
 func get_description(moveName):
@@ -142,14 +142,23 @@ func get_description(moveName):
 		elif moveData["target"] == Battle.targetType.ally: desc += "\n" + "Single Ally"
 		elif moveData["target"] == Battle.targetType.allies: desc += "\n" + "All Allies"
 		elif moveData["target"] == Battle.targetType.user: desc += "\n" + "Self"
-	if moveData.has("damage"): desc += "\n Base Damage: " + String(moveData["damage"])# + " + " + String(Battle.currentUnit.strength)
-	if moveData.has("healing"): desc += "\n Healing: " + String(moveData["healing"])
-	if moveData.has("quick"): desc += "\n Quick "
-	if moveData.has("hits"): desc += "\n Hits: " + String(moveData["hits"])
+	if moveData.has("damage") or moveData.has("healing"): desc += " / "
+	if moveData.has("damage"): desc += "Base Damage: " + String(moveData["damage"])# + " + " + String(Battle.currentUnit.strength)
+	if moveData.has("healing"): desc += "Healing: " + String(moveData["healing"])
+	var tags = []
+	if moveData.has("channel"): tags.append("Channel")
+	if moveData.has("quick"): tags.append("Quick")
+	if moveData.has("hits"): tags.append(str(moveData["hits"], " Hits"))
+	if moveData.has("barrage"): tags.append("Barrage")
+	if !tags.empty(): desc += "\n"
+	for tag in tags:
+		desc += tag + " "
+	if moveData.has("status") or moveData.has("description"): desc += "\n"
 	if moveData.has("status"):
-		desc += "\n Status: " + moveData["status"]
+		desc += "Status: " + moveData["status"]
 		if moveData.has("value"): desc += " " + String(moveData["value"])
-	if moveData.has("description"): desc += "\n " + String(moveData["description"])
+		if moveData.has("description"): desc += " | "
+	if moveData.has("description"): desc += String(moveData["description"])
 	return desc
 
 #Effects
@@ -181,6 +190,7 @@ func give_status(unit, status, value = 0, stack = null, altZero = false): #for w
 		var statusInfo = StatusManager.find_status(unit, status)
 		StatusManager.add_status(unit, status, statusInfo["value"] * value)
 	else:
+		if typeof(value) ==  TYPE_ARRAY: value = value.size() #the usual
 		if value > 0:
 			StatusManager.add_status(unit, status, value) 
 		else:
@@ -188,9 +198,9 @@ func give_status(unit, status, value = 0, stack = null, altZero = false): #for w
 
 func take_recoil(unit, damage, modifier):
 	if modifier >= 0:
-		unit.take_damage(damage * modifier)
+		unit.take_damage(ceil(damage * modifier))
 	else:
-		unit.heal(damage * modifier * -1)
+		unit.heal(ceil(damage * modifier * -1))
 
 func change_attribute(unit, attribute, amount, multiplier = 1):
 	if typeof(multiplier) == TYPE_ARRAY: #for when i am getting weird with passing arguments
@@ -212,8 +222,14 @@ func get_unit_poison(_unit): #kinda redundant, definitely a stopgap
 	else: return 0
 
 func add_hits(firstCond, secondCond, hitCount, equal = true):
-	if (equal and firstCond == secondCond) or (!equal and firstCond != secondCond):
-		Battle.hits = hitCount
+	if typeof(firstCond) == TYPE_STRING or (equal and firstCond == secondCond) or (!equal and firstCond != secondCond):
+		Battle.hits += hitCount
+
+func crusher_claw(moveTarget, hitCount):
+	var StatusManager = get_node("../StatusManager")
+	if moveTarget.shield > 0 or StatusManager.find_status(moveTarget, "Dodgy"):
+		print("h")
+		Battle.hits += hitCount
 
 func fill_boxes(player, moveName):
 	for box in player.boxHolder.get_children():
