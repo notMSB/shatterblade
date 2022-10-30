@@ -6,4 +6,4 @@ var allMoves = ["Attack"]
 
 func _ready():
 	isPlayer = false
-	if maxHealth > 20: allMoves[0] = "Attack+"
+	if maxHealth > 15: allMoves[0] = "Attack+"

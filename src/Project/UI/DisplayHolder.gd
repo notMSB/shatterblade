@@ -97,8 +97,7 @@ func sprite_move(box, boxName, isMove = true):
 		box.get_node("Name").modulate = Color(1, 1, 1, 1)
 	if isMove: spritePath = str("res://src/Assets/Icons/Moves/", boxName, ".png")
 	else: spritePath = str("res://src/Assets/Icons/Components/", boxName, ".png")
-	var tempFile = File.new()
-	if(tempFile.file_exists(spritePath)):
+	if ResourceLoader.exists(spritePath):
 		sprite.texture = load(spritePath)
 		sprite.visible = true
 		cRect.visible = false
@@ -120,7 +119,7 @@ func cleanup_moves(unit, boxColor = null): #makes all boxes perform the move the
 		box.get_node("Info").text = ""
 		if boxColor: box.get_node("ColorRect").color = boxColor
 
-func manage_and_color_boxes(unit, boxColor = null): #Puts all of a unit's boxes in map mode and kills spent items
+func manage_and_color_boxes(unit, invWindow = null): #Puts all of a unit's boxes in map mode and kills spent items
 	var move
 	var moveData
 	for box in unit.boxHolder.get_children():
@@ -129,12 +128,12 @@ func manage_and_color_boxes(unit, boxColor = null): #Puts all of a unit's boxes 
 		if (moveData["type"] == Moves.moveType.item and box.currentUses == 0) or moveData.has("fleeting"): #kill
 			box_move(box, "X", true)
 		elif moveData["type"] == Moves.moveType.trick:
-			if box.moveIndex == 1 and box.moves[1] == "Catch" and box.timesEnabled > 0: box_move(box, "X", true) #temp
+			if box.moveIndex == 1 and box.moves[1] == "Catch" and box.timesEnabled > 0: box_move(box, "X", true) #temp, hardcode
 			else: box_move(box, move) #Needed to make sure multimove equipment resets
 		box.get_node("Info").text = ""
 		box.timesUsed = 0
 		box.timesEnabled = 0
-		if boxColor: box.get_node("ColorRect").color = boxColor
+		if invWindow: invWindow.identify_product(box)
 
 func sort_order(a, b):
 	if Moves.moveList[a]["resVal"] > Moves.moveList[b]["resVal"]:
@@ -154,8 +153,7 @@ func setup_enemy(unit, enemyCount, totalEnemies):
 	var button = display.get_node("Button")
 	sprite.visible = true
 	var spritePath = str("res://src/Assets/Enemies/", unit.identity, ".png")
-	var tempFile = File.new()
-	if(tempFile.file_exists(spritePath)):
+	if(ResourceLoader.exists(spritePath)):
 		sprite.texture = load(spritePath)
 		sprite.flip_h = true
 	button.rect_size = sprite.get_rect().size #match the button size with the sprite

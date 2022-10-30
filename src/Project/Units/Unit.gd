@@ -22,6 +22,7 @@ var maxap = 100
 var shield = 0
 
 var ui #set in battle function
+var battleName = ""
 
 var statuses = []
 var hittables = [] #Keeps track of statuses that count down on hit

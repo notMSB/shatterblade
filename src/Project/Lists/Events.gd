@@ -5,6 +5,7 @@ var eventList
 enum timings {day, overworld, night, dungeon, special}
 
 func _ready():
+	print("events")
 	eventList = {
 	"Dungeon": {"time": timings.special, "description": "Enter dungeon?",
 		"choices": ["Yes", "No"],
@@ -76,13 +77,19 @@ func generate_event(questData):
 	newEvent["objective"] = questData["objective"]
 	return newEvent
 
-func give_reward(openWindow = false): #todo: service reward
-	var questEvent = Map.activePoint.pointQuest
-	if questEvent["reward"] == "service":
-		if questEvent["prize"] == "trade": Map.grab_event("Store")
-		elif questEvent["prize"] == "repair": Map.grab_event("Crafting")
-	else:
-		Map.inventoryWindow.add_item(questEvent["prize"], true, openWindow)
+func give_reward(openWindow = false, rewardExists = true):
+	Map.activePoint.pointType = Map.pointTypes.visited
+	if rewardExists:
+		var questEvent = Map.activePoint.pointQuest
+		if questEvent["reward"] == "service":
+			if questEvent["prize"] == "trade": 
+				Map.activePoint.set_type(Map.pointTypes.trader)
+				Map.grab_event("Store")
+			elif questEvent["prize"] == "repair": 
+				Map.activePoint.set_type(Map.pointTypes.repair)
+				Map.grab_event("Crafting")
+		else:
+			Map.inventoryWindow.add_item(questEvent["prize"], true, openWindow)
 
 #Conditions
 func has_class(className):
@@ -118,7 +125,7 @@ func quest_labor(time): #task that takes X time
 	give_reward()
 
 func quest_hunt(target): #battle with rare enemy
-	#give_reward(true) #reward can be given in advance since battles are currently inescapable
+	give_reward(false, false) #reward can be given in advance since battles are currently inescapable
 	Map.activate_battle([target]) #the reward is the component from the target
 
 func quest_weapon_request(weaponType): #random weapon of a certain class
@@ -159,14 +166,11 @@ func enter_temple():
 	temples.get_child(index).enter()
 
 func activate_craft():
-	Map.activePoint.usedSmith = true
 	Map.inventoryWindow.offerMode = Map.inventoryWindow.oModes.repair
 	Map.inventoryWindow.offerType = Map.inventoryWindow.oTypes.any
 	Map.activate_inventory(Map.inventoryWindow.iModes.offer)
 
 func activate_shop():
-	var shopPoint = Map.activePoint
-	if shopPoint.pointType == Map.pointTypes.event: shopPoint.pointType = Map.pointTypes.trader #convert quest to trader
 	Map.inventoryWindow.shuffle_trade_stock()
 	Map.activate_inventory(Map.inventoryWindow.iModes.trade)
 	return true

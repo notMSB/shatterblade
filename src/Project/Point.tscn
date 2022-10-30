@@ -1,8 +1,12 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://src/Project/Point.gd" type="Script" id=1]
 [ext_resource path="res://src/Assets/Enemies/test.png" type="Texture" id=2]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=3]
+
+[sub_resource type="DynamicFont" id=4]
+size = 20
+font_data = ExtResource( 3 )
 
 [sub_resource type="DynamicFont" id=3]
 font_data = ExtResource( 3 )
@@ -20,6 +24,7 @@ margin_left = -15.0
 margin_top = -15.0
 margin_right = 15.0
 margin_bottom = 15.0
+custom_fonts/font = SubResource( 4 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

@@ -11,7 +11,7 @@ func start_battle(_startingHealth):
 
 func check_move(usedBox, targetHealth, _moveUser):
 	if targetHealth == 0:
-		print("cool")
+		#print("cool")
 		Boons.grant_favor(REWARD)
 		if usedBox.maxUses > 0:
 			usedBox.reduce_uses(-1)

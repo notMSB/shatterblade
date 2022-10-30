@@ -45,6 +45,13 @@ func check_neighbor(line, excludeDungeon = false): #checks if a line is connecte
 				else: return line
 	return false
 
+func set_type(type):
+	pointType = type
+	set_type_text(Map.pointTypes.keys()[type][0].to_upper())
+
+func set_type_text(txt):
+	$Button.text = txt
+
 func set_name(text):
 	$Name.visible = true
 	$Name.text = str(text)

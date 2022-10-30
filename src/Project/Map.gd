@@ -56,7 +56,7 @@ var delayBattle = null
 
 var battleWindow
 var inventoryWindow
-enum pointTypes {none, start, battle, event, quest, visited, town, dungeon, trader, temple, end} #Points to the left of "visited" turn off after being activated
+enum pointTypes {none, start, battle, quest, visited, event, town, dungeon, repair, trader, temple, end} #Points to the left of "visited" turn off after being activated
 
 var canEnd = false
 var checkedLines = []
@@ -93,7 +93,9 @@ func _ready():
 	for display in $HolderHolder/DisplayHolder.get_children():
 		display.set_battle()
 		for tracker in display.get_node("Trackers").get_children():
-			tracker.visible = false
+			tracker.visible = true
+	for unit in global.storedParty:
+		battleWindow.set_ui(unit)
 	get_parent().move_child(battleWindow, inventoryWindow.get_index())
 	var Party = get_parent().get_node_or_null("Party")
 	if Party: get_parent().move_child(Party, get_index())
@@ -141,6 +143,8 @@ func activate_point(point):
 		else: pass #todo: event saying town is closed
 	elif type == pointTypes.trader:
 		grab_event("Store")
+	elif type == pointTypes.repair:
+		grab_event("Crafting")
 	elif type == pointTypes.temple:
 		grab_event("Temple")
 	elif type == pointTypes.battle or !isDay or point.sectionNum > currentDay: #no events at night
@@ -197,15 +201,17 @@ func run_event(event):
 	for option in $Events/Choices.get_children():
 			option.queue_free()
 	for i in event["choices"].size():
+		var canClick = true
 		if event.has("conditions") and typeof(event["conditions"][i]) == TYPE_ARRAY: #assess the condition
 			cond = event["conditions"][i]
 			function = event["conditions"][i][0] #first element is the function, rest is the args
-			if !function.call_funcv(cond.slice(1, cond.size()-1)): continue #skip using it as an option if the condition is false
+			if !function.call_funcv(cond.slice(1, cond.size()-1)): canClick = false #skip using it as an option if the condition is false
 		choice = ChoiceUI.instance()
 		$Events/Choices.add_child(choice)
 		choice.position.y = yIncrement
 		yIncrement += choice.get_node("Button").rect_size.y
 		choice.get_node("Info").text = event["choices"][i]
+		if !canClick: choice.get_node("Button").visible = false
 
 func finish_event(checkName):
 	if calledEvent == checkName:
@@ -228,7 +234,7 @@ func make_points(nextPos):
 		nextPos.y += INCREMENT
 		if nextPos.y >= bottomRight.y: #done, clean up leftovers and set start/end points
 			organize_lines()
-			startIndex.pointType = pointTypes.start
+			startIndex.set_type(pointTypes.start)
 			activePoint = startIndex
 			startIndex.toggle_activation(true)
 			startIndex.set_name("Start")
@@ -267,7 +273,7 @@ func place_dungeons(possibleDungeons, borderPoints): #dungeons start in one sect
 		dungeonLine = border[randi() % border.size()]
 		entrySection = min(dungeonLine.linePoints[0].sectionNum, dungeonLine.linePoints[1].sectionNum)
 		for point in dungeonLine.linePoints: #border[rando] is a line
-			point.pointType = pointTypes.dungeon
+			point.set_type(pointTypes.dungeon)
 			point.info["dungeonIndex"] = entrySection
 			point.info["direction"] = point.sectionNum - entrySection #0 for entry 1 for exit
 			if entrySection == point.sectionNum: 
@@ -283,10 +289,10 @@ func place_dungeons(possibleDungeons, borderPoints): #dungeons start in one sect
 
 func place_temple(point):
 	var newTemple = Temple.instance()
-	point.set_name("Temple")
+	#point.set_name("Temple")
 	$HolderHolder/TempleHolder.add_child(newTemple)
 	newTemple.setup()
-	point.pointType = pointTypes.temple
+	point.set_type(pointTypes.temple)
 	point.info["templeIndex"] = point.sectionNum - 1
 
 func place_town(exitPoint, borderPoints): #towns are adjacent to dungeon exits and in the same section, if possible they are also on the border. ties broken by closeness to center
@@ -310,7 +316,7 @@ func place_town(exitPoint, borderPoints): #towns are adjacent to dungeon exits a
 			bestSpot = townSpots[i]
 			print("swapping town to more central spot")
 	bestSpot.set_name("Town")
-	bestSpot.pointType = pointTypes.town
+	bestSpot.set_type(pointTypes.town)
 	#print(bottomRight.y/2)
 
 func clean_up():
@@ -323,7 +329,7 @@ func clean_up():
 			print("hiding null point")
 			point.visible = false
 	set_label(endIndex, "End", true)
-	endIndex.pointType = pointTypes.end
+	endIndex.set_type(pointTypes.end)
 	if !canEnd: 
 		print("disaster")
 		regen_map()
@@ -356,6 +362,9 @@ func regen_map(newMember = false):
 		advance_day(true)
 		time = DAYTIME
 		set_time_text()
+		for unit in global.storedParty:
+			unit.currentHealth = unit.maxHealth
+			unit.update_hp()
 	else: print("Bad map gen settings")
 
 func add_new_member():
@@ -370,6 +379,7 @@ func add_new_member():
 	battleWindow.partyNum += 1
 	battleWindow.setup_player(global.storedParty.size()-1, true)
 	unit.ui.set_battle()
+	battleWindow.set_ui(unit)
 	#for tracker in unit.ui.get_node("Trackers").get_children():
 	#	tracker.visible = false
 	Boons.call_boon("new_member", [inventoryWindow])
@@ -441,9 +451,27 @@ func classify_remaining_points():
 		for eventPoint in sectionPoints:
 			eventPoint.pointType = pointTypes.event
 			make_quest(eventPoint)
+	kill_off_section_text()
+
+func kill_off_section_text():
+	for point in $HolderHolder/PointHolder.get_children():
+		if point.pointType == pointTypes.dungeon: point.set_type_text("D")
+		elif point.pointType == pointTypes.end: point.set_type_text("E")
+		elif point.pointType == pointTypes.start: point.set_type_text("S")
+		elif point.pointType == pointTypes.town: point.set_type_text("T")
+		elif point.sectionNum == currentDay:
+			if point.pointType > pointTypes.event:
+				point.set_type_text(pointTypes.keys()[point.pointType][0].to_upper())
+			elif point.pointQuest:
+				if point.pointQuest["prize"] == "trade": point.set_type_text("T")
+				if point.pointQuest["prize"] == "repair": point.set_type_text("R")
+		else:
+			point.set_type_text("")
 
 func make_quest(point):
 	point.pointQuest = $Events.generate_event(Quests.generate_quest())
+	if point.pointQuest["prize"] == "trade": point.set_type_text("T")
+	elif point.pointQuest["prize"] == "repair": point.set_type_text("R")
 
 func determine_distances(checkPoint): #gives every node a distance from start and returns if the end node is accessible
 	if checkPoint == startIndex: checkPoint.clicksFromStart = 0
@@ -524,9 +552,12 @@ func subtract_time(diff, refillAllMana = false):
 
 func set_time_text():
 	timeNode.get_node("Area").text = "Area " + String(currentArea + 1)
-	if isDay: timeNode.get_node("State").text = "Day " + String(currentDay + 1)
-	else: timeNode.get_node("State").text = "Night"
-	timeNode.get_node("Hour").text = String(time)
+	if isDay: 
+		timeNode.get_node("State").text = "Day " + String(currentDay + 1)
+		timeNode.get_node("Hour").text = String(time - 50)
+	else: 
+		timeNode.get_node("State").text = "Night " + String(currentDay + 1)
+		timeNode.get_node("Hour").text = String(time)
 
 func eval_darkness(pointA, pointB):
 	if pointA.sectionNum != currentDay and pointB.sectionNum != currentDay and !currentDungeon:
@@ -540,6 +571,7 @@ func advance_day(reset = false):
 	if reset: currentDay = 0
 	else: currentDay += 1
 	set_sections()
+	kill_off_section_text()
 
 func update_favor(amount):
 	favorNode.get_node("Amount").text = String(amount)

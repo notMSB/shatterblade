@@ -102,12 +102,8 @@ func shuffle_trade_stock():
 		var maxItems = tHolder.get_child_count()
 		for i in global.storedParty.size():
 			restock.append(rando_move(i))
-		var relic = rando_relic() #todo: something about this
-		if relic != "Silver":
-			restock.append(relic)
-		relic = rando_relic()
-		if relic != "Silver":
-			restock.append(relic)
+		restock.append(rando_relic())
+		restock.append(rando_relic())
 		restock.append(rando_item())
 		restock.append(rando_item())
 		restock.append(rando_component())
@@ -154,6 +150,8 @@ func rando_move(index):
 
 func rando_relic():
 	var relics = Moves.get_relics()
+	relics.erase("Silver")
+	relics.erase("Silver")
 	return relics[randi() % relics.size()]
 
 func set_mode():
@@ -167,6 +165,10 @@ func set_mode():
 		set_text($Current, currentTraderValue)
 	else:
 		toggle_trade_visibility(false)
+	if mode == iModes.offer and offerType != oTypes.any:
+		$Offer.visible = true
+		$Offer.text = offerNeed
+	else: $Offer.visible = false
 
 func toggle_trade_visibility(toggle):
 	tHolder.visible = toggle
@@ -522,6 +524,8 @@ func exit(): #Save inventory and leave
 		if offerMode == oModes.reward: get_node("../Map/Events").give_reward()
 		elif offerMode == oModes.repair:
 			add_item(oBox.get_node("Name").text, true)
+			get_node("../Map").activePoint.usedSmith = true
+			if get_node("../Map").activePoint.pointType == get_node("../Map").pointTypes.repair: get_node("../Map").activePoint.pointType = get_node("../Map").pointTypes.visited
 		elif get_node("../Map").currentTemple:
 			get_node("../Map").currentTemple.offer_made(oBox)
 		clear_box(oBox)
@@ -530,6 +534,10 @@ func exit(): #Save inventory and leave
 		for box in tHolder.get_children():
 			tStock.append(box.get_node("Name").text)
 		get_node("../Map").activePoint.traderStock = tStock
+	elif mode == iModes.craft:
+		for i in cHolder.get_child_count()-1:
+			var xBox = xCheck()
+			if xBox: swap_boxes(cHolder.get_child(i),xBox)
 	var unit
 	var moveName
 	var moveData
@@ -549,9 +557,7 @@ func exit(): #Save inventory and leave
 			if checkSlot != Moves.equipType.relic and checkType != Moves.moveType.basic:
 				unit.moves.append(moveName)
 			if moveData.has("passive"):
-				print(moveName)
 				unit.passives[moveData["passive"][0]] = moveData["passive"][1]
-				print(unit.passives)
 			if moveData.has("discount"):
 				unit.set_discount(moveData["discount"])
 			if moveData.has("strength"):

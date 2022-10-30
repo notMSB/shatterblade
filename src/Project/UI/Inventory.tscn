@@ -107,6 +107,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Offer" type="Label" parent="."]
+margin_left = 584.0
+margin_top = 347.0
+margin_right = 691.0
+margin_bottom = 367.0
+custom_fonts/font = SubResource( 2 )
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Description" type="Label" parent="."]
 margin_top = 455.0
 margin_right = 1277.0

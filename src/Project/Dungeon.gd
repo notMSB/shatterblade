@@ -23,7 +23,6 @@ func setup(dLine): #dungeon line, links the two points
 		mascot = Map.Enemies.get_dungeon_mascot()
 		$Description.text = str(mascot, " Dungeon")
 	totalPoints = ceil(dLine.points[0].distance_to(dLine.points[1]) * Map.DISTANCE_TIME_MULT)
-	print(totalPoints)
 	make_points(Vector2(XSTART, YPOS))
 
 func make_points(nextPos, prevPoint = false):

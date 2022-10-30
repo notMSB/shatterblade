@@ -8,7 +8,8 @@ onready var Game = get_parent()
 
 func _on_Party_pressed():
 	add_scene(Party)
-	visible = true
+	$Party.visible = false
+	$Map.visible = true
 
 func _on_Inventory_pressed():
 	add_scene(Inventory)
@@ -19,7 +20,7 @@ func _on_Battle_pressed():
 func _on_Map_pressed():
 	Game.mapMode = true
 	add_scene(Map)
+	visible = false
 
 func add_scene(sceneName):
 	Game.add_child(sceneName.instance())
-	visible = false

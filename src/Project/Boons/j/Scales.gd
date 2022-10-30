@@ -8,7 +8,7 @@ var boxesOK = true
 var level = 0
 
 func prep_inventory():
-	print("scales prep inventory")
+	#print("scales prep inventory")
 	for unit in global.storedParty:
 		unit.moves.insert(0, "Rock")
 	return 1
@@ -27,7 +27,7 @@ func add_rocks(i, invNode):
 	boxHolder.get_child(boxCount).trackerBar = boxHolder.get_child(2).trackerBar
 	for j in boxCount - 2:
 		invNode.swap_boxes(boxHolder.get_child(boxCount - j), boxHolder.get_child(boxCount - j - 1))
-	invNode.dHolder.box_move(boxHolder.get_child(2), "Rock")
+	invNode.dHolder.box_move(boxHolder.get_child(2), "Rock", true)
 
 func level_up(invNode): #upgrade every rock and stick 
 	for i in global.storedParty.size():
@@ -42,8 +42,8 @@ func check_move(usedBox, _targetHealth, _moveUser):
 		usedBoxes.append(usedBox)
 		usedBox.get_node("Scales").visible = true
 	else:
-		if usedBox.get_node("Name").text != "Reload" or usedBox.get_node("Name").text != "Catch": #reloading ok
-			print("Repeat")
+		if !(usedBox.moveIndex == 0 and usedBox.moves.size() > 1): #may need to revisit this when other multimoves are implemented
+			#print("Repeat")
 			boxesOK = false
 
 func end_battle(_endingHealth):

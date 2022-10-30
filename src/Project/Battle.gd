@@ -68,14 +68,14 @@ func _ready(): #Generate units and add to turn order
 				var enemy = Enemies.enemyList[opponents[i - partyNum]]
 				createdUnit.callv("make_stats", enemy["stats"])
 				createdUnit.identity = str(opponents[i - partyNum])
-				createdUnit.name = str(createdUnit.identity, String(i))
+				createdUnit.battleName = str(createdUnit.identity, String(i))
 				if enemy.has("passives"): createdUnit.passives = enemy["passives"]
 				if enemy.has("specials"): 
 					createdUnit.moves = enemy["specials"]
 					createdUnit.allMoves.append_array(createdUnit.moves)
 			else:
 				createdUnit.callv("make_stats", [400])
-				createdUnit.name = str("E", String(i))
+				createdUnit.battleName = str("E", String(i))
 		StatusManager.initialize_statuses(createdUnit)
 		$Units.add_child(createdUnit)
 	for unit in $Units.get_children():
@@ -105,6 +105,7 @@ func setup_player(index, setDisplay = false):
 	else:
 		createdUnit = global.storedParty[index]
 	createdUnit.name = str("P", String(index))
+	createdUnit.battleName = str("P", String(index))
 	if setDisplay:
 		StatusManager.initialize_statuses(createdUnit)
 		$Units.add_child(createdUnit)
@@ -120,7 +121,7 @@ func create_enemies():
 		enemy = Enemies.enemyList[opponent]
 		createdUnit.callv("make_stats", enemy["stats"])
 		createdUnit.identity = opponent
-		createdUnit.name = str(createdUnit.identity, String(i))
+		createdUnit.battleName = str(createdUnit.identity, String(i))
 		if enemy.has("passives"): createdUnit.passives = enemy["passives"]
 		if enemy.has("specials"): 
 			createdUnit.moves = enemy["specials"]
@@ -196,6 +197,10 @@ func play_turn(notFirstTurn = true):
 				else:
 					$BattleUI.toggle_moveboxes(unit.boxHolder, false, false, false, true)
 			StatusManager.countdown_turns(unit, true)
+		for unit in global.storedParty:
+			for box in unit.boxHolder.get_children():
+				var boxName = box.get_node("Name").text
+				if  boxName == "Reload" or boxName == "Catch": box._on_Button_pressed()
 		Boons.call_boon("start_turn")
 		$GoButton.visible = true
 		yield(self, "turn_taken")
@@ -259,7 +264,7 @@ func set_intent(unit, target = false):
 			unit.storedTarget = target
 	var targetText = unit.storedTarget
 	if typeof(targetText) != TYPE_STRING:
-		targetText = targetText.name
+		targetText = targetText.battleName
 	if actionDamage: targetText = str(targetText, " (", actionDamage, ")")
 	unit.update_info(str(unit.storedAction, " -> ", targetText))
 	yield(get_tree().create_timer(.25), "timeout")
@@ -283,9 +288,8 @@ func evaluate_targets(move, user, box):
 		$BattleUI.toggle_buttons(true, get_team(false))
 	elif chosenMove["target"] <= targetType.allies: #If an ally is targeted
 		$BattleUI.toggle_buttons(true, get_team(true))
-	elif chosenMove["target"] == targetType.user: #Self target
-		$BattleUI.toggle_buttons(true, [moveUser])
-	elif chosenMove["target"] == targetType.none: #No target, instant confirm (coded as self)
+	elif chosenMove["target"] == targetType.user or chosenMove["target"] == targetType.none: #Self/no target
+		#$BattleUI.toggle_buttons(true, [moveUser])
 		target_chosen(user.get_index())
 	
 
@@ -371,7 +375,7 @@ func execute_move():
 		hitBonus += Boons.call_boon("before_move", [moveUser])
 		moveUser.storedTarget = moveTarget
 		usedMoveBox.timesUsed += 1
-		if chosenMove["type"] > Moves.moveType.basic and chosenMove["target"] != targetType.none: #durability does not go down for reloads and moves without a classtype
+		if chosenMove["type"] > Moves.moveType.basic and chosenMove["target"] != targetType.none and usedMoveBox.maxUses > 0: #durability does not go down for reloads and moves without a classtype
 			if StatusManager.find_status(moveUser, "Durability Redirect"): #This whole nest is dedicated to the stabilizer
 				for box in moveUser.boxHolder.get_children():
 					if box.maxUses > 0 and !box.buttonMode: #buttonMode clause only relevant for multiple stabilizers on same character (why)
@@ -393,7 +397,6 @@ func execute_move():
 		hits = get_indexed(chosenMove["hits"])
 		if typeof(hits) == TYPE_ARRAY: hits = hits.size() #One hit for every item in an array. Yes
 	else: hits = chosenMove["hits"]
-	print(hitBonus)
 	hits+= hitBonus
 	var bounceHits = true if chosenMove.has("bounce") else false
 	var i = 0
@@ -429,15 +432,19 @@ func execute_move():
 							StatusManager.remove_status(target, StatusManager.statusList, StatusManager.find_status(target, "Provoke"))
 			if !chosenMove.has("timing") or chosenMove["timing"] == Moves.timings.after: #Default timing is after damage
 				activate_effect()
+			if moveUser.isPlayer: #overkill only returns nonzero for a specific boon and level
+				if moveTarget.currentHealth <= 0:
+					StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.gettingKill, [damageCalc]) 
+				var overkill = Boons.call_boon("check_hit", [usedMoveBox, moveTarget.currentHealth, moveUser])
+				if overkill > 0:
+					var nextTarget = get_next_team_unit(moveTarget)
+					if nextTarget: nextTarget.take_damage(overkill)
 		yield(get_tree().create_timer(.5), "timeout")
 		i+=1
-	if moveUser.isPlayer: #overkill only returns nonzero for a specific boon and level
-		if moveTarget.currentHealth <= 0:
-			StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.gettingKill, [damageCalc]) 
-		var overkill = Boons.call_boon("check_move", [usedMoveBox, moveTarget.currentHealth, moveUser])
-		if overkill > 0:
-			var nextTarget = get_next_team_unit(moveTarget)
-			if nextTarget: nextTarget.take_damage(overkill)
+	if moveUser.isPlayer:
+		Boons.call_boon("check_move", [usedMoveBox, moveTarget.currentHealth, moveUser])
+	else:
+		Boons.call_specific("check_move", [null, null, moveUser], "Lion")
 	#if hits == 0: yield(get_tree().create_timer(.25), "timeout") #needed to prevent a crash
 
 func get_next_team_unit(unit): #gets the next player or enemy from an existing player or enemy's position
@@ -496,7 +503,7 @@ func done(reward):
 		Boons.call_boon("end_battle", [get_partyHealth()])
 		for i in global.storedParty.size():
 			set_ui(global.storedParty[i])
-			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], map.inventoryWindow.DEFAULTCOLOR)
+			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], map.inventoryWindow)
 		map.inventoryWindow.add_item(reward)
 		map.get_node("InventoryButton").visible = true
 		visible = false

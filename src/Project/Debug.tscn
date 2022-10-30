@@ -30,31 +30,32 @@ __meta__ = {
 
 [node name="Party" type="Button" parent="."]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
-margin_left = 900.0
-margin_top = 68.149
-margin_right = 1008.0
-margin_bottom = 136.149
-custom_fonts/font = SubResource( 1 )
+margin_left = 599.0
+margin_top = 58.0
+margin_right = 707.0
+margin_bottom = 126.0
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
 text = "Party"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Inventory" type="Button" parent="."]
+visible = false
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
-margin_left = 600.0
-margin_top = 64.0
-margin_right = 708.0
-margin_bottom = 132.0
-custom_fonts/font = SubResource( 1 )
+margin_left = 302.0
+margin_top = 208.0
+margin_right = 410.0
+margin_bottom = 276.0
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
 text = "Items"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -66,27 +67,28 @@ margin_left = 600.0
 margin_top = 192.0
 margin_right = 708.0
 margin_bottom = 260.0
-custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
 text = "Map"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Battle" type="Button" parent="."]
+visible = false
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 300.0
 margin_top = 64.0
 margin_right = 408.0
 margin_bottom = 132.0
-custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
 text = "Battle"
 __meta__ = {
 "_edit_use_anchors_": false

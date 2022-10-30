@@ -39,8 +39,8 @@ __meta__ = {
 }
 
 [node name="BattleBG" type="ColorRect" parent="."]
-modulate = Color( 0.733333, 1, 0, 1 )
-margin_left = 1.0
+self_modulate = Color( 0.0352941, 0.796078, 1, 1 )
+margin_left = -2.0
 margin_top = -3.0
 margin_right = 1280.0
 margin_bottom = 454.0
@@ -50,12 +50,12 @@ __meta__ = {
 }
 
 [node name="GoButton" type="Button" parent="."]
-modulate = Color( 0.415686, 0, 0, 1 )
+modulate = Color( 0.984314, 0.945098, 0, 1 )
 margin_left = 586.0
 margin_top = 385.0
 margin_right = 694.0
 margin_bottom = 453.0
-text = "GO"
+text = "END TURN"
 __meta__ = {
 "_edit_use_anchors_": false
 }

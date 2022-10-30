@@ -89,7 +89,7 @@ func choose_movebox(box, target = null): #happens when move and target are selec
 	box.change_rect_color(Color(1,.6,.2,1))
 	box.buttonMode = false
 	box.get_node("Button").visible = true
-	if target: box.updateInfo(target.name)
+	if target: box.updateInfo(target.battleName)
 
 func toggle_movebox_buttons(toggle):
 	for display in playerHolder.get_children():
@@ -147,10 +147,13 @@ func link_boxes(tracker, boxCount, firstMargin, lastMargin, barType):
 		box.trackerBar = bar
 	if barType == Moves.moveType.special:
 		bar.set_max(currentPlayer.maxAP)
-	elif barType == Moves.moveType.trick:
-		bar.set_max(currentPlayer.maxEnergy)
+		tracker.modulate = Color(.9,.5,.5,1)
 	elif barType == Moves.moveType.magic:
 		bar.set_max(currentPlayer.maxMana)
+		tracker.modulate = Color(.5,.5,.9,1)
+	elif barType == Moves.moveType.trick:
+		bar.set_max(currentPlayer.maxEnergy)
+		tracker.modulate = Color(.5,.9,.5,1)
 	else:
 		pass
 	barText.rect_position.x += PLAYERINCREMENT*.5*(boxCount.size() - 1) #center the text

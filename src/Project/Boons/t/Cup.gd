@@ -40,8 +40,8 @@ func end_battle(_endingHealth):
 		if entry[1] > highest: highest = entry[1]
 		if entry[1] < lowest: lowest = entry[1]
 	if highest - lowest >= 2:
-		print("failure")
+		pass#print("failure")
 	else:
-		print("success")
+		#print("success")
 		Boons.grant_favor(REWARD)
 	

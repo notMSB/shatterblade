@@ -39,8 +39,8 @@ func get_price(selectNode, boonName):
 	if selectNode.clickCost: selectNode.get_node("Price").text = String(selectNode.clickCost)
 
 func offer_made(box):
-	if !Inventory.check_for_curses([box.get_node("Name").text]): #if the offer is not cursed
-		Boons.grant_favor(int(box.get_node("Info").text))
+	if Inventory.check_for_curses([box.get_node("Name").text]): #if the offer is not cursed
+		Boons.grant_favor(int(box.get_node("Info").text) * 3)
 	else: #give it back
 		Inventory.activate_offer(box.get_node("Name").text)
 

@@ -27,7 +27,7 @@ var statusList = {
 	
 	"Venomous": {"activation": statusActivations.usingAttack, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 2]},
 	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "adjust_damage"), "args": ["damage", -1]},
-	"Thorns": {"activation": statusActivations.gettingHit, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5]},
+	"Thorns": {"activation": statusActivations.gettingHit, "system": false ,"effect": funcref(self, "counter_attack"), "args": ["attacker", 5]},
 	"Constricting": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "constrict_attack"), "args": ["unit", "intent"], "targetlock": true, "hittable": true},
 }
 
