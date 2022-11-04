@@ -5,14 +5,13 @@ var eventList
 enum timings {day, overworld, night, dungeon, special}
 
 func _ready():
-	print("events")
 	eventList = {
 	"Dungeon": {"time": timings.special, "description": "Enter dungeon?",
 		"choices": ["Yes", "No"],
 		"outcomes": [[funcref(self, "enter_dungeon")], [funcref(self, "advance")]]},
 	"Town": {"time": timings.special, "description": "It's a town.",
 		"choices": ["Trade", "Smith", "Inn", "Leave"],
-		"conditions": [true, [funcref(self, "used_smith")], [funcref(self, "is_night")], true],
+		"conditions": [true, [funcref(self, "used_smith")], [funcref(self, "can_sleep")], true],
 		"outcomes": [[funcref(self, "activate_shop")], [funcref(self, "activate_craft")], [funcref(self, "rest")], [funcref(self, "advance")]]},
 	"Temple": {"time": timings.special, "description": "Enter temple?",
 		"choices": ["Yes", "No"],
@@ -103,8 +102,8 @@ func used_smith():
 		return false
 	return true
 
-func is_night():
-	if Map.isDay:
+func can_sleep():
+	if Map.isDay and Map.activePoint.sectionNum <= Map.currentDay:
 		return false
 	return true
 
@@ -176,13 +175,11 @@ func activate_shop():
 	return true
 
 func rest():
-	if !Map.isDay:
-		Map.subtract_time(Map.NIGHTLENGTH, true)
-		for unit in global.storedParty:
-			unit.currentHealth = unit.maxHealth
-			unit.update_hp()
-	else:
-		pass
+	var restTime = Map.time
+	Map.subtract_time(restTime, true)
+	for unit in global.storedParty:
+		unit.heal(restTime)
+		unit.update_hp()
 
 func advance():
 	pass

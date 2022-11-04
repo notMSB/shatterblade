@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://src/Project/Debug.gd" type="Script" id=1]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=2]
@@ -18,6 +18,14 @@
 
 [sub_resource type="DynamicFont" id=1]
 size = 34
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 34
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 32
 font_data = ExtResource( 2 )
 
 [node name="Game" type="Node2D"]
@@ -69,14 +77,14 @@ __meta__ = {
 [node name="Party" type="Button" parent="Debug"]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 601.0
-margin_top = 116.149
+margin_top = 84.149
 margin_right = 709.0
-margin_bottom = 184.149
+margin_bottom = 152.149
+custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Party"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -89,28 +97,27 @@ margin_left = 600.0
 margin_top = 64.0
 margin_right = 708.0
 margin_bottom = 132.0
+custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Items"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Map" type="Button" parent="Debug"]
-visible = false
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 600.0
-margin_top = 288.0
+margin_top = 328.0
 margin_right = 708.0
-margin_bottom = 356.0
+margin_bottom = 396.0
+custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Map"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -123,12 +130,40 @@ margin_left = 300.0
 margin_top = 64.0
 margin_right = 408.0
 margin_bottom = 132.0
+custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Battle"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Difficulty" type="Button" parent="Debug"]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 578.0
+margin_top = 194.0
+margin_right = 730.0
+margin_bottom = 262.0
+custom_fonts/font = SubResource( 3 )
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+text = "Difficulty"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Mode" type="Label" parent="Debug/Difficulty"]
+margin_left = -20.0
+margin_top = 60.0
+margin_right = 168.0
+margin_bottom = 99.0
+custom_fonts/font = SubResource( 2 )
+text = "Normal"
+align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -137,3 +172,4 @@ __meta__ = {
 [connection signal="pressed" from="Debug/Inventory" to="Debug" method="_on_Inventory_pressed"]
 [connection signal="pressed" from="Debug/Map" to="Debug" method="_on_Map_pressed"]
 [connection signal="pressed" from="Debug/Battle" to="Debug" method="_on_Battle_pressed"]
+[connection signal="pressed" from="Debug/Difficulty" to="Debug" method="_on_Difficulty_pressed"]

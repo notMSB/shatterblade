@@ -17,6 +17,7 @@ var usageOrder
 var trackerBar
 var buttonMode = true
 var savedTargetName = ""
+var canMove = true #the craftbox and cursed items get this
 
 var boxModeScene
 
@@ -69,8 +70,9 @@ func change_rect_color(color):
 
 func _on_Button_pressed():
 	boxModeScene = set_mode_scene()
+	boxModeScene.set_description($Name.text)
 	if boxModeScene.name == "Inventory": #inventory
-		if !(isCursed and get_parent().name == "MoveBoxes"): boxModeScene.select_box(self)
+		if !(isCursed and get_parent().name == "MoveBoxes") and canMove: boxModeScene.select_box(self)
 	elif boxModeScene.name == "Battle":
 		boxModeScene.set_description($Name.text)
 		if buttonMode:

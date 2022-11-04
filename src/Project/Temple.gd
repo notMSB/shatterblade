@@ -35,7 +35,10 @@ func get_price(selectNode, boonName):
 		selectNode.get_node("Price").text = "Max"
 		selectNode.clickCost = null
 	else:
-		selectNode.clickCost = Boons.boonList[boonName]["costs"][level + 1]
+		if Map.get_parent().hardMode:
+			selectNode.clickCost = Boons.boonList[boonName]["hardCosts"][level + 1]
+		else:
+			selectNode.clickCost = Boons.boonList[boonName]["costs"][level + 1]
 	if selectNode.clickCost: selectNode.get_node("Price").text = String(selectNode.clickCost)
 
 func offer_made(box):

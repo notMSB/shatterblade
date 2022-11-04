@@ -9,8 +9,6 @@ onready var Moves = get_node("../../Data/Moves")
 
 const DefaultMoves = 2
 
-var targetsVisible = false
-
 var playerCount = 0
 var enemyCount = 0
 
@@ -170,9 +168,9 @@ func toggle_buttons(toggle, units = []):
 		else:
 			for child in usedHolder.get_children(): #known to toggle on too many buttons if not in map mode
 				child.get_node("Button").visible = true
-		targetsVisible = true
 	else:
 		for child in playerHolder.get_children():
 			child.get_node("Button").visible = false
 		for child in $DisplayHolder.get_children():
 			child.get_node("Button").visible = false
+	Battle.get_node("GoButton").visible = !toggle

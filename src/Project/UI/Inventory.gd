@@ -35,8 +35,6 @@ var boxesCount = Vector2(0,0)
 
 var currentInvSize = 0
 
-var craftingRestriction = null
-
 const TRADERINVSIZE = 12
 var initialTraderValue
 var currentTraderValue
@@ -52,7 +50,7 @@ var mode = iModes.craft
 
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
 	if global.itemDict.empty():
-		global.itemDict = {"moves": ["Health Potion", "Coin", "Coin"]}
+		global.itemDict = {"wing": 0, "fang": 0, "talon": 0, "sap": 0, "venom": 0, "fur": 0, "blade": 0, "bone": 0, "moves": ["Health Potion", "Coin", "Coin"]}
 	MOVESPACES += Boons.call_boon("prep_inventory")
 	if !Trading.assigned: Trading.assign_component_values()
 	dHolder = $HolderHolder/DisplayHolder
@@ -79,6 +77,7 @@ func _ready(): #Broken with relics as a standalone scene, but works when the Map
 	$Description.visible = !get_parent().mapMode
 
 func welcome_back(newMode):
+	#print(global.itemDict)
 	mode = newMode
 	set_mode()
 	for i in global.storedParty.size():
@@ -108,8 +107,13 @@ func shuffle_trade_stock():
 		restock.append(rando_item())
 		restock.append(rando_component())
 		restock.append(rando_component())
-		while restock.size() < maxItems:
-			restock.append("Coin")
+		restock.append("Coin")
+		if get_parent().hardMode:
+			while restock.size() < maxItems:
+				restock.append("Coin")
+		else:
+			while restock.size() < maxItems:
+				restock.append("X")
 	else:
 		restock = get_node("../Map").activePoint.traderStock
 	Trading.stock = restock
@@ -155,7 +159,6 @@ func rando_relic():
 	return relics[randi() % relics.size()]
 
 func set_mode():
-	cHolder.visible = true if mode == iModes.craft else false
 	oHolder.visible = true if mode == iModes.offer else false
 	if mode == iModes.trade:
 		toggle_trade_visibility(true)
@@ -226,7 +229,7 @@ func make_actionboxes(boxCount, boxMode):
 		if boxMode == iModes.craft: 
 			box.position.x = XSTART*1.25 + (i*i*XINCREMENT) #different spacing for crafting/trading
 			if i == boxCount - 1: #The crafting product box shouldn't be clickable
-				box.get_node("Button").visible = false
+				box.canMove = false
 				productBox = box
 		elif boxMode == iModes.trade: 
 			box.position.x = XSTART - 160 + (i * XINCREMENT)
@@ -239,7 +242,6 @@ func make_actionboxes(boxCount, boxMode):
 func select_box(box = null):
 	box.get_parent().selectedBox = box
 	box.get_node("ColorRect").color = Color(.5,.1,.5,.3)
-	set_description(box.get_node("Name").text)
 	box.get_node("ColorRect").visible = true
 	check_swap(box)
 
@@ -254,6 +256,16 @@ func deselect_multi(boxes):
 	for box in boxes:
 		deselect_box(box)
 	otherSelection = null
+
+func quick_repair(moveBox, componentBox):
+	var craftingRestriction = Crafting.break_down(moveBox.get_node("Name").text)
+	if craftingRestriction.has(componentBox.get_node("Name").text):
+		if moveBox.currentUses < moveBox.maxUses: #do not repair a full weapon
+			clear_box(componentBox)
+			moveBox.repair_uses()
+			return true
+	else:
+		return false
 
 func check_swap(selectedBox):
 	if !otherSelection:
@@ -272,13 +284,27 @@ func check_swap(selectedBox):
 			if !canOffer and checkingOffering:
 				deselect_multi([selectedBox, otherSelection])
 				return
-		elif mode == iModes.craft:
-			if selectedBox.get_parent() == cHolder: 
-				check_crafts(selectedBox, otherSelection) #crafting related checks
+		if otherSelection.get_parent() != tHolder and selectedBox.get_parent() != cHolder and otherSelection.get_parent() != cHolder and selectedBox.get_parent() != tHolder:
+			var potentialProduct = Crafting.sort_then_combine(Crafting.c.get(otherSelection.get_node("Name").text), Crafting.c.get(selectedBox.get_node("Name").text))
+			if potentialProduct.length() > 1:
+				clear_box(selectedBox)
+				clear_box(otherSelection)
+				deselect_multi([selectedBox, otherSelection])
+				add_item(potentialProduct, true)
+				
 				return
-			elif otherSelection.get_parent() == cHolder: 
-				check_crafts(otherSelection, selectedBox)
+			var quickCheck = false
+			if isValidMove(selectedBox.get_node("Name").text): quickCheck = quick_repair(selectedBox, otherSelection)
+			elif isValidMove(otherSelection.get_node("Name").text): quickCheck = quick_repair(otherSelection, selectedBox)
+			if quickCheck:
+				deselect_multi([selectedBox, otherSelection])
 				return
+		if selectedBox.get_parent() == cHolder: 
+			check_crafts(selectedBox, otherSelection) #crafting related checks
+			return
+		elif otherSelection.get_parent() == cHolder: 
+			check_crafts(otherSelection, selectedBox)
+			return
 		if selectedBox.get_parent().name == "MoveBoxes": player_inv_check(selectedBox, otherSelection)
 		elif otherSelection.get_parent().name == "MoveBoxes": player_inv_check(otherSelection, selectedBox)
 		else: swap_boxes(selectedBox, otherSelection)
@@ -319,6 +345,7 @@ func isValidMove(boxName):
 func check_crafts(craftBox, otherBox):
 	var didSwap = false
 	var boxName = otherBox.get_node("Name").text
+	var craftingRestriction
 	if Crafting.c.keys().has(boxName):
 		swap_boxes(craftBox, otherBox)
 		didSwap = true
@@ -348,6 +375,7 @@ func check_crafts(craftBox, otherBox):
 						flip_values(productBox, [weaponBox.get_node("Name").text, weaponBox.maxUses, weaponBox.currentUses])
 						productBox.repair_uses()
 						identify_product(productBox)
+						set_description(productBox.get_node("Name").text)
 						toggle_action_button(true, "Repair")
 						break
 					if i == 1: #only gets in this if it's an invalid repair
@@ -357,6 +385,7 @@ func check_crafts(craftBox, otherBox):
 				#productName.text = product #Put result name in product box
 				dHolder.box_move(productBox, productName.text)
 				identify_product(productBox)
+				set_description(productBox.get_node("Name").text)
 				productBox.set_uses(Moves.get_uses(productName.text))
 				toggle_action_button(true, "Craft")
 		else: #replacing a valid box with an invalid one would yield this result
@@ -364,8 +393,8 @@ func check_crafts(craftBox, otherBox):
 				if isValidMove(components[i]):
 					craftingRestriction = Crafting.break_down(components[i])
 					break
-				else:
-					craftingRestriction = null
+				#else:
+				#	craftingRestriction = null
 			toggle_action_button(false)
 			clear_box(productBox)
 	else:
@@ -480,7 +509,7 @@ func clear_box(box):
 
 func confirm_craft():
 	for cBox in cHolder.get_children():
-		if !cBox.get_node("Button").visible: #Button is only visible on the non-result boxes, so this runs once on the result box
+		if !cBox.canMove:
 			swap_boxes(cBox, xCheck())
 		else:
 			clear_box(cBox)
@@ -519,6 +548,7 @@ func update_itemDict(itemName):
 			global.itemDict[MOVEHOLDER].append(itemName)
 
 func exit(): #Save inventory and leave
+	deselect_box(otherSelection)
 	if mode == iModes.offer and oHolder.get_child(0).get_node("Name").text != "X":
 		var oBox = oHolder.get_child(0)
 		if offerMode == oModes.reward: get_node("../Map/Events").give_reward()
@@ -534,10 +564,10 @@ func exit(): #Save inventory and leave
 		for box in tHolder.get_children():
 			tStock.append(box.get_node("Name").text)
 		get_node("../Map").activePoint.traderStock = tStock
-	elif mode == iModes.craft:
-		for i in cHolder.get_child_count()-1:
-			var xBox = xCheck()
-			if xBox: swap_boxes(cHolder.get_child(i),xBox)
+	for i in cHolder.get_child_count():
+		var xBox = xCheck()
+		if xBox: swap_boxes(cHolder.get_child(i),xBox)
+		if i == 2: clear_box(cHolder.get_child(i))
 	var unit
 	var moveName
 	var moveData
@@ -586,11 +616,5 @@ func reset_trade():
 	return get_tree().reload_current_scene()
 
 func _on_ActionButton_pressed():
-	if mode == iModes.craft:
-		confirm_craft()
-	#below is inaccessible for now
-	elif mode == iModes.trade:
-		reset_trade()
-	elif mode == iModes.offer:
-		exit()
-		get_node("../Map/Events").give_reward()
+	confirm_craft()
+

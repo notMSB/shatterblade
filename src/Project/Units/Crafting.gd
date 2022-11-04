@@ -33,10 +33,12 @@ func test():
 	break_down("Quick Attack")
 
 func sort_then_combine(one, two):
-	if one <= two:
-		return combine(one, two)
-	else:
-		return combine(two, one)
+	if one != null and two != null: #(if one and two:) doesn't work; the 0th component hits false
+		if one <= two:
+			return combine(one, two)
+		else:
+			return combine(two, one)
+	return "X"
 
 func combine(one, two):
 	return products[one][two]

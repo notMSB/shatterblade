@@ -19,14 +19,14 @@ func _ready():
 		create_boon(boon)
 	
 	boonList = {
-		"Scales": {"virtue": v.j, "costs": [50, 75]},
-		"Crown": {"virtue": v.j, "costs": [50, 75]},
+		"Scales": {"virtue": v.j, "costs": [30, 50], "hardCosts": [50, 75]},
+		"Crown": {"virtue": v.j, "costs": [30, 50], "hardCosts": [50, 75]},
 		
-		"Column": {"virtue": v.s, "costs": [50, 75]},
-		"Lion": {"virtue": v.s, "costs": [50, 75]},
+		"Column": {"virtue": v.s, "costs": [30, 50], "hardCosts": [50, 75]},
+		"Lion": {"virtue": v.s, "costs": [30, 50], "hardCosts": [50, 75]},
 		
-		"Cup": {"virtue": v.t, "costs": [50, 75]},
-		"Wings": {"virtue": v.t, "costs": [50, 75]}
+		"Cup": {"virtue": v.t, "costs": [30, 50], "hardCosts": [50, 75]},
+		"Wings": {"virtue": v.t, "costs": [30, 50], "hardCosts": [50, 75]},
 	}
 
 func create_boon(boonName):

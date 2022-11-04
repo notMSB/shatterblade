@@ -132,14 +132,14 @@ func activate_point(point):
 	elif type == pointTypes.start:
 		print("Start")
 	elif type == pointTypes.end: #todo: event asking if you want to end (and eventually a boss here)
-		print("End")
+		#print("End")
 		regen_map(true)
 	elif type == pointTypes.dungeon:
 		grab_event("Dungeon")
 	elif type == pointTypes.town:
-		var townValue = 0 if isDay else 1 #towns should only be open on their day or the night before it
+		var townValue = 0 if isDay else 1 #towns should close on their night
 		townValue += currentDay
-		if townValue == point.sectionNum: grab_event("Town")
+		if townValue <= point.sectionNum: grab_event("Town")
 		else: pass #todo: event saying town is closed
 	elif type == pointTypes.trader:
 		grab_event("Store")
@@ -179,7 +179,9 @@ func activate_battle(newOpponents = null):
 			var dungeonRando = DUNGEONDIFFICULTY[randi() % DUNGEONDIFFICULTY.size()]
 			newOpponents = Enemies.generate_encounter(dungeonRando + get_difficulty_mod(), false, currentDungeon.mascot)
 		elif !newOpponents and distanceTraveled > 1:
-			newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + get_difficulty_mod(), isDay)
+			var dayEncounter = isDay
+			if isDay and activePoint.sectionNum > currentArea: dayEncounter = false
+			newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + get_difficulty_mod(), dayEncounter)
 		battleWindow.visible = true
 		battleWindow.welcome_back(newOpponents)
 
@@ -309,12 +311,12 @@ func place_town(exitPoint, borderPoints): #towns are adjacent to dungeon exits a
 		if backupSpots.empty(): 
 			regen_map()
 			return print("no spots for town")
-		print("backup spots")
+		#print("backup spots")
 		townSpots = backupSpots
 	for i in townSpots.size():
 		if abs(townSpots[i].position.y - bottomRight.y/2) < bestDistance:
 			bestSpot = townSpots[i]
-			print("swapping town to more central spot")
+			#print("swapping town to more central spot")
 	bestSpot.set_name("Town")
 	bestSpot.set_type(pointTypes.town)
 	#print(bottomRight.y/2)
@@ -351,6 +353,7 @@ func regen_map(newMember = false):
 			#you win !
 	startIndex = null
 	endIndex = null
+	canEnd = false
 	for holder in $HolderHolder.get_children():
 		if holder != $HolderHolder/DisplayHolder: #this one can stay
 			for child in holder.get_children():

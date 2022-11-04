@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://src/Project/Debug.gd" type="Script" id=1]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=2]
@@ -7,8 +7,12 @@
 [ext_resource path="res://src/Project/Map.tscn" type="PackedScene" id=5]
 [ext_resource path="res://src/Project/Battle.tscn" type="PackedScene" id=6]
 
-[sub_resource type="DynamicFont" id=1]
+[sub_resource type="DynamicFont" id=3]
 size = 34
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 32
 font_data = ExtResource( 2 )
 
 [node name="Debug" type="Node2D"]
@@ -34,12 +38,40 @@ margin_left = 599.0
 margin_top = 58.0
 margin_right = 707.0
 margin_bottom = 126.0
+custom_fonts/font = SubResource( 3 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Party"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Difficulty" type="Button" parent="."]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 578.0
+margin_top = 170.0
+margin_right = 730.0
+margin_bottom = 238.0
+custom_fonts/font = SubResource( 3 )
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+text = "Difficulty"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Mode" type="Label" parent="Difficulty"]
+margin_left = -20.0
+margin_top = 60.0
+margin_right = 168.0
+margin_bottom = 99.0
+custom_fonts/font = SubResource( 2 )
+text = "Normal"
+align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -51,11 +83,11 @@ margin_left = 302.0
 margin_top = 208.0
 margin_right = 410.0
 margin_bottom = 276.0
+custom_fonts/font = SubResource( 3 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Items"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -64,14 +96,14 @@ __meta__ = {
 [node name="Map" type="Button" parent="."]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 600.0
-margin_top = 192.0
+margin_top = 296.0
 margin_right = 708.0
-margin_bottom = 260.0
+margin_bottom = 364.0
+custom_fonts/font = SubResource( 3 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Map"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -84,17 +116,18 @@ margin_left = 300.0
 margin_top = 64.0
 margin_right = 408.0
 margin_bottom = 132.0
+custom_fonts/font = SubResource( 3 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Battle"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [connection signal="pressed" from="Party" to="." method="_on_Party_pressed"]
+[connection signal="pressed" from="Difficulty" to="." method="_on_Difficulty_pressed"]
 [connection signal="pressed" from="Inventory" to="." method="_on_Inventory_pressed"]
 [connection signal="pressed" from="Map" to="." method="_on_Map_pressed"]
 [connection signal="pressed" from="Battle" to="." method="_on_Battle_pressed"]

@@ -24,3 +24,8 @@ func _on_Map_pressed():
 
 func add_scene(sceneName):
 	Game.add_child(sceneName.instance())
+
+func _on_Difficulty_pressed():
+	Game.hardMode = !Game.hardMode
+	if Game.hardMode: $Difficulty/Mode.text = "Hard"
+	else: $Difficulty/Mode.text = "Normal"

@@ -35,12 +35,11 @@ var info
 var hits
 var hitBonus = 0
 
+var gameOver = false
 var battleDone = true
 var rewardUnit
 
 var opponents = ["Rat"]
-
-var targetsVisible = false
 
 var executionOrder = [] #box, move, user, target
 enum e {box, move, user, target}
@@ -66,15 +65,17 @@ func _ready(): #Generate units and add to turn order
 			createdUnit = Enemy.instance()
 			if opponents.size() > i - partyNum:
 				var enemy = Enemies.enemyList[opponents[i - partyNum]]
-				createdUnit.callv("make_stats", enemy["stats"])
+				if get_parent().hardMode: createdUnit.make_stats(enemy["stats"][1])
+				else: createdUnit.make_stats(enemy["stats"][0])
 				createdUnit.identity = str(opponents[i - partyNum])
 				createdUnit.battleName = str(createdUnit.identity, String(i))
 				if enemy.has("passives"): createdUnit.passives = enemy["passives"]
 				if enemy.has("specials"): 
 					createdUnit.moves = enemy["specials"]
+					if get_parent().hardMode and enemy.has("hardSpecials"): createdUnit.moves.append_array(enemy["hardSpecials"])
 					createdUnit.allMoves.append_array(createdUnit.moves)
 			else:
-				createdUnit.callv("make_stats", [400])
+				createdUnit.make_stats(400)
 				createdUnit.battleName = str("E", String(i))
 		StatusManager.initialize_statuses(createdUnit)
 		$Units.add_child(createdUnit)
@@ -119,7 +120,8 @@ func create_enemies():
 	for opponent in opponents:
 		createdUnit = Enemy.instance()
 		enemy = Enemies.enemyList[opponent]
-		createdUnit.callv("make_stats", enemy["stats"])
+		if get_parent().hardMode: createdUnit.make_stats(enemy["stats"][1])
+		else: createdUnit.make_stats(enemy["stats"][0])
 		createdUnit.identity = opponent
 		createdUnit.battleName = str(createdUnit.identity, String(i))
 		if enemy.has("passives"): createdUnit.passives = enemy["passives"]
@@ -161,7 +163,7 @@ func set_ui(unit, setPassives = false):
 	StatusManager.initialize_statuses(unit)
 	unit.update_box_bars()
 	unit.update_strength(true)
-	unit.shield = 0
+	if battleDone: unit.shield = 0
 	unit.update_hp()
 	if setPassives and unit.passives.size() > 0:
 		for passive in unit.passives:
@@ -176,18 +178,20 @@ func get_partyHealth():
 
 func play_turn(notFirstTurn = true):
 	if battleDone:
+		if gameOver: return get_tree().change_scene("res://src/Project/Lose.tscn")
 		return done(Enemies.enemyList[rewardUnit.identity]["rewards"][0])
 	turnIndex = (turnIndex + 1) % $Units.get_child_count() #Advance to next unit
 	currentUnit = $Units.get_child(turnIndex)
 	if turnIndex == 0: #Start of turn, take player actions
+		usedMoveBox = null
 		if notFirstTurn and get_parent().mapMode: get_node("../Map").subtract_time(1)
 		turnCount+=1
 		for unit in $Units.get_children():
 			unit.update_strength(true)
 			unit.isStunned = false
-			if notFirstTurn: 
-					unit.shield = 0
-					unit.update_hp()
+			if notFirstTurn:
+				unit.shield = 0
+				unit.update_hp()
 			if unit.isPlayer:
 				StatusManager.evaluate_statuses(unit, StatusManager.statusActivations.beforeTurn)
 				unit.update_resource(apIncrement, Moves.moveType.special, true)
@@ -218,7 +222,7 @@ func play_turn(notFirstTurn = true):
 				moveName = currentUnit.storedAction
 				chosenMove = Moves.moveList[currentUnit.storedAction]
 				yield(execute_move(), "completed")
-				yield(set_intent(currentUnit), "completed")
+				if !battleDone: yield(set_intent(currentUnit), "completed")
 				#currentUnit.update_info(currentUnit.storedTarget.name)
 				StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
@@ -259,7 +263,7 @@ func set_intent(unit, target = false):
 				targets.append_array(extraTargets)
 			else: #Ally
 				targets = get_team(false, true)
-			unit.storedTarget = targets[randi() % targets.size()]
+			if targets.size() > 0: unit.storedTarget = targets[randi() % targets.size()]
 		else:
 			unit.storedTarget = target
 	var targetText = unit.storedTarget
@@ -278,19 +282,25 @@ func get_team(gettingPlayers, onlyAlive = false):
 	return team
 
 func evaluate_targets(move, user, box):
-	usedMoveBox = box
-	chosenMove = Moves.moveList[move]
-	moveName = move
-	#$BattleUI.set_description(move, chosenMove, user)
-	moveUser = user
-	$BattleUI.toggle_buttons(false)
-	if chosenMove["target"] <= targetType.enemyTargets: #If an enemy is targeted
-		$BattleUI.toggle_buttons(true, get_team(false))
-	elif chosenMove["target"] <= targetType.allies: #If an ally is targeted
-		$BattleUI.toggle_buttons(true, get_team(true))
-	elif chosenMove["target"] == targetType.user or chosenMove["target"] == targetType.none: #Self/no target
-		#$BattleUI.toggle_buttons(true, [moveUser])
-		target_chosen(user.get_index())
+	if box == usedMoveBox: 
+		$BattleUI.toggle_buttons(false)
+		usedMoveBox = null
+		set_description("")
+	else:
+		usedMoveBox = box
+		chosenMove = Moves.moveList[move]
+		moveName = move
+		#$BattleUI.set_description(move, chosenMove, user)
+		moveUser = user
+		$BattleUI.toggle_buttons(false)
+		if chosenMove["target"] <= targetType.enemyTargets: #If an enemy is targeted
+			$BattleUI.toggle_buttons(true, get_team(false))
+		elif chosenMove["target"] <= targetType.allies: #If an ally is targeted
+			$BattleUI.toggle_buttons(true, get_team(true))
+		elif chosenMove["target"] == targetType.user or chosenMove["target"] == targetType.none: #Self/no target
+			#$BattleUI.toggle_buttons(true, [moveUser])
+			target_chosen(user.get_index())
+			usedMoveBox = null
 	
 
 func set_description(boxMoveName):
@@ -333,6 +343,7 @@ func cut_from_order(box):
 		if action[e.user] == box.user and !action[1].has("quick"): #If a non-quick is committed and a quick is cut, this bool has the quick turn off completely
 			userCommitted = true
 	executionOrder.erase(foundAction) #Erased from order
+	set_description("")
 	
 	if foundAction[e.move].has("resVal"): #Refund resources spent from that action
 		foundAction[e.user].update_resource(box.resValue, foundAction[e.move]["type"], true)
@@ -398,15 +409,17 @@ func execute_move():
 		if typeof(hits) == TYPE_ARRAY: hits = hits.size() #One hit for every item in an array. Yes
 	else: hits = chosenMove["hits"]
 	hits+= hitBonus
-	var bounceHits = true if chosenMove.has("bounce") else false
+	var bounceHits = true if chosenMove.has("barrage") else false
 	var i = 0
+	if chosenMove.has("timing") and chosenMove["timing"] == Moves.timings.before: #Some moves activate effects before the damage
+		activate_effect()
 	while i < hits: #repeat for every hit, while loop enables it to be modified on the fly by move effects from outside this file
-		if targets.size() == 1 and targets[0].currentHealth <= 0: break
-		if bounceHits and i > 0: 
-			targets = [get_next_team_unit(targets[0])]
+		if battleDone: break
+		if bounceHits and i > 0:
+			var bounceTarget = get_next_team_unit(targets[0])
+			if bounceTarget: targets = [bounceTarget]
+		elif targets.size() == 1 and targets[0].currentHealth <= 0: break
 		for target in targets: #repeat for every target	
-			if chosenMove.has("timing") and chosenMove["timing"] == Moves.timings.before: #Some moves activate effects before the damage
-				activate_effect()
 			if chosenMove.has("damage"): #Get base damage, evaluate target status to final damage, deal said damage, update UI
 				damageCalc = chosenMove["damage"] + moveUser.strength + moveUser.tempStrength - target.defense
 				var tempDamage
@@ -422,16 +435,16 @@ func execute_move():
 			
 			if chosenMove.has("status"): #Update target status if there is a status on the move
 				if chosenMove.has("value"): #Value determines length of status effect
-					StatusManager.add_status(target, chosenMove["status"], chosenMove["value"])
+					if can_activate_effect(chosenMove, damageCalc): StatusManager.add_status(target, chosenMove["status"], chosenMove["value"])
 				else: #Status lasts forever or until manually removed
-					StatusManager.add_status(target, chosenMove["status"])
+					if can_activate_effect(chosenMove, damageCalc): StatusManager.add_status(target, chosenMove["status"])
 				if chosenMove["status"] == "Provoke": #intent changing status is unique
 					for cond in target.statuses[StatusManager.statusActivations.passive]:
 						if cond["name"] == "Provoke" and cond["value"] >= 1:
 							set_intent(target, moveUser) #just taunt for now
 							StatusManager.remove_status(target, StatusManager.statusList, StatusManager.find_status(target, "Provoke"))
 			if !chosenMove.has("timing") or chosenMove["timing"] == Moves.timings.after: #Default timing is after damage
-				activate_effect()
+				if can_activate_effect(chosenMove, damageCalc): activate_effect()
 			if moveUser.isPlayer: #overkill only returns nonzero for a specific boon and level
 				if moveTarget.currentHealth <= 0:
 					StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.gettingKill, [damageCalc]) 
@@ -446,6 +459,12 @@ func execute_move():
 	else:
 		Boons.call_specific("check_move", [null, null, moveUser], "Lion")
 	#if hits == 0: yield(get_tree().create_timer(.25), "timeout") #needed to prevent a crash
+
+func can_activate_effect(moveData, damage):
+	if moveData.has("damage"):
+		if damage != 0: return true
+		else: return false
+	else: return true
 
 func get_next_team_unit(unit): #gets the next player or enemy from an existing player or enemy's position
 	var unitIndex = (unit.get_index() + 1) % $Units.get_child_count()
@@ -476,7 +495,7 @@ func evaluate_completion(deadUnit):
 	if deadEnemies >= enemyNum:
 		battleDone = true
 		rewardUnit = deadUnit
-		print("Battle Ready To Complete")
+		#print("Battle Ready To Complete")
 
 func evaluate_game_over():
 	var deadUnits = 0
@@ -485,7 +504,7 @@ func evaluate_game_over():
 			deadUnits +=1
 	if deadUnits == global.storedParty.size():
 		battleDone = true
-		return get_tree().change_scene("res://src/Project/Lose.tscn")
+		gameOver = true
 
 func evaluate_revives():
 	for unit in global.storedParty:
