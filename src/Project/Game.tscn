@@ -20,11 +20,11 @@
 size = 34
 font_data = ExtResource( 2 )
 
-[sub_resource type="DynamicFont" id=3]
+[sub_resource type="DynamicFont" id=2]
 size = 34
 font_data = ExtResource( 2 )
 
-[sub_resource type="DynamicFont" id=2]
+[sub_resource type="DynamicFont" id=3]
 size = 32
 font_data = ExtResource( 2 )
 
@@ -146,7 +146,7 @@ margin_left = 578.0
 margin_top = 194.0
 margin_right = 730.0
 margin_bottom = 262.0
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
@@ -161,7 +161,7 @@ margin_left = -20.0
 margin_top = 60.0
 margin_right = 168.0
 margin_bottom = 99.0
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 3 )
 text = "Normal"
 align = 1
 __meta__ = {

@@ -19,9 +19,13 @@ onready var Boons = get_node("../Data/Boons")
 const INCREMENT = 90
 const KILLDISTANCE = 70 #lower kill distance means more points
 const MAXDISTANCE = 199
-const FUZZ = 45 #should never be more than half of the increment
+const FUZZ = 35 #should never be more than half of the increment
 const CORNER_CHECK = 20
 const DISTANCE_TIME_MULT = .05
+
+const LEFTBOUND = 280
+const MIDPOINT = 640
+const RIGHTBOUND = 960
 
 const NIGHTLENGTH = 50
 const TOTALSECTIONS = 2
@@ -241,6 +245,7 @@ func make_points(nextPos):
 			startIndex.toggle_activation(true)
 			startIndex.set_name("Start")
 			determine_distances(startIndex)
+			move_map(LEFTBOUND)
 			return clean_up()
 		nextPos.x = INCREMENT
 	make_points(nextPos)
@@ -596,3 +601,11 @@ func fuzz_point(currentPoint):
 
 func rando_fuzz():
 	return randi() % (FUZZ * 2)
+
+func move_map(pointPos):
+	var checkPos = 640 - pointPos
+	checkPos = min(checkPos, LEFTBOUND)
+	checkPos = max(checkPos, LEFTBOUND * -1)
+	$HolderHolder/LineHolder.position.x = checkPos
+	$HolderHolder/PointHolder.position.x = checkPos
+	$HolderHolder/SectionHolder.position.x = checkPos

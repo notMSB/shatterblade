@@ -565,9 +565,11 @@ func exit(): #Save inventory and leave
 			tStock.append(box.get_node("Name").text)
 		get_node("../Map").activePoint.traderStock = tStock
 	for i in cHolder.get_child_count():
+		if i == 2: 
+			clear_box(cHolder.get_child(i))
+			break
 		var xBox = xCheck()
 		if xBox: swap_boxes(cHolder.get_child(i),xBox)
-		if i == 2: clear_box(cHolder.get_child(i))
 	var unit
 	var moveName
 	var moveData
