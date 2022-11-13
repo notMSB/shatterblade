@@ -21,6 +21,7 @@ func _ready():
 		"outcomes": [[funcref(self, "activate_shop")], [funcref(self, "advance")]]},
 	"Crafting": {"time": timings.day, "description": "Repair an item?",
 		"choices": ["Yes", "No"],
+		"conditions": [false, true],
 		"outcomes": [[funcref(self, "activate_craft")], [funcref(self, "advance")]]},
 	"Test": {"time": timings.night, "description": "hello 1",
 		"choices": ["-4", "+4"],
@@ -67,16 +68,18 @@ func generate_event(questData):
 	newEvent["time"] = timings.special
 	newEvent["description"] = str("This is a generated ", questData["type"], " event.")
 	newEvent["choices"] = [String(questData["objective"]), "Do not"]
-	newEvent["outcomes"] = []
-	newEvent["outcomes"].append([funcref(self, "activate_quest"), questData["type"], questData["objective"]])
-	newEvent["outcomes"].append([funcref(self, "advance")])
+	newEvent["outcomes"] = [[funcref(self, "activate_quest"), questData["type"], questData["objective"]], [funcref(self, "advance")]]
 	newEvent["prize"] = questData["prize"]
 	newEvent["reward"] = questData["reward"]
 	newEvent["type"] = questData["type"]
 	newEvent["objective"] = questData["objective"]
+	
+	if questData["type"] == "fetch" or questData["type"] == "weapon_request": #put an offerbox inside the event
+		newEvent["conditions"] = [false, true]
+	
 	return newEvent
 
-func give_reward(openWindow = false, rewardExists = true):
+func give_reward(rewardExists = true):
 	Map.activePoint.pointType = Map.pointTypes.visited
 	if rewardExists:
 		var questEvent = Map.activePoint.pointQuest
@@ -88,7 +91,7 @@ func give_reward(openWindow = false, rewardExists = true):
 				Map.activePoint.set_type(Map.pointTypes.repair)
 				Map.grab_event("Crafting")
 		else:
-			Map.inventoryWindow.add_item(questEvent["prize"], true, openWindow)
+			Map.inventoryWindow.add_item(questEvent["prize"], true)
 
 #Conditions
 func has_class(className):
@@ -113,25 +116,27 @@ func activate_quest(questType, objective):
 	var questFunc = funcref(self, str("quest_", questType))
 	questFunc.call_func(objective)
 
-func quest_fetch(neededComponment): #need for certain component
-	Map.inventoryWindow.offerMode = Map.inventoryWindow.oModes.reward
-	Map.inventoryWindow.offerType = Map.inventoryWindow.oTypes.component
-	Map.inventoryWindow.offerNeed = neededComponment
-	Map.activate_inventory(Map.inventoryWindow.iModes.offer)
+func quest_fetch(_neededComponment): #need for certain component
+	#Map.inventoryWindow.offerMode = Map.inventoryWindow.oModes.reward
+	#Map.inventoryWindow.offerType = Map.inventoryWindow.oTypes.component
+	#Map.inventoryWindow.offerNeed = neededComponment
+	#Map.activate_inventory(Map.inventoryWindow.iModes.offer)
+	give_reward()
 
 func quest_labor(time): #task that takes X time
 	adjust_time(time * -1)
 	give_reward()
 
 func quest_hunt(target): #battle with rare enemy
-	give_reward(false, false) #reward can be given in advance since battles are currently inescapable
+	give_reward(false) #reward can be given in advance since battles are currently inescapable
 	Map.activate_battle([target]) #the reward is the component from the target
 
-func quest_weapon_request(weaponType): #random weapon of a certain class
-	Map.inventoryWindow.offerMode = Map.inventoryWindow.oModes.reward
-	Map.inventoryWindow.offerType = Map.inventoryWindow.oTypes.weapon
-	Map.inventoryWindow.offerNeed = weaponType
-	Map.activate_inventory(Map.inventoryWindow.iModes.offer)
+func quest_weapon_request(_weaponType): #random weapon of a certain class
+	#Map.inventoryWindow.offerMode = Map.inventoryWindow.oModes.reward
+	#Map.inventoryWindow.offerType = Map.inventoryWindow.oTypes.weapon
+	#Map.inventoryWindow.offerNeed = weaponType
+	#Map.activate_inventory(Map.inventoryWindow.iModes.offer)
+	give_reward()
 
 func adjust_time(value):
 	Map.subtract_time(value * -1)
@@ -165,14 +170,11 @@ func enter_temple():
 	temples.get_child(index).enter()
 
 func activate_craft():
-	Map.inventoryWindow.offerMode = Map.inventoryWindow.oModes.repair
-	Map.inventoryWindow.offerType = Map.inventoryWindow.oTypes.any
-	Map.activate_inventory(Map.inventoryWindow.iModes.offer)
+	Map.repair_event_box()
 
 func activate_shop():
 	Map.inventoryWindow.shuffle_trade_stock()
-	Map.activate_inventory(Map.inventoryWindow.iModes.trade)
-	return true
+	Map.activate_inventory()
 
 func rest():
 	var restTime = Map.time
@@ -182,4 +184,4 @@ func rest():
 		unit.update_hp()
 
 func advance():
-	pass
+	Map.return_event_box()

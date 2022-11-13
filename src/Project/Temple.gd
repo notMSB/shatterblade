@@ -44,8 +44,9 @@ func get_price(selectNode, boonName):
 func offer_made(box):
 	if Inventory.check_for_curses([box.get_node("Name").text]): #if the offer is not cursed
 		Boons.grant_favor(int(box.get_node("Info").text) * 3)
-	else: #give it back
-		Inventory.activate_offer(box.get_node("Name").text)
+		Inventory.clear_box(box)
+	else:
+		pass
 
 func enter():
 	visible = true
@@ -74,8 +75,10 @@ func _on_HealButton_pressed():
 			Boons.grant_favor(-1)
 
 func _on_OfferButton_pressed():
-	Inventory.activate_offer()
+	offer_made($Templebox)
 
 func _on_ExitButton_pressed():
 	visible = false
 	Map.currentTemple = null
+	if $Templebox/Name.text != "X":
+		Inventory.swap_boxes($Templebox, Inventory.xCheck())

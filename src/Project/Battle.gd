@@ -524,7 +524,6 @@ func done(reward):
 			set_ui(global.storedParty[i])
 			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], map.inventoryWindow)
 		map.inventoryWindow.add_item(reward)
-		map.get_node("InventoryButton").visible = true
 		visible = false
 		evaluate_revives()
 		deadEnemies = 0

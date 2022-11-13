@@ -2,6 +2,8 @@ extends Node2D
 
 onready var CheckScene = $"../../../"
 
+export var canMove = true #cursed items and craft/repair product boxes get this set false
+
 const REPAIRVALUE = .5
 
 var user
@@ -17,7 +19,6 @@ var usageOrder
 var trackerBar
 var buttonMode = true
 var savedTargetName = ""
-var canMove = true #the craftbox and cursed items get this
 
 var boxModeScene
 
@@ -34,11 +35,13 @@ func updateInfo(targetName = null):
 func set_mode_scene(): #returns battle, inventory, or map
 	if CheckScene.name == "DisplayHolder": 
 		CheckScene = CheckScene.get_node("../../")
+	elif CheckScene.name == "Events" or CheckScene.name == "RepairScroll" or CheckScene.name == "CraftScroll" or CheckScene.name == "HolderHolder": 
+		CheckScene = CheckScene.get_node("../")
 	if CheckScene.name == "Map":
-		if CheckScene.inventoryWindow.visible == true:
-			return CheckScene.inventoryWindow
-		elif CheckScene.battleWindow.visible == true:
+		if CheckScene.battleWindow.visible == true:
 			return CheckScene.battleWindow
+		else:
+			return CheckScene.inventoryWindow
 	return CheckScene
 
 func reduce_uses(amount):
@@ -73,6 +76,7 @@ func _on_Button_pressed():
 	boxModeScene.set_description($Name.text)
 	if boxModeScene.name == "Inventory": #inventory
 		if !(isCursed and get_parent().name == "MoveBoxes") and canMove: boxModeScene.select_box(self)
+		else: boxModeScene.set_description($Name.text)
 	elif boxModeScene.name == "Battle":
 		boxModeScene.set_description($Name.text)
 		if buttonMode:

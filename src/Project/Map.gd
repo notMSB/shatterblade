@@ -10,6 +10,8 @@ export (PackedScene) var ChoiceUI
 export (PackedScene) var Dungeon
 export (PackedScene) var Temple
 export (PackedScene) var Section
+export (PackedScene) var QuickCraft
+export (PackedScene) var QuickRepair
 
 onready var Moves = get_node("../Data/Moves")
 onready var Quests = get_node("../Data/Quests")
@@ -100,10 +102,17 @@ func _ready():
 			tracker.visible = true
 	for unit in global.storedParty:
 		battleWindow.set_ui(unit)
+		for box in unit.boxHolder.get_children():
+			inventoryWindow.identify_product(box)
 	get_parent().move_child(battleWindow, inventoryWindow.get_index())
 	var Party = get_parent().get_node_or_null("Party")
 	if Party: get_parent().move_child(Party, get_index())
 	set_time_text()
+	set_quick_panels()
+
+func set_quick_panels():
+	set_quick_crafts()
+	set_quick_repairs()
 
 func set_boon_text():
 	favorNode.get_node("Virtue").text = Boons.set_text()
@@ -115,19 +124,14 @@ func set_description(descriptor, forBox = true):
 func setup_inventory():
 	inventoryWindow = Inventory.instance()
 	get_parent().add_child(inventoryWindow)
-	inventoryWindow.visible = false
 
 func setup_battle():
 	battleWindow = Battle.instance()
 	get_parent().add_child(battleWindow)
 	battleWindow.visible = false
 
-func activate_inventory(mode = null):
-	$InventoryButton.visible = false
-	if mode:
-		inventoryWindow.welcome_back(mode)
-	else:
-		inventoryWindow.welcome_back(inventoryWindow.iModes.craft) #can always craft
+func activate_inventory():
+	inventoryWindow.welcome_back()
 
 func activate_point(point):
 	var type = point.pointType
@@ -175,19 +179,17 @@ func check_delay():
 		activate_battle(temp)
 
 func activate_battle(newOpponents = null):
-	if inventoryWindow.visible:
-		delayBattle = newOpponents
-	else:
-		$InventoryButton.visible = false
-		if currentDungeon:
-			var dungeonRando = DUNGEONDIFFICULTY[randi() % DUNGEONDIFFICULTY.size()]
-			newOpponents = Enemies.generate_encounter(dungeonRando + get_difficulty_mod(), false, currentDungeon.mascot)
-		elif !newOpponents and distanceTraveled > 1:
-			var dayEncounter = isDay
-			if isDay and activePoint.sectionNum > currentArea: dayEncounter = false
-			newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + get_difficulty_mod(), dayEncounter)
-		battleWindow.visible = true
-		battleWindow.welcome_back(newOpponents)
+	#if inventoryWindow.visible:
+		#delayBattle = newOpponents
+	if currentDungeon:
+		var dungeonRando = DUNGEONDIFFICULTY[randi() % DUNGEONDIFFICULTY.size()]
+		newOpponents = Enemies.generate_encounter(dungeonRando + get_difficulty_mod(), false, currentDungeon.mascot)
+	elif !newOpponents and distanceTraveled > 1:
+		var dayEncounter = isDay
+		if isDay and activePoint.sectionNum > currentArea: dayEncounter = false
+		newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + get_difficulty_mod(), dayEncounter)
+	battleWindow.visible = true
+	battleWindow.welcome_back(newOpponents)
 
 func get_difficulty_mod():
 	var nightMod = 0 if isDay else 1
@@ -208,16 +210,41 @@ func run_event(event):
 			option.queue_free()
 	for i in event["choices"].size():
 		var canClick = true
-		if event.has("conditions") and typeof(event["conditions"][i]) == TYPE_ARRAY: #assess the condition
-			cond = event["conditions"][i]
-			function = event["conditions"][i][0] #first element is the function, rest is the args
-			if !function.call_funcv(cond.slice(1, cond.size()-1)): canClick = false #skip using it as an option if the condition is false
 		choice = ChoiceUI.instance()
 		$Events/Choices.add_child(choice)
 		choice.position.y = yIncrement
 		yIncrement += choice.get_node("Button").rect_size.y
 		choice.get_node("Info").text = event["choices"][i]
+		
+		if event.has("conditions"):
+			if typeof(event["conditions"][i]) == TYPE_ARRAY: #assess the condition
+				cond = event["conditions"][i]
+				function = event["conditions"][i][0] #first element is the function, rest is the args
+				if !function.call_funcv(cond.slice(1, cond.size()-1)): canClick = false #skip using it as an option if the condition is false
+			else:
+				canClick = event["conditions"][i]
+				if !canClick: #offering condition
+					if event.has("type"):
+						if event["type"] == "fetch":
+							inventoryWindow.offerType = inventoryWindow.oTypes.component
+						else: #weapon request
+							inventoryWindow.offerType = inventoryWindow.oTypes.weapon
+						inventoryWindow.offerNeed = event["objective"]
+					else: #repair
+						inventoryWindow.offerType = inventoryWindow.oTypes.any
+					choice.get_node("Offerbox").visible = true
 		if !canClick: choice.get_node("Button").visible = false
+
+func repair_event_box():
+	var repairName = $Events/Choices.get_child(0).get_node("Offerbox/Name").text
+	if repairName != "X":
+		inventoryWindow.add_to_player(repairName)
+		activePoint.pointType = pointTypes.visited
+
+func return_event_box():
+	var eBox = $Events/Choices.get_child(0).get_node("Offerbox")
+	if eBox.get_node("Name").text != "X":
+		inventoryWindow.swap_boxes(eBox, inventoryWindow.xCheck())
 
 func finish_event(checkName):
 	if calledEvent == checkName:
@@ -580,6 +607,58 @@ func advance_day(reset = false):
 	else: currentDay += 1
 	set_sections()
 	kill_off_section_text()
+
+func set_quick_crafts():
+	var quickIncrement = 80
+	var presentComponents = []
+	var totalRows = 0
+	
+	for child in $CraftScroll/ColorRect.get_children():
+		$CraftScroll/ColorRect.remove_child(child)
+		child.queue_free()
+	
+	for item in global.itemDict:
+		if item != "moves": #components only
+			if global.itemDict[item] >= 2:
+				create_quick_craft(item, item, totalRows, quickIncrement)
+				totalRows+=1
+			if global.itemDict[item] >= 1:
+				presentComponents.append(item)
+	
+	for i in presentComponents.size():
+		var j = i + 1
+		while j < presentComponents.size():
+			create_quick_craft(presentComponents[i], presentComponents[j], totalRows, quickIncrement)
+			j+=1
+			totalRows+=1
+	$CraftScroll/ColorRect.rect_min_size = Vector2(LEFTBOUND, quickIncrement * totalRows)
+
+func create_quick_craft(one, two, totalRows, quickIncrement):
+	var newQuick = QuickCraft.instance()
+	$CraftScroll/ColorRect.add_child(newQuick)
+	newQuick.position.y = totalRows * quickIncrement
+	newQuick.assemble(one, two)
+
+func set_quick_repairs():
+	var quickIncrement = 80
+	var totalRows = 0
+	var weaponList = inventoryWindow.get_all_gear()
+	
+	for child in $RepairScroll/ColorRect.get_children():
+		$RepairScroll/ColorRect.remove_child(child)
+		child.queue_free()
+	
+	for weapon in weaponList:
+		var newQuick = QuickRepair.instance()
+		$RepairScroll/ColorRect.add_child(newQuick)
+		newQuick.position.y = totalRows * quickIncrement
+		newQuick.originalBox = weapon
+		$HolderHolder/DisplayHolder.box_move(newQuick.get_node("Weapon"), weapon.get_node("Name").text)
+		var temp = [weapon.get_node("Name").text, weapon.maxUses, weapon.currentUses]
+		inventoryWindow.flip_values(newQuick.get_node("Weapon"), temp)
+		totalRows += 1
+		newQuick.disassemble(weapon.get_node("Name").text)
+	$RepairScroll/ColorRect.rect_min_size = Vector2(LEFTBOUND, quickIncrement * totalRows)
 
 func update_favor(amount):
 	favorNode.get_node("Amount").text = String(amount)

@@ -6,10 +6,10 @@ export (PackedScene) var PlayerMove
 
 const DEFAULTMOVES = 2
 const PLAYERXSTART = 600
-const PLAYERYSTART = 550
+const PLAYERYSTART = 600
 const PLAYERINCREMENT = 80
 
-const UNITYSTART = 200
+const UNITYSTART = 115
 const XINCREMENT = 300
 
 onready var Moves = get_node("../../../Data/Moves")
