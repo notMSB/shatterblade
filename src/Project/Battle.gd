@@ -248,6 +248,8 @@ func set_intent(unit, target = false):
 		unit.storedTarget = unit
 	elif actionInfo["target"] == targetType.enemies:
 		unit.storedTarget = "Party"
+	elif actionInfo["target"] == targetType.everyone:
+		unit.storedTarget = "Everyone"
 	else:
 		if unit.targetlock: #Don't set a new one
 			pass
@@ -256,11 +258,16 @@ func set_intent(unit, target = false):
 			var extraTargets = []
 			if actionInfo["target"] == targetType.enemy:
 				targets = get_team(true, true)
+				var stealth = []
 				for target in targets:
-					if StatusManager.find_status(target, "Provoke"):
+					if StatusManager.find_status(target, "Stealth"):
+						targets.erase(target)
+						stealth.append(target)
+					elif StatusManager.find_status(target, "Provoke"): #stealth overrides provoke
 						extraTargets.append(target) #get another one in there
 						extraTargets.append(target) #and another, why not
 				targets.append_array(extraTargets)
+				if targets.empty(): targets = stealth #stealthed units should only be targeted if there are no other valid targets
 			else: #Ally
 				targets = get_team(false, true)
 			if targets.size() > 0: unit.storedTarget = targets[randi() % targets.size()]
@@ -293,7 +300,10 @@ func evaluate_targets(move, user, box):
 		#$BattleUI.set_description(move, chosenMove, user)
 		moveUser = user
 		$BattleUI.toggle_buttons(false)
-		if chosenMove["target"] <= targetType.enemyTargets: #If an enemy is targeted
+		if chosenMove["target"] == targetType.everyone or chosenMove["target"] == targetType.enemies or chosenMove["target"] == targetType.allies:
+			target_chosen()
+			usedMoveBox = null
+		elif chosenMove["target"] <= targetType.enemyTargets: #If an enemy is targeted
 			$BattleUI.toggle_buttons(true, get_team(false))
 		elif chosenMove["target"] <= targetType.allies: #If an ally is targeted
 			$BattleUI.toggle_buttons(true, get_team(true))
@@ -306,8 +316,8 @@ func evaluate_targets(move, user, box):
 func set_description(boxMoveName):
 	descriptionNode.text = Moves.get_description(boxMoveName)
 
-func target_chosen(index):
-	moveTarget = $Units.get_child(index)
+func target_chosen(index = null):
+	moveTarget = $Units.get_child(index) if index != null else null
 	executionOrder.append([usedMoveBox, chosenMove, moveUser, moveTarget])
 	usedMoveBox.usageOrder = executionOrder.size()
 	if chosenMove["target"] != targetType.none: $BattleUI.choose_movebox(usedMoveBox, moveTarget)
@@ -369,6 +379,9 @@ func execute_move():
 	var targets = []
 	if chosenMove["target"] == targetType.enemies:
 		targets = get_team(!moveUser.isPlayer, true)
+	elif chosenMove["target"] == targetType.everyone:
+		targets = get_team(moveUser.isPlayer, true)
+		targets.append_array(get_team(!moveUser.isPlayer, true))
 	elif chosenMove["target"] == targetType.enemyTargets:
 		var tempTargets = get_team(!moveUser.isPlayer, true)
 		for unit in tempTargets:
@@ -415,11 +428,16 @@ func execute_move():
 		activate_effect()
 	while i < hits: #repeat for every hit, while loop enables it to be modified on the fly by move effects from outside this file
 		if battleDone: break
-		if bounceHits and i > 0:
-			var bounceTarget = get_next_team_unit(targets[0])
-			if bounceTarget: targets = [bounceTarget]
+		if bounceHits:
+			var bounce = true if i > 0 else false
+			if chosenMove.has("condition") and !bounce: bounce = !chosenMove["condition"].call_func(targets[0])
+			if bounce:
+				var condition = chosenMove["condition"] if chosenMove.has("condition") else null
+				var bounceTarget = get_next_team_unit(targets[0], condition)
+				if bounceTarget: targets = [bounceTarget]
 		elif targets.size() == 1 and targets[0].currentHealth <= 0: break
 		for target in targets: #repeat for every target	
+			moveTarget = target
 			if chosenMove.has("damage"): #Get base damage, evaluate target status to final damage, deal said damage, update UI
 				damageCalc = chosenMove["damage"] + moveUser.strength + moveUser.tempStrength - target.defense
 				var tempDamage
@@ -438,48 +456,50 @@ func execute_move():
 					if can_activate_effect(chosenMove, damageCalc): StatusManager.add_status(target, chosenMove["status"], chosenMove["value"])
 				else: #Status lasts forever or until manually removed
 					if can_activate_effect(chosenMove, damageCalc): StatusManager.add_status(target, chosenMove["status"])
-				if chosenMove["status"] == "Provoke": #intent changing status is unique
-					for cond in target.statuses[StatusManager.statusActivations.passive]:
-						if cond["name"] == "Provoke" and cond["value"] >= 1:
-							set_intent(target, moveUser) #just taunt for now
-							StatusManager.remove_status(target, StatusManager.statusList, StatusManager.find_status(target, "Provoke"))
-			if !chosenMove.has("timing") or chosenMove["timing"] == Moves.timings.after: #Default timing is after damage
-				if can_activate_effect(chosenMove, damageCalc): activate_effect()
-			if moveUser.isPlayer: #overkill only returns nonzero for a specific boon and level
-				if moveTarget.currentHealth <= 0:
+			if target.currentHealth <= 0:
+				if moveUser.isPlayer: #overkill only returns nonzero for a specific boon and level
 					StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.gettingKill, [damageCalc]) 
-				var overkill = Boons.call_boon("check_hit", [usedMoveBox, moveTarget.currentHealth, moveUser])
-				if overkill > 0:
-					var nextTarget = get_next_team_unit(moveTarget)
-					if nextTarget: nextTarget.take_damage(overkill)
+					var overkill = Boons.call_boon("check_hit", [usedMoveBox, target.currentHealth, moveUser])
+					if overkill > 0:
+						var nextTarget = get_next_team_unit(target)
+						if nextTarget: nextTarget.take_damage(overkill)
+				if chosenMove.has("killeffect"): activate_effect("killeffect", "killargs")
+			if can_activate_effect(chosenMove, damageCalc): 
+				if !chosenMove.has("timing") or chosenMove["timing"] == Moves.timings.after: #Default timing is after damage
+					activate_effect()
+				if chosenMove.has("secondEffect"): 
+					activate_effect("secondEffect", "secondArgs")
 		yield(get_tree().create_timer(.5), "timeout")
 		i+=1
 	if moveUser.isPlayer:
 		Boons.call_boon("check_move", [usedMoveBox, moveTarget.currentHealth, moveUser])
 	else:
 		Boons.call_specific("check_move", [null, null, moveUser], "Lion")
-	#if hits == 0: yield(get_tree().create_timer(.25), "timeout") #needed to prevent a crash
+	if hits == 0: yield(get_tree().create_timer(.5), "timeout") #needed to prevent a crash
 
 func can_activate_effect(moveData, damage):
 	if moveData.has("damage"):
-		if damage != 0: return true
-		else: return false
-	else: return true
+		if damage == 0: return false
+	else:
+		if moveData.has("condition"):
+			return moveData["condition"].call_func(moveTarget)
 
-func get_next_team_unit(unit): #gets the next player or enemy from an existing player or enemy's position
+func get_next_team_unit(unit, condFunc = null): #gets the next player or enemy from an existing player or enemy's position
 	var unitIndex = (unit.get_index() + 1) % $Units.get_child_count()
 	var checkUnit
 	while unitIndex != unit.get_index(): #should stop by returning a unit but will always drop after a runthrough
 		checkUnit = $Units.get_child(unitIndex)
 		if checkUnit.isPlayer == unit.isPlayer and checkUnit.currentHealth > 0: #needs to be on the same team and alive
-			return checkUnit
+			var canUseUnit = true
+			if condFunc: canUseUnit = condFunc.call_func(checkUnit)
+			if canUseUnit: return checkUnit
 		unitIndex = (unitIndex + 1) % $Units.get_child_count()
 	return false #can't find anything valid
 
-func activate_effect():
-	if chosenMove.has("effect") and chosenMove.has("args"):
+func activate_effect(effectName = "effect", argsName = "args"):
+	if chosenMove.has(effectName) and chosenMove.has(argsName):
 		var newArgs = []
-		for argument in chosenMove["args"]:
+		for argument in chosenMove[argsName]:
 			if typeof(argument) == TYPE_OBJECT: #Functions are objects
 				newArgs.append(argument.call_func(newArgs[0])) #Run the function on a previous arg, then append result as an arg
 			elif typeof(argument) == TYPE_STRING: 
@@ -489,7 +509,7 @@ func activate_effect():
 					newArgs.append(argument)
 			else: #an int
 				newArgs.append(argument)
-		chosenMove["effect"].call_funcv(newArgs) #Run the effect function on these arguments
+		chosenMove[effectName].call_funcv(newArgs) #Run the effect function on these arguments
 
 func evaluate_completion(deadUnit):
 	if deadEnemies >= enemyNum:

@@ -6,8 +6,8 @@ var index
 var type
 
 var totalPoints
-const INCREMENT = 100
-const XSTART = 200
+const INCREMENT = 50
+const XSTART = 300
 const YPOS = 300
 
 var originLocation

@@ -1,27 +1,40 @@
 extends Node2D
 
-enum l {day, night, dungeon} #locations
+enum l {day, night, dungeon, special} #locations
 
 const MAXENCOUNTERSIZE = 4
 var strongestEnemy = 3
 
 onready var enemyList = {
+	
 	"Bat": {"stats": [4, 8], "passives": {"Dodgy": 1}, "specials": ["Vampire"], 
 		"rewards": ["wing"], "locations": [l.day], "difficulty": 1},
 	"Bird": {"stats": [15, 20], "specials": ["Triple Hit"], "hardSpecials": ["Dive Bomb"],
 		"rewards": ["talon"], "locations": [l.day], "difficulty": 3},
 	"Flower": {"stats": [15, 24], "passives": {"Thorns": 2}, "specials": ["Growth"], "hardSpecials": ["Careful Strike"],
 		"rewards": ["sap"], "locations": [l.dungeon], "difficulty": 1},
+	"Goblin": {"stats": [3, 6], "specials": [], "hardSpecials": [],
+		"rewards": ["blade"], "locations": [l.special], "difficulty": 1},
 	"Rat": {"stats": [6, 7], "passives": {"Dodgy": 1}, "specials": ["Plague"], 
 		"rewards": ["fur"], "locations": [l.night], "difficulty": 1},
-	"Scorpion": {"stats": [17, 22], "specials": ["Crusher Claw"], "hardSpecials": ["Piercing Sting"],
-		"rewards": ["blade"], "locations": [l.dungeon], "difficulty": 2},
 	"Skeleton": {"stats": [21, 28], "specials": ["Power Attack", "Coldsteel"], 
 		"rewards": ["bone"], "locations": [l.night], "difficulty": 3},
 	"Snake": {"stats": [11, 14], "passives": {"Venomous": 0}, "specials": ["Constrict"], "hardSpecials": ["Venoshock"],
 		"rewards": ["venom"], "locations": [l.day], "difficulty": 2},
 	"Wolf": {"stats": [16, 21], "specials": ["Frostfang"], "hardSpecials": ["Take Down"],
 		"rewards": ["fang"], "locations": [l.night], "difficulty": 2},
+	"Zombie": {"stats": [1, 1], "specials": [], "hardSpecials": [],
+		"rewards": ["blade"], "locations": [l.special], "difficulty": 2},
+	
+	"Kraken": {"stats": [1, 1], "specials": [], "hardSpecials": [],
+		"rewards": ["blade"], "locations": [l.special], "difficulty": 2},
+	"Phoenix": {"stats": [1, 1], "specials": [], "hardSpecials": [],
+		"rewards": ["blade"], "locations": [l.special], "difficulty": 2},
+	"Scorpion": {"stats": [17, 22], "specials": ["Crusher Claw"], "hardSpecials": ["Piercing Sting"],
+		"rewards": ["blade"], "locations": [l.dungeon], "difficulty": 2},
+	
+	"Vampire": {"stats": [1, 1], "specials": [], "hardSpecials": [],
+		"rewards": ["blade"], "locations": [l.special], "difficulty": 3},
 }
 
 func get_dungeon_mascot():

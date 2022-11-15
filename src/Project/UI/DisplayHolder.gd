@@ -127,7 +127,7 @@ func manage_and_color_boxes(unit, invWindow = null): #Puts all of a unit's boxes
 		moveData = Moves.moveList[move]
 		if (moveData["type"] == Moves.moveType.item and box.currentUses == 0) or moveData.has("fleeting"): #kill
 			box_move(box, "X", true)
-		elif moveData["type"] == Moves.moveType.trick:
+		elif moveData["type"] == Moves.moveType.trick or moveData.has("charge"):
 			if box.moveIndex == 1 and box.moves[1] == "Catch" and box.timesEnabled > 0: box_move(box, "X", true) #temp, hardcode
 			else: box_move(box, move) #Needed to make sure multimove equipment resets
 		box.get_node("Info").text = ""

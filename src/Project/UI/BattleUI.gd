@@ -52,7 +52,7 @@ func advance_box_move(box): #For boxes with multiple moves
 	box.moveIndex = (box.moveIndex + 1) % box.moves.size()
 	prepare_box(box)
 	if box.moveIndex > 0:
-		box.get_node("Info").text = box.moves[box.moveIndex - 1] if Moves.moveList[box.moves[0]].type == Moves.moveType.trick else ""
+		box.get_node("Info").text = box.moves[box.moveIndex - 1] if Moves.moveList[box.moves[0]].type >= Moves.moveType.special else ""
 
 func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false, disableChannels: bool = false, turnStart = false): #keepMoves as true means only boxes that aren't already committed are enabled
 	var move
@@ -62,7 +62,10 @@ func toggle_moveboxes(boxes, toggle : bool, keepMoves : bool = false, disableCha
 			var moveData = Moves.moveList[move]
 			#print(str(move, ": ",box.timesEnabled))
 			#Channels are disabled if the unit already has an action in the queue, broken equipment and unusables are always disabled
-			if turnStart: box.timesEnabled += 1
+			if turnStart: 
+				box.timesEnabled += 1
+				if Battle.turnCount == 1 and moveData.has("charge"): #first turn for charges
+					advance_box_move(box)
 			if (toggle and !(disableChannels and moveData.has("channel")) and box.currentUses != 0 and !moveData.has("unusable")
 			and !(box.timesUsed > 0 and moveData.has("uselimit")) and !(box.timesEnabled > 1 and moveData.has("turnlimit"))): 
 				toggle_single(box, true)

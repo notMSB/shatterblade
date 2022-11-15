@@ -1,32 +1,36 @@
 extends Node2D
 
 #components
-enum c {wing, fang, talon, sap, venom, fur, blade, bone, wood}
+enum c {wing, fang, talon, sap, venom, fur, blade, bone, garbage, darkness}
 
 var products = {
 	c.wing: {c.wing: "Speed Potion", c.fang: "Vampire", c.talon: "Dive Bomb", c.sap: "Dodge",
-			c.venom: "Venoshock", c.fur: "Hide", c.blade: "Triple Hit", c.bone: "Flex",
-			c.wood: "X"},
+			 c.venom: "Venoshock", c.fur: "Hide", c.blade: "Triple Hit", c.bone: "Flex",
+			 c.garbage: "Goblin Dodge", c.darkness: "Invisibility"},
 	
 	c.fang: {c.fang: "Throwing Knife", c.talon: "Take Down", c.sap: "Constrict", c.venom: "Poison Strike",
-			c.fur: "Cleave", c.blade: "Power Attack", c.bone: "Frostfang", c.wood:"X"},
+			 c.fur: "Cleave", c.blade: "Power Attack", c.bone: "Frostfang", c.garbage: "Tasty Bite", 
+			 c.darkness: "Taste Test"},
 	
 	c.talon: {c.talon: "Brass Knuckles", c.sap: "Eye Poke", c.venom: "Taunt", c.fur: "Quick Attack",
-			c.blade: "Crusher Claw", c.bone: "Turtle Up", c.wood:"X"},
+			  c.blade: "Crusher Claw", c.bone: "Turtle Up", c.garbage: "Back Rake", c.darkness: "Breaker Slash"},
 	
 	c.sap: {c.sap: "Health Potion", c.venom: "Growth", c.fur: "Protect", c.blade: "Pierce",
-			c.bone: "Bonemerang", c.wood:"X"},
+			c.bone: "Bonemerang", c.garbage: "Spit Shine", c.darkness: "Midnight Flare"},
 	
 	c.venom: {c.venom: "Poison Potion", c.fur: "Restore", c.blade: "Piercing Sting", c.bone: "Plague",
-			c.wood: "X"},
+			  c.garbage: "Belch", c.darkness: "Mass Infection"},
 	
-	c.fur: {c.fur: "Leather Buckler", c.blade: "Sucker Punch", c.bone: "Careful Strike", c.wood: "X"},
+	c.fur: {c.fur: "Leather Buckler", c.blade: "Sucker Punch", c.bone: "Careful Strike", c.garbage: "Play Dead",
+			c.darkness: "Defense Pact"},
 	
-	c.blade: {c.blade: "Storm of Steel", c.bone: "Coldsteel", c.wood: "Channel Power"},
+	c.blade: {c.blade: "Storm of Steel", c.bone: "Coldsteel", c.garbage: "Shiv", c.darkness: "Dark Spikes"},
 	
-	c.bone: {c.bone: "Bone Zone", c.wood: "X"},
+	c.bone: {c.bone: "Bone Zone", c.garbage: "Bone Club", c.darkness: "Seeker Volley"},
 	
-	c.wood: {c.wood: "X"}
+	c.garbage: {c.garbage: "Concoction", c.darkness: "Dark Dive"},
+	
+	c.darkness: {c.darkness: "Dark Matter"}
 }
 
 func test():

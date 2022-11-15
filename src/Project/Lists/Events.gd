@@ -12,7 +12,7 @@ func _ready():
 	"Town": {"time": timings.special, "description": "It's a town.",
 		"choices": ["Trade", "Smith", "Inn", "Leave"],
 		"conditions": [true, [funcref(self, "used_smith")], [funcref(self, "can_sleep")], true],
-		"outcomes": [[funcref(self, "activate_shop")], [funcref(self, "activate_craft")], [funcref(self, "rest")], [funcref(self, "advance")]]},
+		"outcomes": [[funcref(self, "activate_shop")], [funcref(self, "show_crafting_event")], [funcref(self, "rest")], [funcref(self, "advance")]]},
 	"Temple": {"time": timings.special, "description": "Enter temple?",
 		"choices": ["Yes", "No"],
 		"outcomes": [[funcref(self, "enter_temple")], [funcref(self, "advance")]]},
@@ -169,8 +169,12 @@ func enter_temple():
 	var temples = Map.get_node("HolderHolder/TempleHolder")
 	temples.get_child(index).enter()
 
+func show_crafting_event():
+	Map.grab_event("Crafting")
+
 func activate_craft():
 	Map.repair_event_box()
+	Map.activePoint.usedSmith = true
 
 func activate_shop():
 	Map.inventoryWindow.shuffle_trade_stock()

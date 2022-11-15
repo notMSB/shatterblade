@@ -86,6 +86,9 @@ func _ready():
 			global.storedParty[i].update_hp()
 		for display in $HolderHolder/DisplayHolder.get_children():
 			display.get_node("Name").text = Moves.get_classname(global.storedParty[display.get_index()].allowedType)
+			if display.get_node("Name").text == "Fighter": display.get_node("ColorRect").color = Color(.9,.3,.3,1) #R
+			elif display.get_node("Name").text == "Mage": display.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
+			elif display.get_node("Name").text == "Rogue": display.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
 	bottomRight = Vector2($ReferenceRect.margin_right, $ReferenceRect.margin_bottom)
 	timeNode.position.y += bottomRight.y + 20
 	timeNode.position.x += 15
@@ -239,7 +242,7 @@ func repair_event_box():
 	var repairName = $Events/Choices.get_child(0).get_node("Offerbox/Name").text
 	if repairName != "X":
 		inventoryWindow.add_to_player(repairName)
-		activePoint.pointType = pointTypes.visited
+		if activePoint.pointType != pointTypes.town: activePoint.pointType = pointTypes.visited
 
 func return_event_box():
 	var eBox = $Events/Choices.get_child(0).get_node("Offerbox")

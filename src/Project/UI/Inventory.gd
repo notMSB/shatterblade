@@ -345,6 +345,7 @@ func swap_boxes(one, two, check = false):
 	if two.get_parent().name == "MoveBoxes": assess_unit_passives(two.get_parent().get_parent().get_index())
 	if one.name == "Offerbox": finalize_offering(one)
 	elif two.name == "Offerbox": finalize_offering(two)
+	if tHolder.visible: reset_and_update_itemDict() #make sure quick panels are accurate while trading
 
 func finalize_offering(offeringBox):
 	if offeringBox.get_node("Name").text != "X":

@@ -18,6 +18,7 @@ var statusList = {
 	"Stun": {"activation": statusActivations.beforeTurn, "system": false, "effect": funcref(self, "stunned"), "args": ["unit"]},
 	
 	"Provoke": {"activation": statusActivations.passive},
+	"Stealth": {"activation": statusActivations.passive, "system": false},
 	
 	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 1]},
 	"Blocking": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.5]},
