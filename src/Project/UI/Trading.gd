@@ -11,20 +11,25 @@ var stock = []
 const RELICDEFAULTPRICE = 7
 const DEFAULTVALUE = 5
 
-func assign_component_values():
+func assign_component_values(biome, dungeonMascot):
 	var eList = Enemies.enemyList
+	var validEnemies = []
+	for enemy in eList:
+		if eList[enemy]["biome"] == biome:
+			validEnemies.append(enemy)
+	validEnemies.append(dungeonMascot)
 	for component in Crafting.c:
 		values[component] = DEFAULTVALUE
-	for enemy in eList:
-		if eList[enemy]["locations"].has(Enemies.l.dungeon):
+	for enemy in validEnemies:
+		if eList[enemy]["locations"].has(Enemies.l.day):
 			for reward in eList[enemy]["rewards"]:
-				values[reward] = max(1, values[reward] - 1)
+				values[reward] = DEFAULTVALUE - 3
 		elif eList[enemy]["locations"].has(Enemies.l.night):
 			for reward in eList[enemy]["rewards"]:
-				values[reward] = max(1, values[reward] - 2)
-		elif eList[enemy]["locations"].has(Enemies.l.day):
+				values[reward] = DEFAULTVALUE - 2
+		elif eList[enemy]["locations"].has(Enemies.l.dungeon):
 			for reward in eList[enemy]["rewards"]:
-				values[reward] = max(1, values[reward] - 3)
+				values[reward] = DEFAULTVALUE - 1
 	assigned = true
 
 func get_item_value(itemName, box = null):

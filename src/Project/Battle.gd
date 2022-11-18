@@ -123,6 +123,7 @@ func create_enemies():
 		if get_parent().hardMode: createdUnit.make_stats(enemy["stats"][1])
 		else: createdUnit.make_stats(enemy["stats"][0])
 		createdUnit.identity = opponent
+		createdUnit.spriteBase = enemy["sprite"]
 		createdUnit.battleName = str(createdUnit.identity, String(i))
 		if enemy.has("passives"): createdUnit.passives = enemy["passives"]
 		if enemy.has("specials"): 
@@ -179,7 +180,10 @@ func get_partyHealth():
 func play_turn(notFirstTurn = true):
 	if battleDone:
 		if gameOver: return get_tree().change_scene("res://src/Project/Lose.tscn")
-		return done(Enemies.enemyList[rewardUnit.identity]["rewards"][0])
+		var rewards = [Enemies.enemyList[rewardUnit.identity]["rewards"][0]]
+		for enemy in get_team(false):
+			if Enemies.enemyList[enemy.identity].has("elite"): rewards.append("Health Potion")
+		return done(rewards)
 	turnIndex = (turnIndex + 1) % $Units.get_child_count() #Advance to next unit
 	currentUnit = $Units.get_child(turnIndex)
 	if turnIndex == 0: #Start of turn, take player actions
@@ -483,6 +487,7 @@ func can_activate_effect(moveData, damage):
 	else:
 		if moveData.has("condition"):
 			return moveData["condition"].call_func(moveTarget)
+	return true
 
 func get_next_team_unit(unit, condFunc = null): #gets the next player or enemy from an existing player or enemy's position
 	var unitIndex = (unit.get_index() + 1) % $Units.get_child_count()
@@ -533,7 +538,7 @@ func evaluate_revives():
 			unit.ui.visible = true
 			unit.update_hp()
 
-func done(reward):
+func done(rewards):
 	#$BattleUI.toggle_trackers(false)
 	if !get_parent().mapMode:
 		return get_tree().reload_current_scene()
@@ -543,7 +548,8 @@ func done(reward):
 		for i in global.storedParty.size():
 			set_ui(global.storedParty[i])
 			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], map.inventoryWindow)
-		map.inventoryWindow.add_item(reward)
+		map.inventoryWindow.add_multi(rewards)
+		#map.inventoryWindow.add_item(reward)
 		visible = false
 		evaluate_revives()
 		deadEnemies = 0

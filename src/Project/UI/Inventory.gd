@@ -51,9 +51,8 @@ var mode = iModes.craft
 
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
 	if global.itemDict.empty():
-		global.itemDict = {"wing": 0, "fang": 0, "talon": 0, "sap": 0, "venom": 0, "fur": 0, "blade": 0, "bone": 0, "moves": ["Health Potion", "Coin", "Coin"]}
+		global.itemDict = {"wing": 0, "fang": 0, "claw": 0, "sap": 0, "venom": 0, "fur": 0, "blade": 0, "bone": 0, "garbage": 0, "darkness": 0, "moves": ["Health Potion", "Coin", "Coin"]}
 	MOVESPACES += Boons.call_boon("prep_inventory")
-	if !Trading.assigned: Trading.assign_component_values()
 	dHolder = $HolderHolder/DisplayHolder
 	make_grid()
 	make_actionboxes(TRADERINVSIZE, TRADERROWLIMIT)
@@ -99,7 +98,7 @@ func shuffle_trade_stock():
 		restock.append(rando_item())
 		restock.append(rando_item())
 		restock.append(rando_component())
-		restock.append(rando_component())
+		restock.append(rando_component(true))
 		restock.append("Coin")
 		if get_parent().hardMode:
 			while restock.size() < maxItems:
@@ -123,10 +122,14 @@ func restock_trade():
 			dHolder.box_move(box, "X")
 		identify_product(box)
 
-func rando_component():
+func rando_component(rare = false):
 	var keys = Crafting.c.keys()
-	if keys.has("wood"): keys.erase("wood") #temp
-	return keys[randi() % keys.size()]
+	var validComponents = []
+	if rare:
+		for component in keys:
+			if Trading.values[component] >= 5: validComponents.append(component)
+	else: validComponents = keys
+	return validComponents[randi() % validComponents.size()]
 
 func rando_item():
 	var list = Moves.moveList
@@ -426,17 +429,27 @@ func get_all_gear():
 			allGear.append(iBox)
 	return allGear
 
-func xCheck(): #returns an empty inventory space, todo: scenario for full inventory
+func xCheck(count = false): #returns an empty inventory space, todo: scenario for full inventory
+	var xCount = 0
 	for iBox in iHolder.get_children():
 		var iName = iBox.get_node("Name").text
 		if iName == "X":
-			return iBox
-	return null
+			if count: xCount += 1
+			else: return iBox
+	return xCount
 
 func clear_box(box):
 	dHolder.box_move(box, "X")
 	box.set_uses(-1)
 	identify_product(box)
+
+func add_multi(items):
+	var spaces = xCheck(true)
+	if spaces < items.size():
+		pass
+	else:
+		for item in items:
+			add_item(item, true)
 
 func add_item(itemName, newUses = false): #todo: case for full inventory
 	var openBox = xCheck()

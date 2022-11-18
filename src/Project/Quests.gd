@@ -5,7 +5,7 @@ onready var Trading = get_node("../Trading")
 onready var Enemies = get_node("../Enemies")
 onready var Crafting = get_node("../Crafting")
 
-const RARECOST = 3
+const RARECOST = 4
 const LABORMIN = 5
 const LABORMAX = 21
 const UNIQUETYPES = 3
@@ -17,16 +17,20 @@ enum s {trade, repair} #service
 const SERVICES = 2
 var servicesMade = 0
 
+var currentBiome
+
 var relics = []
 var cheapComponents = []
 var rareComponents = []
 
 func _ready():
 	randomize()
-	Trading.assign_component_values()
 	relics = Moves.get_relics()
-	sort_components()
 	#generate_quest()
+
+func setup(biome):
+	currentBiome = biome
+	sort_components()
 
 func generate_quest():
 	var newQuest = {}
@@ -51,9 +55,10 @@ func generate_quest():
 	return newQuest
 
 func sort_components():
+	rareComponents.clear()
+	cheapComponents.clear()
 	for item in Trading.values:
-		if Trading.values[item] == 5: continue #temp
-		elif Trading.values[item] >= RARECOST: rareComponents.append(item) 
+		if Trading.values[item] >= RARECOST: rareComponents.append(item) 
 		else: cheapComponents.append(item)
 
 func generate_fetch():
@@ -66,7 +71,7 @@ func generate_hunt():
 	var targets = []
 	for enemy in Enemies.enemyList:
 		var enemyData = Enemies.enemyList[enemy]
-		if (enemyData["locations"].has(Enemies.l.night) and enemyData["difficulty"] > 1) or enemyData["locations"].has(Enemies.l.dungeon): 
+		if (enemyData["locations"].has(Enemies.l.night) and enemyData["difficulty"] < 3) or enemyData["locations"].has(Enemies.l.dungeon): 
 			targets.append(enemy)
 	return rando_item(targets)
 

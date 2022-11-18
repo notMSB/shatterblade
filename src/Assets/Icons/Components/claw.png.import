@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/talon.png-421297852bdc607a17b0a38db0c1c8fa.stex"
+path="res://.import/claw.png-9b02fce708944741534123dfced00204.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://src/Assets/Icons/Components/talon.png"
-dest_files=[ "res://.import/talon.png-421297852bdc607a17b0a38db0c1c8fa.stex" ]
+source_file="res://src/Assets/Icons/Components/claw.png"
+dest_files=[ "res://.import/claw.png-9b02fce708944741534123dfced00204.stex" ]
 
 [params]
 

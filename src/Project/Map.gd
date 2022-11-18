@@ -17,6 +17,7 @@ onready var Moves = get_node("../Data/Moves")
 onready var Quests = get_node("../Data/Quests")
 onready var Enemies = get_node("../Data/Enemies")
 onready var Boons = get_node("../Data/Boons")
+onready var Trading = get_node("../Data/Trading")
 
 const INCREMENT = 90
 const KILLDISTANCE = 70 #lower kill distance means more points
@@ -57,6 +58,10 @@ const DAYDIFFICULTYMOD = 1
 var isDay = true
 var currentDungeon = null
 var currentTemple = null
+var biomesList
+var availableBiomes = []
+var currentBiome
+var seenElite = false
 
 var delayBattle = null
 
@@ -77,7 +82,13 @@ func _ready():
 	favorNode = Favor.instance()
 	add_child(favorNode)
 	Boons.Map = self
+	
+	biomesList = Enemies.b
+	availableBiomes = range(0, biomesList.size()-1) #exclude the "none" at the end
+	set_biome()
+	Trading.assign_component_values(currentBiome, "Scorpion") #todo: change this when new mascots are added
 	setup_inventory()
+	
 	if global.storedParty.size() > 0: 
 		for i in global.storedParty.size():
 			while global.storedParty[i].moves.size() < inventoryWindow.MOVESPACES:
@@ -110,12 +121,24 @@ func _ready():
 	get_parent().move_child(battleWindow, inventoryWindow.get_index())
 	var Party = get_parent().get_node_or_null("Party")
 	if Party: get_parent().move_child(Party, get_index())
+	
 	set_time_text()
 	set_quick_panels()
 
 func set_quick_panels():
 	set_quick_crafts()
 	set_quick_repairs()
+
+func set_biome():
+	currentBiome = availableBiomes[randi() % availableBiomes.size()]
+	availableBiomes.erase(currentBiome)
+	match currentBiome:
+		biomesList.plains: $Background.color = Color("00005f") #Blue
+		biomesList.forest: $Background.color = Color("005c00") #Green
+		biomesList.mountain: $Background.color = Color("923b3b") #Red
+		biomesList.city: $Background.color = Color("6f7300") #Yellow
+		biomesList.battlefield: $Background.color = Color("923e00") #Orange
+		biomesList.graveyard: $Background.color = Color("4e004e") #Purple
 
 func set_boon_text():
 	favorNode.get_node("Virtue").text = Boons.set_text()
@@ -186,13 +209,19 @@ func activate_battle(newOpponents = null):
 		#delayBattle = newOpponents
 	if currentDungeon:
 		var dungeonRando = DUNGEONDIFFICULTY[randi() % DUNGEONDIFFICULTY.size()]
-		newOpponents = Enemies.generate_encounter(dungeonRando + get_difficulty_mod(), false, currentDungeon.mascot)
+		newOpponents = Enemies.generate_encounter(dungeonRando + get_difficulty_mod(), false, currentBiome, currentDungeon.mascot)
 	elif !newOpponents and distanceTraveled > 1:
 		var dayEncounter = isDay
-		if isDay and activePoint.sectionNum > currentArea: dayEncounter = false
-		newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + get_difficulty_mod(), dayEncounter)
+		if isDay and activePoint.sectionNum > currentDay: dayEncounter = false #if it's day but you're out of bounds it counts as night
+		newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + get_difficulty_mod(), dayEncounter, currentBiome, null, seenElite)
 	battleWindow.visible = true
+	check_for_elite(newOpponents)
 	battleWindow.welcome_back(newOpponents)
+
+func check_for_elite(opponents):
+	for enemy in opponents:
+		if Enemies.enemyList[enemy].has("elite"):
+			seenElite = true
 
 func get_difficulty_mod():
 	var nightMod = 0 if isDay else 1
@@ -399,6 +428,8 @@ func regen_map(newMember = false):
 		make_points(Vector2(INCREMENT,INCREMENT*.5))
 		advance_day(true)
 		time = DAYTIME
+		seenElite = false
+		set_biome()
 		set_time_text()
 		for unit in global.storedParty:
 			unit.currentHealth = unit.maxHealth
@@ -461,6 +492,7 @@ func organize_lines():
 			elif point.position.x >= endIndex.position.x: endIndex = point
 
 func classify_remaining_points():
+	Quests.setup(currentBiome)
 	var remainingPoints = []
 	for point in $HolderHolder/PointHolder.get_children():
 		if point.visible and point.pointType == pointTypes.none:
@@ -589,7 +621,8 @@ func subtract_time(diff, refillAllMana = false):
 	set_time_text()
 
 func set_time_text():
-	timeNode.get_node("Area").text = "Area " + String(currentArea + 1)
+	var biomeName = String(biomesList.keys()[currentBiome])
+	timeNode.get_node("Area").text = "Area " + String(currentArea + 1) + " - " + biomeName[0].to_upper()+biomeName.substr(1, -1)
 	if isDay: 
 		timeNode.get_node("State").text = "Day " + String(currentDay + 1)
 		timeNode.get_node("Hour").text = String(time - 50)

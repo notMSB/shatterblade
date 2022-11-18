@@ -1,18 +1,18 @@
 extends Node2D
 
 #components
-enum c {wing, fang, talon, sap, venom, fur, blade, bone, garbage, darkness}
+enum c {wing, fang, claw, sap, venom, fur, blade, bone, garbage, darkness}
 
 var products = {
-	c.wing: {c.wing: "Speed Potion", c.fang: "Vampire", c.talon: "Dive Bomb", c.sap: "Dodge",
+	c.wing: {c.wing: "Speed Potion", c.fang: "Vampire", c.claw: "Dive Bomb", c.sap: "Dodge",
 			 c.venom: "Venoshock", c.fur: "Hide", c.blade: "Triple Hit", c.bone: "Flex",
 			 c.garbage: "Goblin Dodge", c.darkness: "Invisibility"},
 	
-	c.fang: {c.fang: "Throwing Knife", c.talon: "Take Down", c.sap: "Constrict", c.venom: "Poison Strike",
+	c.fang: {c.fang: "Throwing Knife", c.claw: "Take Down", c.sap: "Constrict", c.venom: "Poison Strike",
 			 c.fur: "Cleave", c.blade: "Power Attack", c.bone: "Frostfang", c.garbage: "Tasty Bite", 
 			 c.darkness: "Taste Test"},
 	
-	c.talon: {c.talon: "Brass Knuckles", c.sap: "Eye Poke", c.venom: "Taunt", c.fur: "Quick Attack",
+	c.claw: {c.claw: "Brass Knuckles", c.sap: "Eye Poke", c.venom: "Taunt", c.fur: "Quick Attack",
 			  c.blade: "Crusher Claw", c.bone: "Turtle Up", c.garbage: "Back Rake", c.darkness: "Breaker Slash"},
 	
 	c.sap: {c.sap: "Health Potion", c.venom: "Growth", c.fur: "Protect", c.blade: "Pierce",

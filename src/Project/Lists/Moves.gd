@@ -38,7 +38,7 @@ func _ready():
 	"Flex": {"target": targetType.user, "resVal": 25, "status": "Double Damage", "value": 1, "quick": true, "slot": equipType.gear, "type": moveType.special},
 	"Protect": {"target": targetType.ally, "resVal": 5, "effect": funcref(self, "switch_intents"), "args": ["moveTarget", "moveUser"], "quick": true, "slot": equipType.gear, "type": moveType.special, "description": "Enemy attacks intended for target change to user"},
 	"Turtle Up": {"target": targetType.user, "resVal": 15, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 6, funcref(self, "get_enemy_targeters")], "description": "Shields 6 for each enemy targeting the user", "slot": equipType.gear, "type": moveType.special},
-	"Goblin Dodge": {"target": targetType.enemies, "resVal": 25, "quick": true, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "taunt"), "args": []},
+	"Goblin Dodge": {"target": targetType.enemies, "resVal": 15, "quick": true, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "taunt"), "args": [], "description": "All enemies target the user"},
 	"Spit Shine": {"target": targetType.ally, "resVal": 5, "healing": 6, "slot": equipType.gear, "type": moveType.special, "quick": true, "status": "Poison", "value": 5},
 	
 	"Charge": {"target": targetType.none, "resVal": 10, "cycle": true, "slot": equipType.none, "type": moveType.special},
@@ -73,7 +73,7 @@ func _ready():
 	"Taunt": {"target": targetType.enemy, "resVal": 2, "quick": true, "slot": equipType.gear, "type": moveType.trick, "effect": funcref(self, "taunt"), "args": []},
 	"Eye Poke": {"target": targetType.enemy,"resVal": 3, "timing": timings.before, "status": "Stun", "value": 1, "effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 1], "description": "Inflict stun if enemy is targeting the user.", "slot": equipType.gear, "type": moveType.trick, "quick": true, "hits": 0},
 	"Play Dead": {"target": targetType.user, "resVal": 4, "timing": timings.before, "status": "Dodgy", "value": 2, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser", .25, 1], "description": "2 dodge if at or below 25% HP.", "slot": equipType.gear, "type": moveType.trick, "hits": 0},
-	"Back Rake": {"target": targetType.enemy,"resVal": 3, "timing": timings.before, "status": "Stun", "value": 1, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser:storedTarget", .25, 1], "description": "Inflict stun if user is at 25% HP or less.", "slot": equipType.gear, "type": moveType.trick, "quick": true, "hits": 0},
+	"Back Rake": {"target": targetType.enemy,"resVal": 3, "quick": true, "timing": timings.before, "status": "Stun", "value": 1, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser:storedTarget", .25, 1], "description": "Inflict stun if user is at 25% HP or less.", "slot": equipType.gear, "type": moveType.trick, "hits": 0},
 	
 	"Reload": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "slot": equipType.none, "type": moveType.trick},
 	"Catch": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "slot": equipType.none, "type": moveType.trick, "turnlimit": 1, "description": "Use it or lose it."},
@@ -175,7 +175,7 @@ func get_description(moveName):
 	if moveData.has("channel"): tags.append("Channel")
 	if moveData.has("charge"): tags.append("Charge")
 	if moveData.has("quick"): tags.append("Quick")
-	if moveData.has("hits"): tags.append(str(moveData["hits"], " Hits"))
+	if moveData.has("hits") and moveData["hits"] > 1: tags.append(str(moveData["hits"], " Hits"))
 	if moveData.has("barrage"): tags.append("Barrage")
 	if moveData.has("uselimit"): tags.append("Once Per Battle")
 	if !tags.empty():

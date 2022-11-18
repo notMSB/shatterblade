@@ -152,7 +152,7 @@ func setup_enemy(unit, enemyCount, totalEnemies):
 	var sprite = display.get_node("Sprite")
 	var button = display.get_node("Button")
 	sprite.visible = true
-	var spritePath = str("res://src/Assets/Enemies/", unit.identity, ".png")
+	var spritePath = str("res://src/Assets/Enemies/", unit.spriteBase, ".png")
 	if(ResourceLoader.exists(spritePath)):
 		sprite.texture = load(spritePath)
 		sprite.flip_h = true
