@@ -4,6 +4,8 @@ onready var Battle = get_node("../../")
 
 var isPlayer
 var maxHealth
+var identity = ""
+var real = true
 
 var startingStrength = 0
 var tempStrength = 0
@@ -30,6 +32,17 @@ var passives = {}
 
 var moves = []
 
+func clone_values(original):
+	currentHealth = original.currentHealth
+	maxHealth = original.maxHealth
+	shield = original.shield
+	strength = original.strength
+	storedTarget = original.storedTarget
+	storedAction = original.storedAction
+	identity = original.identity
+	statuses = original.statuses.duplicate(true)
+	real = false
+
 func make_stats(hp):
 	maxHealth = hp
 	currentHealth = maxHealth
@@ -47,10 +60,9 @@ func take_damage(damageVal):
 			currentHealth -= floor(max(0, damageVal))
 		update_hp()
 		if currentHealth <= 0:
-			ui.visible = false
+			if ui: ui.visible = false
 			damageVal += currentHealth #Returns amount of damage actually dealt for recoil reasons
 			if !isPlayer: 
-				Battle.deadEnemies += 1
 				Battle.evaluate_completion(self)
 			else:
 				Battle.evaluate_game_over()
@@ -78,7 +90,7 @@ func update_strength(resetTemp = false):
 			ui.get_node("BattleElements/Strength").text = strengthText
 
 func update_info(text):
-	if ui.get_node_or_null("Info") != null:
+	if ui and ui.get_node_or_null("Info") != null:
 		ui.get_node("Info").text = String(text)
 
 func cease_to_exist():

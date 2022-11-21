@@ -12,10 +12,10 @@ const COUNTDOWNVAL = 50
 var statusList = {
 	"Regen": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "regenerate"), "args": ["unit", 1]},
 	
-	"Poison": {"activation": statusActivations.beforeTurn, "system": true, "effect": funcref(self, "value_damage"), "args": ["unit", "value",]},
+	"Poison": {"activation": statusActivations.beforeTurn, "subtractEarly": true, "system": true, "effect": funcref(self, "value_damage"), "args": ["unit", "value",]},
 	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -0.01, "value"]},
 	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.01, "value"]},
-	"Stun": {"activation": statusActivations.beforeTurn, "system": false, "effect": funcref(self, "stunned"), "args": ["unit"]},
+	"Stun": {"activation": statusActivations.beforeTurn, "subtractLate": true, "system": false, "effect": funcref(self, "stunned"), "args": ["unit"]},
 	
 	"Provoke": {"activation": statusActivations.passive},
 	"Stealth": {"activation": statusActivations.passive, "system": false},
@@ -52,10 +52,10 @@ func countdown_turns(unit, turnStart):
 		for cond in list:
 			var status = statusList[cond["name"]]
 			if status.has("system"): #Pass if there is no countdown system
-				if !turnStart and status["system"]: #Points subtract at turn end
+				if status["system"] and (turnStart == status.has("subtractEarly")): #Points usually subtract at turn end
 					if cond["value"] < 10: cond["value"] = 0
 					else: cond["value"] -= ceil(cond["value"] *.5)
-				elif turnStart and !status["system"] : #Turns subtract at turn start
+				elif !status["system"] and (turnStart != status.has("subtractLate")): #Turns usually subtract at turn start
 					cond["value"] -= 1
 				if cond["value"] <= 0:
 					remove_status(unit, list, cond) #Remove the status if there's no more points or turns
@@ -75,7 +75,7 @@ func add_status(unit, status, value = 0): #If value is not sent, status does not
 			unit.targetlock = true
 		if statusList[status].has("hittable"):
 			unit.hittables.append(status)
-	unit.update_status_ui()
+	if unit.ui: unit.update_status_ui()
 	#print(unit.statuses)
 
 func remove_status(unit, list, cond):
@@ -113,7 +113,7 @@ func evaluate_statuses(unit, type, args = []):
 						remove_status(unit, list, cond)
 	if type == statusActivations.gettingHit: #Some statuses remove on getting hit and are not under the gettingHit activation
 		remove_hittables(unit)
-	unit.update_status_ui()
+	if unit.ui: unit.update_status_ui()
 	return info
 
 

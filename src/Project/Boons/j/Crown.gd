@@ -20,7 +20,8 @@ func level_up(invNode): #find the crown and upgrade it
 		var iName = iBox.get_node("Name").text
 		if iName == "Crown": invNode.dHolder.box_move(iBox, "Crown+")
 
-func check_hit(usedBox, targetHealth, _moveUser):
-	if targetHealth < 0 and (usedBox.moves[0] == "Crown" or usedBox.moves[0] == "Crown+"):
-		#print("cool")
-		Boons.grant_favor(REWARD)
+func check_hit(usedBox, targetHealth, _moveUser, real):
+	if usedBox != null and real:
+		if targetHealth < 0 and (usedBox.moves[0] == "Crown" or usedBox.moves[0] == "Crown+"):
+			#print("cool")
+			Boons.grant_favor(REWARD)

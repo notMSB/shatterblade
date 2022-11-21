@@ -12,12 +12,12 @@ func start_battle(_startingHealth): #make thorns passive
 		else:
 			unit.passives["Thorns"] = 0
 
-func post_status_eval(unit):
-	if unit.currentHealth < 0:
+func post_status_eval(unit, real):
+	if unit.currentHealth < 0 and real:
 		#print("poison kill")
 		Boons.grant_favor(REWARD)
 
-func check_move(_usedBox, _targetHealth, moveUser):
-	if moveUser.currentHealth <= 0 and !moveUser.isPlayer:
+func check_move(_usedBox, _targetHealth, moveUser, real):
+	if moveUser.currentHealth <= 0 and !moveUser.isPlayer and real:
 		#print("thorns/recoil kill")
 		Boons.grant_favor(REWARD)

@@ -37,7 +37,7 @@ func level_up(invNode): #upgrade every rock and stick
 func start_battle(_startingHealth):
 	boxesOK = true
 
-func check_move(usedBox, _targetHealth, _moveUser):
+func check_move(usedBox, _targetHealth, _moveUser, _real):
 	if !usedBoxes.has(usedBox):
 		usedBoxes.append(usedBox)
 		usedBox.get_node("Scales").visible = true

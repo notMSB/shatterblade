@@ -32,6 +32,7 @@ func _ready():
 	"Vampire": {"target": targetType.enemy, "damage": 8, "resVal": 15, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", -.25], "description": "25% lifesteal", "slot": equipType.gear, "type": moveType.special},
 	"Tasty Bite": {"target": targetType.enemy, "damage": 5, "resVal": 10, "status": "Poison", "value": 5, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "give_status"), "args": ["moveUser", "Poison", 5]},
 	"Bone Club": {"target": targetType.enemy, "damage": 30, "resVal": 20, "slot": equipType.gear, "type": moveType.special, "charge": true, "channel": true ,"cycle": ["Charge"]},
+	"Feeding Frenzy": {"target": targetType.enemy, "damage": 8, "resVal": 15, "timing": timings.before, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveTarget", .99, 1], "description": "Extra hit if enemy is damaged.", "slot": equipType.gear, "type": moveType.special},
 	"Breaker Slash": {"target": targetType.enemy, "damage": 9, "resVal": 20, "timing": timings.before, "effect": funcref(self, "hits_for_durability"), "args": ["usedMoveBox", .5, 1], "description": "Extra hit if this weapon is at half or less uses", "slot": equipType.gear, "type": moveType.special},
 	"Dark Dive": {"target": targetType.enemy, "damage": 12, "resVal": 15, "timing": timings.before, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser", .25, 1], "secondEffect": funcref(self, "take_recoil"), "secondArgs": ["moveUser", "damageCalc", .30], "description": "Extra hit if user is below 25% HP. 30% recoil.", "slot": equipType.gear, "type": moveType.special},
 	
@@ -48,7 +49,7 @@ func _ready():
 	"Frostfang": {"target": targetType.enemy, "damage": 10, "resVal": 20, "status": "Chill", "value": 50, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", .5, true], "description": "Multiplies target chill by 1.5 after the hit", "slot": equipType.gear, "type": moveType.magic},
 	"Plague": {"target": targetType.enemies, "damaging": true, "resVal": 30, "status": "Poison", "value": 5, "slot": equipType.gear, "type": moveType.magic, "uses": 6},
 	"Venoshock": {"target": targetType.enemy, "damaging": true, "resVal": 10, "status": "Poison", "value": 6, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", funcref(self, "get_unit_poison")],"description": "Shield 1 for every poison that enemy has.", "slot": equipType.gear, "type": moveType.magic},
-	"Belch": {"target": targetType.enemy, "damage": 10, "resVal": 20, "status": "Chill", "value": 50, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Poison", funcref(self, "get_unit_poison")], "description": "Poisons enemy as much as the user is poisoned", "slot": equipType.gear, "type": moveType.magic},
+	"Belch": {"target": targetType.enemy, "resVal": 20, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Poison", funcref(self, "get_unit_poison")], "description": "Poisons enemy as much as the user is poisoned", "slot": equipType.gear, "type": moveType.magic},
 	"Mass Infection": {"target": targetType.everyone, "damaging": true, "resVal": 30, "status": "Poison", "value": 10, "slot": equipType.gear, "type": moveType.magic, "uses": 6, "condition": funcref(self, "is_damaged")},
 	"Dark Spikes": {"target": targetType.enemy, "damage": 6, "resVal": 20, "barrage": true, "hits": 3, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", 1], "killeffect": funcref(self, "change_attribute"), "killargs": ["moveUser", "shield", 12], "description": "12 shield on kill, 100% recoil", "slot": equipType.gear, "type": moveType.magic},
 	"Seeker Volley": {"target": targetType.enemy, "damage": 5, "resVal": 20, "barrage": true, "hits": 4, "slot": equipType.gear, "type": moveType.magic, "condition": funcref(self, "is_damaged"), "description": "Only targets damaged enemies if possible."},
@@ -87,7 +88,7 @@ func _ready():
 	"Storm of Steel": {"target": targetType.enemy, "damage": 2, "resVal": 0, "slot": equipType.gear, "type": moveType.item, "hits": 10, "barrage": true},
 	"Bone Zone": {"target": targetType.user, "resVal": 0, "quick": true ,"effect": funcref(self, "fill_boxes"), "args": ["moveUser", "Bone Attack"], "description": "bones", "slot": equipType.gear, "type": moveType.item, "uses": 2},
 	"Bone Attack": {"slot": equipType.none, "resVal": 0 ,"type": moveType.none, "uselimit": 1, "fleeting": true, "target": targetType.enemy, "damage": 7, "quick": true, "uses": 1},
-	"Concoction": {"target": targetType.enemy, "damage": 16, "resVal": 0, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .5], "description": "50% recoil", "slot": equipType.gear, "type": moveType.item},
+	"Concoction": {"target": targetType.enemies, "damage": 8, "resVal": 0, "quick": true, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .5], "description": "50% recoil", "slot": equipType.gear, "type": moveType.item},
 	"Dark Matter": {"target": targetType.everyone, "damage": 20, "resVal": 0, "slot": equipType.gear, "type": moveType.item},
 	
 	"Rock": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 2, "quick": true, "cursed": true},
@@ -202,7 +203,7 @@ func get_enemy_targeters(unit):
 
 func is_enemy_targeting_user(enemy):
 	var targetType = typeof(enemy.storedTarget)
-	if (targetType == TYPE_STRING and enemy.storedTarget == "Party") or (enemy.storedTarget == Battle.moveUser):
+	if (targetType == TYPE_STRING and (enemy.storedTarget == "Party" or enemy.storedTarget == "everyone")) or (enemy.storedTarget == Battle.moveUser):
 		return 1
 	return 0
 
@@ -257,6 +258,8 @@ func is_unit_poisoned(unit): #a little overly specific
 	var StatusManager = get_node("../StatusManager")
 	if StatusManager.find_status(unit, "Poison"): return 1
 	else: return 0
+
+
 
 func get_unit_poison(unit): #kinda redundant, definitely a stopgap
 	var poisonedUnit

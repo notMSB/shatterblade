@@ -7,6 +7,7 @@ export (PackedScene) var PlayerMove
 const DEFAULTMOVES = 2
 const PLAYERXSTART = 600
 const PLAYERYSTART = 600
+const STARTXINCREMENT = 120
 const PLAYERINCREMENT = 80
 
 const UNITYSTART = 115
@@ -19,7 +20,7 @@ func setup_player(unit, playerCount):
 	add_child(display)
 	display.get_node("Name").text = unit.name
 	unit.isPlayer = true
-	display.position.x = PLAYERXSTART + (playerCount % 2 * PLAYERINCREMENT)
+	display.position.x = PLAYERXSTART + (playerCount % 2 * STARTXINCREMENT)
 	display.position.y = PLAYERYSTART + PLAYERINCREMENT if playerCount > 1 else PLAYERYSTART
 	
 	add_moves(unit, display, playerCount)
@@ -39,7 +40,7 @@ func create_move(unit, playerCount, posIndex):
 	unit.boxHolder.add_child(moveBox)
 	var xPos = moveBox.position.x
 	if posIndex < DEFAULTMOVES: #set up attack and defend defaults
-		moveBox.position.x = xPos - PLAYERINCREMENT if playerCount % 2 == 0 else xPos + PLAYERINCREMENT
+		moveBox.position.x = xPos - 100 if playerCount % 2 == 0 else xPos + 100
 		moveBox.get_node("ColorRect").rect_size.y = 40
 		move = moveBox.get_node("Name").text
 		if posIndex == 0:
@@ -52,7 +53,7 @@ func create_move(unit, playerCount, posIndex):
 		if unit.moves.size() < posIndex - DEFAULTMOVES + 1:
 			move = "X"
 		else: move = unit.moves[posIndex - DEFAULTMOVES]
-		moveBox.position.x = xPos - PLAYERINCREMENT*posIndex if playerCount % 2 == 0 else xPos + PLAYERINCREMENT*posIndex
+		moveBox.position.x = xPos - PLAYERINCREMENT*posIndex - 20 if playerCount % 2 == 0 else xPos + PLAYERINCREMENT*posIndex + 20
 	if Moves.moveList[move].has("resVal"):
 		moveBox.resValue = Moves.moveList[move]["resVal"]
 	box_move(moveBox, move)

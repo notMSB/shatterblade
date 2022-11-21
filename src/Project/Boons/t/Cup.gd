@@ -6,6 +6,7 @@ const REWARD = 5
 const MAXENEMIES = 4
 
 var moveUsers = []
+var previewUsers = []
 var killers = []
 var level = 0
 
@@ -16,15 +17,21 @@ func start_battle(_startingHealth):
 		killers.append([member, 0])
 		member.ui.get_node("BattleElements/VirtueStatus").text = "0"
 
-func before_move(moveUser): #returns a bonus to amount of hits the move has, level lets entire party get a hit
-	if !moveUsers.has(moveUser):
-		moveUsers.append(moveUser)
+func start_preview(previewUnits):
+	previewUsers.clear()
+	for i in moveUsers.size():
+		previewUsers.append(previewUnits[i])
+
+func before_move(moveUser, real): #returns a bonus to amount of hits the move has, level lets entire party get a hit
+	var currentUsers = moveUsers if real else previewUsers
+	if !currentUsers.has(moveUser):
+		currentUsers.append(moveUser)
 		if level >= 1: return 1
-		elif moveUsers.size() < 2: return 1
+		elif currentUsers.size() < 2: return 1
 	return 0
 
-func check_move(_usedBox, targetHealth, moveUser):
-	if targetHealth <= 0:
+func check_move(_usedBox, targetHealth, moveUser, real):
+	if targetHealth <= 0 and real:
 		for entry in killers:
 			if entry[0] == moveUser:
 				entry[1] += 1
