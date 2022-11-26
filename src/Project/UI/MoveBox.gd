@@ -73,15 +73,50 @@ func change_rect_color(color):
 
 func _on_Button_pressed():
 	boxModeScene = set_mode_scene()
-	boxModeScene.set_description($Name.text)
 	if boxModeScene.name == "Inventory": #inventory
 		if !(isCursed and get_parent().name == "MoveBoxes") and canMove: boxModeScene.select_box(self)
-		else: boxModeScene.set_description($Name.text)
+		#else: boxModeScene.set_description($Name.text)
 	elif boxModeScene.name == "Battle":
-		boxModeScene.set_description($Name.text)
+		#boxModeScene.set_description($Name.text)
 		if buttonMode:
 			boxModeScene.evaluate_targets(moves[moveIndex], user, self)
 		else:
 			boxModeScene.cut_from_order(self)
 	else: #map scene
-		boxModeScene.set_description($Name.text)
+		pass
+
+func set_tooltip_text(tip):
+	$Tooltip/Background.margin_left = -120
+	$Tooltip/Background.margin_right = 120
+	$Tooltip/Inside.margin_left = -117
+	$Tooltip/Inside.margin_right = 117
+	$Tooltip/Background.margin_top = -160
+	$Tooltip/Inside.margin_top = -157
+	$Tooltip/Label.margin_top = -157
+	var longestLineSize = 0
+	var splits = tip.split("\n")
+	for line in splits:
+		var length = $Tooltip/Label.get_font("font").get_string_size(line).x
+		if length > longestLineSize: longestLineSize = length
+	var lineCount = splits.size()
+	if longestLineSize > 225: lineCount += 1
+	elif longestLineSize < 200:
+		var offset = (200 - longestLineSize) / 2
+		$Tooltip/Inside.margin_left += offset
+		$Tooltip/Inside.margin_right -= offset
+		$Tooltip/Background.margin_left += offset
+		$Tooltip/Background.margin_right -= offset
+	if lineCount < 5:
+		var offset = (5 - lineCount) * 16
+		$Tooltip/Inside.margin_top += offset
+		$Tooltip/Background.margin_top += offset
+		$Tooltip/Label.margin_top += offset
+	$Tooltip/Label.text = tip
+
+func _on_mouse_entered():
+	if $Tooltip/Label.text.length() > 0:
+		$Tooltip.visible = true
+
+func _on_mouse_exited():
+	$Tooltip.visible = false
+	

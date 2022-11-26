@@ -6,7 +6,7 @@ export (PackedScene) var PlayerMove
 
 const DEFAULTMOVES = 2
 const PLAYERXSTART = 600
-const PLAYERYSTART = 600
+const PLAYERYSTART = 500
 const STARTXINCREMENT = 120
 const PLAYERINCREMENT = 80
 
@@ -83,6 +83,7 @@ func box_move(moveBox, move, isUseless = false):
 		if isUseless: moveBox.set_uses(-1)
 		moveBox.isCursed = true if moveData.has("cursed") else false
 		sprite_move(moveBox, move)
+		moveBox.set_tooltip_text(Moves.get_description(move))
 	else:
 		moveBox.get_node("Name").text = move
 		sprite_move(moveBox, move, false)

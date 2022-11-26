@@ -79,17 +79,16 @@ func _on_Button_pressed():
 					return #done
 
 func _on_Button_mouse_entered():
-	if sectionNum != Map.currentDay and !Map.currentDungeon: pass
-	elif pointType == Map.pointTypes.event and pointQuest:
-		if !Map.isDay: Map.set_description("battle")
-		var desc = str(pointQuest["description"], "\n", pointQuest["objective"])
-		if pointQuest["reward"] == "service": desc += "\n" + pointQuest["prize"]
-		Map.set_description(desc, false)
-	else: Map.set_description(Map.pointTypes.keys()[pointType], false)
+	#if sectionNum != Map.currentDay and !Map.currentDungeon: pass
+	#elif pointType == Map.pointTypes.event and pointQuest:
+		#if !Map.isDay: Map.set_description("battle")
+		#var desc = str(pointQuest["description"], "\n", pointQuest["objective"])
+		#if pointQuest["reward"] == "service": desc += "\n" + pointQuest["prize"]
+		#Map.set_description(desc, false)
+	#else: Map.set_description(Map.pointTypes.keys()[pointType], false)
 	if !isActive: #the lines are already on if it's active
 		toggle_lines(true)
 
 func _on_Button_mouse_exited():
-	Map.set_description("")
 	if !isActive: #cannot turn off lines of the active node
 		toggle_lines(false)

@@ -162,13 +162,13 @@ func get_description(moveName):
 	var desc = moveName
 	if moveData.has("resVal") and moveData["resVal"] > 0: desc += " [" + String(moveData["resVal"]) + "]"
 	if moveData.has("target"):
-		if moveData["target"] == Battle.targetType.enemy: desc += "\n" + "Single Enemy"
-		elif moveData["target"] == Battle.targetType.enemies: desc += "\n" + "All Enemies"
-		elif moveData["target"] == Battle.targetType.enemyTargets: desc += "\n" + "Same Target Enemies"
-		elif moveData["target"] == Battle.targetType.ally: desc += "\n" + "Single Ally"
-		elif moveData["target"] == Battle.targetType.allies: desc += "\n" + "All Allies"
-		elif moveData["target"] == Battle.targetType.everyone: desc += "\n" + "EVERYONE"
-		elif moveData["target"] == Battle.targetType.user: desc += "\n" + "Self"
+		if moveData["target"] == targetType.enemy: desc += "\n" + "Single Enemy"
+		elif moveData["target"] == targetType.enemies: desc += "\n" + "All Enemies"
+		elif moveData["target"] == targetType.enemyTargets: desc += "\n" + "Same Target Enemies"
+		elif moveData["target"] == targetType.ally: desc += "\n" + "Single Ally"
+		elif moveData["target"] == targetType.allies: desc += "\n" + "All Allies"
+		elif moveData["target"] == targetType.everyone: desc += "\n" + "EVERYONE"
+		elif moveData["target"] == targetType.user: desc += "\n" + "Self"
 	if moveData.has("damage") or moveData.has("healing"): desc += " / "
 	if moveData.has("damage"): desc += "Base Damage: " + String(moveData["damage"])# + " + " + String(Battle.currentUnit.strength)
 	if moveData.has("healing"): desc += "Healing: " + String(moveData["healing"])

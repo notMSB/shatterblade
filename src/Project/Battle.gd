@@ -305,7 +305,6 @@ func evaluate_targets(move, user, box):
 	if box == usedMoveBox: 
 		$BattleUI.toggle_buttons(false)
 		usedMoveBox = null
-		set_description("")
 	else:
 		usedMoveBox = box
 		chosenMove = Moves.moveList[move]
@@ -324,10 +323,6 @@ func evaluate_targets(move, user, box):
 			#$BattleUI.toggle_buttons(true, [moveUser])
 			target_chosen(user.get_index())
 			usedMoveBox = null
-	
-
-func set_description(boxMoveName):
-	descriptionNode.text = Moves.get_description(boxMoveName)
 
 func target_chosen(index = null):
 	moveTarget = $Units.get_child(index) if index != null else null
@@ -367,7 +362,6 @@ func cut_from_order(box):
 		if action[e.user] == box.user and !action[1].has("quick"): #If a non-quick is committed and a quick is cut, this bool has the quick turn off completely
 			userCommitted = true
 	executionOrder.erase(foundAction) #Erased from order
-	set_description("")
 	
 	if foundAction[e.move].has("resVal"): #Refund resources spent from that action
 		foundAction[e.user].update_resource(box.resValue, foundAction[e.move]["type"], true)

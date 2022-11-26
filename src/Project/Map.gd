@@ -101,8 +101,7 @@ func _ready():
 			elif display.get_node("Name").text == "Mage": display.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
 			elif display.get_node("Name").text == "Rogue": display.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
 	bottomRight = Vector2($ReferenceRect.margin_right, $ReferenceRect.margin_bottom)
-	timeNode.position.y += bottomRight.y + 20
-	timeNode.position.x += 15
+	timeNode.position.y += bottomRight.y
 	favorNode.position.y += bottomRight.y + 5
 	favorNode.position.x += bottomRight.x - 150
 	set_boon_text()
@@ -119,6 +118,7 @@ func _ready():
 		for box in unit.boxHolder.get_children():
 			inventoryWindow.identify_product(box)
 	get_parent().move_child(battleWindow, inventoryWindow.get_index())
+	#get_parent().move_child(self, inventoryWindow.get_index())
 	var Party = get_parent().get_node_or_null("Party")
 	if Party: get_parent().move_child(Party, get_index())
 	
@@ -142,10 +142,6 @@ func set_biome():
 
 func set_boon_text():
 	favorNode.get_node("Virtue").text = Boons.set_text()
-
-func set_description(descriptor, forBox = true):
-	if forBox: $Description.text = Moves.get_description(descriptor)
-	else: $Description.text = String(descriptor)
 
 func setup_inventory():
 	inventoryWindow = Inventory.instance()
@@ -506,6 +502,7 @@ func classify_remaining_points():
 				sectionPoints.append(point)
 		if sectionPoints.empty(): 
 			regen_map() #needs to be a really messed up mapgen for this, but if it happens it crashes
+			print("no points for quests")
 			return
 		if i > 0:
 			var randoPoint = sectionPoints[randi() % sectionPoints.size()]
@@ -622,7 +619,8 @@ func subtract_time(diff, refillAllMana = false):
 
 func set_time_text():
 	var biomeName = String(biomesList.keys()[currentBiome])
-	timeNode.get_node("Area").text = "Area " + String(currentArea + 1) + " - " + biomeName[0].to_upper()+biomeName.substr(1, -1)
+	timeNode.get_node("Area").text = "Area " + String(currentArea + 1)
+	timeNode.get_node("Biome").text = biomeName[0].to_upper()+biomeName.substr(1, -1)
 	if isDay: 
 		timeNode.get_node("State").text = "Day " + String(currentDay + 1)
 		timeNode.get_node("Hour").text = String(time - 50)
