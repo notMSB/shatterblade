@@ -51,6 +51,7 @@ func advance_box_move(box): #For boxes with multiple moves
 	box.timesEnabled = 0
 	box.moveIndex = (box.moveIndex + 1) % box.moves.size()
 	prepare_box(box)
+	box.set_tooltip_text(Moves.get_description(box.moves[box.moveIndex]))
 	if box.moveIndex > 0:
 		box.get_node("Info").text = box.moves[box.moveIndex - 1] if Moves.moveList[box.moves[0]].type >= Moves.moveType.special else ""
 

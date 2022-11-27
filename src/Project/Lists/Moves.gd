@@ -89,7 +89,7 @@ func _ready():
 	"Bone Zone": {"target": targetType.user, "resVal": 0, "quick": true ,"effect": funcref(self, "fill_boxes"), "args": ["moveUser", "Bone Attack"], "description": "bones", "slot": equipType.gear, "type": moveType.item, "uses": 2},
 	"Bone Attack": {"slot": equipType.none, "resVal": 0 ,"type": moveType.none, "uselimit": 1, "fleeting": true, "target": targetType.enemy, "damage": 7, "quick": true, "uses": 1},
 	"Concoction": {"target": targetType.enemies, "damage": 8, "resVal": 0, "quick": true, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .5], "description": "50% recoil", "slot": equipType.gear, "type": moveType.item},
-	"Dark Matter": {"target": targetType.everyone, "damage": 20, "resVal": 0, "slot": equipType.gear, "type": moveType.item},
+	"Dark Matter": {"target": targetType.everyone, "damage": 15, "resVal": 0, "slot": equipType.gear, "type": moveType.item},
 	
 	"Rock": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 2, "quick": true, "cursed": true},
 	"Rock+": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 4, "quick": true, "cursed": true},

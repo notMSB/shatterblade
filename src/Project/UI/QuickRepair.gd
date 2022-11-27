@@ -13,6 +13,7 @@ func disassemble(weaponName):
 	for i in components.size():
 		if i == 0: DisplayHolder.box_move($LeftComponent, components[i])
 		elif i == 1: DisplayHolder.box_move($RightComponent, components[i])
+	#$Weapon/Tooltip.position = Vector2(0, 85)
 
 func fix_and_reset():
 	originalBox.repair_uses()
@@ -26,3 +27,10 @@ func _on_LeftButton_pressed():
 func _on_RightButton_pressed():
 	if Inventory.remove_component($RightComponent.get_node("Name").text):
 		fix_and_reset()
+
+func _on_button_mouse_entered():
+	if $Weapon/Tooltip/Label.text.length() > 0:
+		$Weapon/Tooltip.visible = true
+
+func _on_button_mouse_exited():
+	$Weapon/Tooltip.visible = false

@@ -37,14 +37,15 @@ func level_up(invNode): #upgrade every rock and stick
 func start_battle(_startingHealth):
 	boxesOK = true
 
-func check_move(usedBox, _targetHealth, _moveUser, _real):
-	if !usedBoxes.has(usedBox):
-		usedBoxes.append(usedBox)
-		usedBox.get_node("Scales").visible = true
-	else:
-		if !(usedBox.moveIndex == 0 and usedBox.moves.size() > 1): #may need to revisit this when other multimoves are implemented
-			#print("Repeat")
-			boxesOK = false
+func check_move(usedBox, _targetHealth, _moveUser, real):
+	if real:
+		if !usedBoxes.has(usedBox):
+			usedBoxes.append(usedBox)
+			usedBox.get_node("Scales").visible = true
+		else:
+			if !(usedBox.moveIndex == 0 and usedBox.moves.size() > 1): #may need to revisit this when other multimoves are implemented
+				#print("Repeat")
+				boxesOK = false
 
 func end_battle(_endingHealth):
 	if boxesOK: Boons.grant_favor(REWARD)

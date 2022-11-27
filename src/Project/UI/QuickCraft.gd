@@ -14,8 +14,16 @@ func assemble(one, two):
 	DisplayHolder.box_move($Productbox, productName)
 	$Productbox.set_uses(Moves.get_uses(productName))
 	Inventory.identify_product($Productbox)
+	#$Productbox/Tooltip.position = Vector2(-100, 85)
 
 func _on_Button_pressed():
 	Inventory.remove_component($Leftbox.get_node("Name").text)
 	Inventory.remove_component($Rightbox.get_node("Name").text)
 	Inventory.add_to_player($Productbox.get_node("Name").text)
+
+func _on_Button_mouse_entered():
+	if $Productbox/Tooltip/Label.text.length() > 0:
+		$Productbox/Tooltip.visible = true
+
+func _on_Button_mouse_exited():
+	$Productbox/Tooltip.visible = false

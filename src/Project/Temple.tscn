@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://src/Project/Temple.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/UI/BoonSelect.tscn" type="PackedScene" id=2]
@@ -16,6 +16,10 @@ font_data = ExtResource( 3 )
 
 [sub_resource type="DynamicFont" id=2]
 size = 12
+font_data = ExtResource( 3 )
+
+[sub_resource type="DynamicFont" id=4]
+size = 14
 font_data = ExtResource( 3 )
 
 [node name="Temple" type="Node2D"]
@@ -170,6 +174,43 @@ custom_fonts/font = SubResource( 2 )
 text = "1/1"
 align = 1
 valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Tooltip" type="Node2D" parent="Templebox"]
+visible = false
+z_index = 5
+
+[node name="Background" type="ColorRect" parent="Templebox/Tooltip"]
+margin_left = -120.0
+margin_top = -160.0
+margin_right = 120.0
+margin_bottom = -25.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Inside" type="ColorRect" parent="Templebox/Tooltip"]
+margin_left = -117.0
+margin_top = -157.0
+margin_right = 117.0
+margin_bottom = -28.0
+color = Color( 0.458824, 0.25098, 0.25098, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Templebox/Tooltip"]
+margin_left = -112.0
+margin_top = -157.0
+margin_right = 113.0
+margin_bottom = -22.0
+custom_fonts/font = SubResource( 4 )
+text = "aaaaaaaaaaaaaa"
+align = 1
+valign = 1
+autowrap = true
 __meta__ = {
 "_edit_use_anchors_": false
 }

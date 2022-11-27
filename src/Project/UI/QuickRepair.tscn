@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://src/Project/UI/MoveBox.gd" type="Script" id=2]
@@ -11,6 +11,10 @@ font_data = ExtResource( 1 )
 
 [sub_resource type="DynamicFont" id=2]
 size = 12
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=4]
+size = 14
 font_data = ExtResource( 1 )
 
 [sub_resource type="DynamicFont" id=1]
@@ -202,27 +206,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="LeftButton" type="Button" parent="."]
-margin_right = 140.0
-margin_bottom = 80.0
-custom_fonts/font = SubResource( 1 )
-text = "       >"
-flat = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="RightButton" type="Button" parent="."]
-margin_left = 141.0
-margin_right = 280.0
-margin_bottom = 80.0
-custom_fonts/font = SubResource( 1 )
-text = "<       "
-flat = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="Weapon" type="Node2D" parent="."]
 position = Vector2( 140, 30 )
 script = ExtResource( 2 )
@@ -314,8 +297,71 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Tooltip" type="Node2D" parent="Weapon"]
+visible = false
+position = Vector2( 0, 185 )
+z_index = 5
+
+[node name="Background" type="ColorRect" parent="Weapon/Tooltip"]
+margin_left = -120.0
+margin_top = -160.0
+margin_right = 120.0
+margin_bottom = -25.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Inside" type="ColorRect" parent="Weapon/Tooltip"]
+margin_left = -117.0
+margin_top = -157.0
+margin_right = 117.0
+margin_bottom = -28.0
+color = Color( 0.458824, 0.25098, 0.25098, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Weapon/Tooltip"]
+margin_left = -112.0
+margin_top = -157.0
+margin_right = 113.0
+margin_bottom = -22.0
+custom_fonts/font = SubResource( 4 )
+text = "aaaaaaaaaaaaaa"
+align = 1
+valign = 1
+autowrap = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LeftButton" type="Button" parent="."]
+margin_right = 140.0
+margin_bottom = 80.0
+custom_fonts/font = SubResource( 1 )
+text = "       >"
+flat = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RightButton" type="Button" parent="."]
+margin_left = 141.0
+margin_right = 280.0
+margin_bottom = 80.0
+custom_fonts/font = SubResource( 1 )
+text = "<       "
+flat = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="LeftComponent/Button" to="LeftComponent" method="_on_Button_pressed"]
 [connection signal="pressed" from="RightComponent/Button" to="RightComponent" method="_on_Button_pressed"]
-[connection signal="pressed" from="LeftButton" to="." method="_on_LeftButton_pressed"]
-[connection signal="pressed" from="RightButton" to="." method="_on_RightButton_pressed"]
 [connection signal="pressed" from="Weapon/Button" to="Weapon" method="_on_Button_pressed"]
+[connection signal="mouse_entered" from="LeftButton" to="." method="_on_button_mouse_entered"]
+[connection signal="mouse_exited" from="LeftButton" to="." method="_on_button_mouse_exited"]
+[connection signal="pressed" from="LeftButton" to="." method="_on_LeftButton_pressed"]
+[connection signal="mouse_entered" from="RightButton" to="." method="_on_button_mouse_entered"]
+[connection signal="mouse_exited" from="RightButton" to="." method="_on_button_mouse_exited"]
+[connection signal="pressed" from="RightButton" to="." method="_on_RightButton_pressed"]
