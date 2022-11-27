@@ -20,7 +20,7 @@ onready var Boons = get_node("../Data/Boons")
 onready var Trading = get_node("../Data/Trading")
 
 const INCREMENT = 90
-const KILLDISTANCE = 70 #lower kill distance means more points
+const KILLDISTANCE = 81 #lower kill distance means more points
 const MAXDISTANCE = 199
 const FUZZ = 35 #should never be more than half of the increment
 const CORNER_CHECK = 20
@@ -508,7 +508,7 @@ func classify_remaining_points():
 			var randoPoint = sectionPoints[randi() % sectionPoints.size()]
 			place_temple(randoPoint)
 			sectionPoints.erase(randoPoint)
-		var battleCount = ceil(sectionPoints.size() * .6)
+		var battleCount = ceil(sectionPoints.size() * .5)
 		while battleCount > 0:
 			var randoPoint = sectionPoints[randi() % sectionPoints.size()]
 			randoPoint.pointType = pointTypes.battle
@@ -518,9 +518,9 @@ func classify_remaining_points():
 		for eventPoint in sectionPoints:
 			eventPoint.pointType = pointTypes.event
 			make_quest(eventPoint)
-	kill_off_section_text()
+	set_point_displays()
 
-func kill_off_section_text():
+func set_point_displays():
 	for point in $HolderHolder/PointHolder.get_children():
 		if point.pointType == pointTypes.dungeon: point.set_type_text("D")
 		elif point.pointType == pointTypes.end: point.set_type_text("E")
@@ -530,15 +530,30 @@ func kill_off_section_text():
 			if point.pointType > pointTypes.event:
 				point.set_type_text(pointTypes.keys()[point.pointType][0].to_upper())
 			elif point.pointQuest:
-				if point.pointQuest["prize"] == "trade": point.set_type_text("T")
-				if point.pointQuest["prize"] == "repair": point.set_type_text("R")
+				if point.pointQuest["prize"] == "trade": point.set_name("Trader")
+				elif point.pointQuest["prize"] == "repair": point.set_name("Repair")
+				var sprite = point.get_node("Image")
+				var spritePath
+				if point.pointQuest["type"] == "fetch": 
+					spritePath = str("res://src/Assets/Icons/Components/", point.pointQuest["objective"], ".png")
+					sprite.set_scale(Vector2(.5,.5))
+				else:
+					sprite.set_scale(Vector2(.25,.25))
+					if point.pointQuest["type"] == "labor": spritePath = "res://src/Assets/Misc/labor.png"
+					if point.pointQuest["type"] == "weapon_request": spritePath = str("res://src/Assets/Misc/", point.pointQuest["objective"], ".png")
+					if point.pointQuest["type"] == "hunt": spritePath = str("res://src/Assets/Enemies/", Enemies.enemyList[point.pointQuest["objective"]]["sprite"], ".png")
+				
+				point.get_node("Button").flat = true
+				sprite.texture = load(spritePath)
+				sprite.visible = true
+				
 		else:
 			point.set_type_text("")
+			point.get_node("Button").flat = false
+			point.get_node("Image").visible = false
 
 func make_quest(point):
 	point.pointQuest = $Events.generate_event(Quests.generate_quest())
-	if point.pointQuest["prize"] == "trade": point.set_type_text("T")
-	elif point.pointQuest["prize"] == "repair": point.set_type_text("R")
 
 func determine_distances(checkPoint): #gives every node a distance from start and returns if the end node is accessible
 	if checkPoint == startIndex: checkPoint.clicksFromStart = 0
@@ -640,7 +655,7 @@ func advance_day(reset = false):
 	if reset: currentDay = 0
 	else: currentDay += 1
 	set_sections()
-	kill_off_section_text()
+	set_point_displays()
 
 func set_quick_crafts():
 	var quickIncrement = 80

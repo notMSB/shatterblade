@@ -43,7 +43,7 @@ self_modulate = Color( 0.0352941, 0.796078, 1, 1 )
 margin_left = -2.0
 margin_top = -3.0
 margin_right = 1280.0
-margin_bottom = 360.0
+margin_bottom = 460.0
 color = Color( 0.168627, 0.141176, 0.141176, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -52,9 +52,9 @@ __meta__ = {
 [node name="GoButton" type="Button" parent="."]
 modulate = Color( 0.984314, 0.945098, 0, 1 )
 margin_left = 586.0
-margin_top = 289.0
+margin_top = 390.0
 margin_right = 694.0
-margin_bottom = 357.0
+margin_bottom = 458.0
 text = "END TURN"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -63,9 +63,9 @@ __meta__ = {
 [node name="Preview" type="Button" parent="."]
 modulate = Color( 0.984314, 0.945098, 0, 1 )
 margin_left = 290.0
-margin_top = 289.0
+margin_top = 390.0
 margin_right = 398.0
-margin_bottom = 357.0
+margin_bottom = 458.0
 text = "PREVIEW ON"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -94,6 +94,7 @@ __meta__ = {
 }
 
 [node name="Description" type="Label" parent="BattleUI"]
+visible = false
 margin_top = 455.0
 margin_right = 1277.0
 margin_bottom = 560.0

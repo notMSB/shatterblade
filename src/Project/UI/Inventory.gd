@@ -3,7 +3,7 @@ extends Node2D
 export (PackedScene) var MoveBox
 
 const XSTART = 200
-const YSTART = 440
+const YSTART = 536
 const TRADEXSTART = 440
 const TRADEYSTART = 80
 

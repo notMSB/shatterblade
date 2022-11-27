@@ -6,7 +6,7 @@ export (PackedScene) var PlayerMove
 
 const DEFAULTMOVES = 2
 const PLAYERXSTART = 600
-const PLAYERYSTART = 500
+const PLAYERYSTART = 599
 const STARTXINCREMENT = 120
 const PLAYERINCREMENT = 80
 
