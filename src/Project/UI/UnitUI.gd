@@ -16,10 +16,13 @@ func check_mode():
 		fixTargets = true
 
 func _on_Button_pressed():
-	if !fixTargets:
-		Battle.target_chosen(get_index())
+	if !Battle.visible:
+		Battle.get_node("../Map").use_map_move(global.storedParty[get_index()])
 	else:
-		Battle.target_chosen(get_index() + Battle.partyNum)
+		if !fixTargets:
+			Battle.target_chosen(get_index())
+		else:
+			Battle.target_chosen(get_index() + Battle.partyNum)
 
 func position_preview_rect(projectedHP = null, isPlayer = false):
 	var multiplier = 118 if isPlayer else 200

@@ -9,6 +9,7 @@ const REPAIRVALUE = .5
 var user
 
 var isCursed = false
+var mapUse = false
 
 var moves = []
 var moveIndex = 0
@@ -71,22 +72,8 @@ func change_rect_color(color):
 	$ColorRect.color = color
 	$ColorRect.visible = true
 
-func _on_Button_pressed():
-	boxModeScene = set_mode_scene()
-	if boxModeScene.name == "Inventory": #inventory
-		if !(isCursed and get_parent().name == "MoveBoxes") and canMove: boxModeScene.select_box(self)
-		#else: boxModeScene.set_description($Name.text)
-	elif boxModeScene.name == "Battle":
-		#boxModeScene.set_description($Name.text)
-		if buttonMode:
-			boxModeScene.evaluate_targets(moves[moveIndex], user, self)
-		else:
-			boxModeScene.cut_from_order(self)
-	else: #map scene
-		pass
-
 func set_tooltip_text(tip):
-	$Tooltip/Background.margin_left = -120
+	$Tooltip/Background.margin_left = -120 #Need to reset all of these to default for each time a new move needs a tooltip generated
 	$Tooltip/Background.margin_right = 120
 	$Tooltip/Inside.margin_left = -117
 	$Tooltip/Inside.margin_right = 117
@@ -95,12 +82,12 @@ func set_tooltip_text(tip):
 	$Tooltip/Label.margin_top = -157
 	var longestLineSize = 0
 	var splits = tip.split("\n")
+	var lineCount = splits.size()
 	for line in splits:
 		var length = $Tooltip/Label.get_font("font").get_string_size(line).x
+		if length > 225: lineCount += 1 #extra long descriptions
 		if length > longestLineSize: longestLineSize = length
-	var lineCount = splits.size()
-	if longestLineSize > 225: lineCount += 1
-	elif longestLineSize < 200:
+	if longestLineSize < 200:
 		var offset = (200 - longestLineSize) / 2
 		$Tooltip/Inside.margin_left += offset
 		$Tooltip/Inside.margin_right -= offset
@@ -119,4 +106,26 @@ func _on_mouse_entered():
 
 func _on_mouse_exited():
 	$Tooltip.visible = false
-	
+
+func _on_Button_pressed():
+	boxModeScene = set_mode_scene()
+	if boxModeScene.name == "Inventory": #inventory
+		var map = boxModeScene.get_node("../Map")
+		if map.battleWindow.visible == true:
+			pass #cannot click inventory items in battle
+		elif !(isCursed and get_parent().name == "MoveBoxes") and canMove: 
+			if mapUse:
+				map.toggle_map_use(self)
+			else:
+				for child in map.get_node("HolderHolder/DisplayHolder").get_children():
+					child.get_node("Button").visible = false
+			boxModeScene.select_box(self)
+		#else: boxModeScene.set_description($Name.text)
+	elif boxModeScene.name == "Battle":
+		#boxModeScene.set_description($Name.text)
+		if buttonMode:
+			boxModeScene.evaluate_targets(moves[moveIndex], user, self)
+		else:
+			boxModeScene.cut_from_order(self)
+	else: #map scene
+		pass

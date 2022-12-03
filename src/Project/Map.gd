@@ -63,6 +63,9 @@ var availableBiomes = []
 var currentBiome
 var seenElite = false
 
+var selectedMapMove = null
+var selectedMapBox = null
+
 var delayBattle = null
 
 var battleWindow
@@ -86,6 +89,7 @@ func _ready():
 	biomesList = Enemies.b
 	availableBiomes = range(0, biomesList.size()-1) #exclude the "none" at the end
 	set_biome()
+	$HolderHolder/DisplayHolder.Moves = Moves
 	Trading.assign_component_values(currentBiome, "Scorpion") #todo: change this when new mascots are added
 	setup_inventory()
 	
@@ -96,10 +100,7 @@ func _ready():
 			global.storedParty[i].ui = $HolderHolder/DisplayHolder.setup_player(global.storedParty[i], i)
 			global.storedParty[i].update_hp()
 		for display in $HolderHolder/DisplayHolder.get_children():
-			display.get_node("Name").text = Moves.get_classname(global.storedParty[display.get_index()].allowedType)
-			if display.get_node("Name").text == "Fighter": display.get_node("ColorRect").color = Color(.9,.3,.3,1) #R
-			elif display.get_node("Name").text == "Mage": display.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
-			elif display.get_node("Name").text == "Rogue": display.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
+			set_display_color(display)
 	bottomRight = Vector2($ReferenceRect.margin_right, $ReferenceRect.margin_bottom)
 	timeNode.position.y += bottomRight.y
 	favorNode.position.y += bottomRight.y + 5
@@ -154,6 +155,12 @@ func setup_battle():
 
 func activate_inventory():
 	inventoryWindow.welcome_back()
+
+func set_display_color(display):
+	var unitType = global.storedParty[display.get_index()].allowedType
+	if unitType == Moves.moveType.special: display.get_node("ColorRect").color = Color(.9,.3,.3,1) #R
+	elif unitType == Moves.moveType.magic: display.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
+	elif unitType == Moves.moveType.trick: display.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
 
 func activate_point(point):
 	var type = point.pointType
@@ -212,7 +219,7 @@ func activate_battle(newOpponents = null):
 		newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + get_difficulty_mod(), dayEncounter, currentBiome, null, seenElite)
 	battleWindow.visible = true
 	check_for_elite(newOpponents)
-	battleWindow.welcome_back(newOpponents)
+	battleWindow.welcome_back(newOpponents, currentArea)
 
 func check_for_elite(opponents):
 	for enemy in opponents:
@@ -267,7 +274,7 @@ func repair_event_box():
 	var repairName = $Events/Choices.get_child(0).get_node("Offerbox/Name").text
 	if repairName != "X":
 		inventoryWindow.add_to_player(repairName)
-		if activePoint.pointType != pointTypes.town: activePoint.pointType = pointTypes.visited
+		if activePoint.pointType != pointTypes.town: activePoint.mark_as_visited()
 
 func return_event_box():
 	var eBox = $Events/Choices.get_child(0).get_node("Offerbox")
@@ -280,6 +287,36 @@ func finish_event(checkName):
 			option.queue_free()
 		$Events.visible = false
 		calledEvent = null #clearing this out is needed because it's checked to process event outcomes
+
+func toggle_map_use(box):
+	if box.get_parent().name != "MoveBoxes" and box.resValue > 0: #for moves that need to be equipped to be used
+		pass
+	else:
+		selectedMapBox = box
+		selectedMapMove = box.moves[box.moveIndex]
+		for child in get_node("HolderHolder/DisplayHolder").get_children():
+			child.get_node("Button").visible = true
+
+func use_map_move(unit):
+	var moveUser = null
+	if selectedMapBox.get_parent().name == "MoveBoxes": moveUser = global.storedParty[selectedMapBox.get_parent().get_parent().get_index()]
+	if moveUser == null or moveUser.mana >= Moves.moveList[selectedMapMove]["resVal"]:
+		if Moves.moveList[selectedMapMove].has("healing"):
+			unit.heal(Moves.moveList[selectedMapMove]["healing"])
+		if Moves.moveList[selectedMapMove].has("statBoost"):
+			unit.boost_stat(Moves.moveList[selectedMapMove]["statBoost"])
+		selectedMapBox.reduce_uses(1)
+		if selectedMapBox.currentUses == 0: #it's broken
+			$HolderHolder/DisplayHolder.box_move(selectedMapBox, "X", true)
+		if moveUser != null: moveUser.update_resource(Moves.moveList[selectedMapMove]["resVal"], Moves.moveType.magic, false)
+	end_map_move()
+
+func end_map_move():
+	inventoryWindow.deselect_multi([selectedMapBox])
+	for child in $HolderHolder/DisplayHolder.get_children():
+		child.get_node("Button").visible = false
+	selectedMapMove = null
+	selectedMapBox = null
 
 func make_points(nextPos):
 	var currentPoint = Point.instance()
@@ -407,7 +444,7 @@ func regen_map(newMember = false):
 			var Party = get_parent().get_node_or_null("Party")
 			if Party:
 				Party.visible = true
-				Party.create_options(Party.OPTIONS)
+				Party.area_break()
 		else:
 			return get_tree().change_scene("res://src/Project/Win.tscn")
 			#you win !
@@ -440,11 +477,14 @@ func add_new_member():
 		unit.moves.append("X")
 	unit.ui = $HolderHolder/DisplayHolder.setup_player(unit, global.storedParty.size()-1)
 	unit.update_hp()
-	unit.ui.get_node("Name").text = Moves.get_classname(global.storedParty[unit.ui.get_index()].allowedType)
+	unit.ui.get_node("Name").text = unit.displayName
+	set_display_color(unit.ui)
 	battleWindow.partyNum += 1
 	battleWindow.setup_player(global.storedParty.size()-1, true)
 	unit.ui.set_battle()
 	battleWindow.set_ui(unit)
+	for box in unit.boxHolder.get_children():
+		inventoryWindow.identify_product(box)
 	#for tracker in unit.ui.get_node("Trackers").get_children():
 	#	tracker.visible = false
 	Boons.call_boon("new_member", [inventoryWindow])

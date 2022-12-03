@@ -19,8 +19,6 @@ var storedAction
 var storedTarget
 
 var currentHealth
-var ap = 0
-var maxap = 100
 var shield = 0
 
 var ui #set in battle function

@@ -80,7 +80,7 @@ func generate_event(questData):
 	return newEvent
 
 func give_reward(rewardExists = true):
-	Map.activePoint.pointType = Map.pointTypes.visited
+	Map.activePoint.mark_as_visited()
 	if rewardExists:
 		var questEvent = Map.activePoint.pointQuest
 		if questEvent["reward"] == "service":

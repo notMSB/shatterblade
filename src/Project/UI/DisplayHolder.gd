@@ -13,12 +13,12 @@ const PLAYERINCREMENT = 80
 const UNITYSTART = 165
 const XINCREMENT = 300
 
-onready var Moves = get_node("../../../Data/Moves")
+var Moves
 
 func setup_player(unit, playerCount):
 	var display = PlayerProfile.instance()
 	add_child(display)
-	display.get_node("Name").text = unit.name
+	display.get_node("Name").text = unit.displayName
 	unit.isPlayer = true
 	display.position.x = PLAYERXSTART + (playerCount % 2 * STARTXINCREMENT)
 	display.position.y = PLAYERYSTART + PLAYERINCREMENT if playerCount > 1 else PLAYERYSTART
@@ -82,6 +82,7 @@ func box_move(moveBox, move, isUseless = false):
 		moveBox.get_node("Info").text = ""
 		if isUseless: moveBox.set_uses(-1)
 		moveBox.isCursed = true if moveData.has("cursed") else false
+		moveBox.mapUse = true if moveData.has("mapUsable") else false
 		sprite_move(moveBox, move)
 		moveBox.set_tooltip_text(Moves.get_description(move))
 	else:
@@ -127,7 +128,7 @@ func manage_and_color_boxes(unit, invWindow = null): #Puts all of a unit's boxes
 	for box in unit.boxHolder.get_children():
 		move = box.moves[0]
 		moveData = Moves.moveList[move]
-		if (moveData["type"] == Moves.moveType.item and box.currentUses == 0) or moveData.has("fleeting"): #kill
+		if (moveData["type"] >= Moves.moveType.item and box.currentUses == 0) or moveData.has("fleeting"): #it's broken
 			box_move(box, "X", true)
 		elif moveData["type"] == Moves.moveType.trick or moveData.has("charge"):
 			if box.moveIndex == 1 and box.moves[1] == "Catch" and box.timesEnabled > 0: box_move(box, "X", true) #temp, hardcode

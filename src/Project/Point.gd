@@ -22,9 +22,14 @@ func toggle_activation(active, skip = false):
 		deactivate_color()
 		Map.activePoint = null
 		if pointType < Map.pointTypes.visited:
-			pointType = Map.pointTypes.visited
+			mark_as_visited()
 	isActive = active
 	toggle_lines(active)
+
+func mark_as_visited():
+	pointType = Map.pointTypes.visited
+	$Image.visible = false
+	$Button.flat = false
 
 func deactivate_color():
 	$Sprite.modulate = Color(.5,.1,.5,1) #special color for deactivating a previously active node

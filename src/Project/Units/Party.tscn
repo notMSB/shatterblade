@@ -1,22 +1,119 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://src/Project/Units/Party.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/UI/BoonSelect.tscn" type="PackedScene" id=2]
-[ext_resource path="res://src/Project/UI/ChoiceUI.tscn" type="PackedScene" id=5]
+[ext_resource path="res://src/Project/UI/PlayerMove.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/Project/UI/PlayerProfile.tscn" type="PackedScene" id=4]
+[ext_resource path="res://src/Project/UI/PartyChoice.tscn" type="PackedScene" id=5]
 [ext_resource path="res://src/Project/Units/Player.tscn" type="PackedScene" id=6]
+[ext_resource path="res://src/Project/UI/UnitUI.tscn" type="PackedScene" id=7]
+[ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=8]
+[ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=9]
+[ext_resource path="res://src/Project/Map.tscn" type="PackedScene" id=10]
+
+[sub_resource type="DynamicFont" id=2]
+size = 24
+font_data = ExtResource( 9 )
+
+[sub_resource type="DynamicFont" id=4]
+size = 34
+font_data = ExtResource( 9 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 32
+font_data = ExtResource( 9 )
 
 [node name="Party" type="Node2D"]
 script = ExtResource( 1 )
 Player = ExtResource( 6 )
-ChoiceUI = ExtResource( 5 )
+PartyChoice = ExtResource( 5 )
 BoonSelect = ExtResource( 2 )
+MapScene = ExtResource( 10 )
+
+[node name="DisplayHolder" type="Node2D" parent="."]
+script = ExtResource( 8 )
+UnitUI = ExtResource( 7 )
+PlayerProfile = ExtResource( 4 )
+PlayerMove = ExtResource( 3 )
 
 [node name="ColorRect" type="ColorRect" parent="."]
-margin_right = 1301.0
+margin_right = 1280.0
 margin_bottom = 726.0
 color = Color( 0.345098, 0.345098, 0.345098, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="UI" type="Node2D" parent="ColorRect"]
+
+[node name="BoonText" type="Label" parent="ColorRect/UI"]
+margin_top = 10.0
+margin_right = 1280.0
+margin_bottom = 46.0
+custom_fonts/font = SubResource( 2 )
+text = "0/1 Boon Selected"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MemberText" type="Label" parent="ColorRect/UI"]
+margin_top = 590.0
+margin_right = 1280.0
+margin_bottom = 706.0
+custom_fonts/font = SubResource( 2 )
+text = "0/2 Members Selected"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Difficulty" type="Button" parent="ColorRect/UI"]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 244.0
+margin_top = 626.0
+margin_right = 396.0
+margin_bottom = 694.0
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 4 )
+text = "Difficulty"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Mode" type="Label" parent="ColorRect/UI/Difficulty"]
+margin_left = -20.0
+margin_top = 60.0
+margin_right = 168.0
+margin_bottom = 99.0
+custom_fonts/font = SubResource( 3 )
+text = "Normal"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Start" type="Button" parent="ColorRect/UI"]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 564.0
+margin_top = 626.0
+margin_right = 716.0
+margin_bottom = 694.0
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 4 )
+disabled = true
+text = "Start"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Choices" type="Node2D" parent="."]
+
+[connection signal="pressed" from="ColorRect/UI/Difficulty" to="." method="_on_Difficulty_pressed"]
+[connection signal="pressed" from="ColorRect/UI/Start" to="." method="_on_Start_pressed"]

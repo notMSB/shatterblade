@@ -117,15 +117,16 @@ func setup_player(index, setDisplay = false):
 		$BattleUI.setup_display(createdUnit, 0)
 	return createdUnit
 
-func create_enemies():
+func create_enemies(enemyDifficulty):
 	var createdUnit
 	var enemy
 	var i = 0
 	for opponent in opponents:
 		createdUnit = Enemy.instance()
 		enemy = Enemies.enemyList[opponent]
-		if get_parent().hardMode: createdUnit.make_stats(enemy["stats"][1])
-		else: createdUnit.make_stats(enemy["stats"][0])
+		
+		if get_parent().hardMode: enemyDifficulty += 1
+		createdUnit.make_stats(enemy["stats"][enemyDifficulty])
 		createdUnit.identity = opponent
 		createdUnit.spriteBase = enemy["sprite"]
 		createdUnit.battleName = str(createdUnit.identity, String(i))
@@ -144,7 +145,7 @@ func create_enemies():
 	enemyNum = opponents.size()
 	yield(get_tree().create_timer(0), "timeout")
 
-func welcome_back(newOpponents = null): #reusing an existing battle scene for a new battle
+func welcome_back(newOpponents = null, currentArea = 0): #reusing an existing battle scene for a new battle
 	$BattleUI.toggle_trackers(true)
 	turnCount = 0
 	$BattleUI.enemyCount = 0
@@ -159,13 +160,13 @@ func welcome_back(newOpponents = null): #reusing an existing battle scene for a 
 			set_ui(unit, true)
 	turnIndex = -1
 	if newOpponents: opponents = newOpponents
-	yield(create_enemies(), "completed")
+	yield(create_enemies(currentArea), "completed")
 	if autoPreview: toggle_previews(true)
 	play_turn(false)
 
 func set_ui(unit, setPassives = false):
 	unit.strength = unit.startingStrength
-	unit.ap = 0
+	unit.ap = unit.baseAP
 	unit.energy = unit.maxEnergy
 	unit.statuses.clear()
 	StatusManager.initialize_statuses(unit)
@@ -205,13 +206,13 @@ func play_turn(notFirstTurn = true):
 				unit.update_hp()
 			if unit.isPlayer:
 				StatusManager.evaluate_statuses(unit, StatusManager.statusActivations.beforeTurn)
+				StatusManager.countdown_turns(unit, true)
 				unit.update_resource(apIncrement, Moves.moveType.special, true)
 				unit.update_resource(unit.maxEnergy, Moves.moveType.trick, true)
 				if !unit.isStunned:
 					$BattleUI.toggle_moveboxes(unit.boxHolder, true, false, false, true)
 				else:
 					$BattleUI.toggle_moveboxes(unit.boxHolder, false, false, false, true)
-			StatusManager.countdown_turns(unit, true)
 		for unit in global.storedParty:
 			for box in unit.boxHolder.get_children():
 				var boxName = box.get_node("Name").text
@@ -228,6 +229,7 @@ func play_turn(notFirstTurn = true):
 		if currentUnit.currentHealth > 0: #if you're dead stop doing moves
 			StatusManager.evaluate_statuses(currentUnit, StatusManager.statusActivations.beforeTurn)
 			Boons.call_boon("post_status_eval", [currentUnit, currentUnit.real])
+			StatusManager.countdown_turns(currentUnit, true)
 			if currentUnit.currentHealth > 0 and !currentUnit.isStunned: #poison could kill
 				moveUser = currentUnit
 				moveTarget = currentUnit.storedTarget
@@ -302,6 +304,7 @@ func get_team(gettingPlayers, onlyAlive = false, real = true):
 	return team
 
 func evaluate_targets(move, user, box):
+	if usedMoveBox: usedMoveBox.change_rect_color(Color(.5,.1,.5,1))  #set any already selected box back to default color
 	if box == usedMoveBox: 
 		$BattleUI.toggle_buttons(false)
 		usedMoveBox = null
@@ -323,6 +326,7 @@ func evaluate_targets(move, user, box):
 			#$BattleUI.toggle_buttons(true, [moveUser])
 			target_chosen(user.get_index())
 			usedMoveBox = null
+		if usedMoveBox: usedMoveBox.change_rect_color(Color(.6,.6,.6,1)) #color indicating this is the selected box
 
 func target_chosen(index = null):
 	moveTarget = $Units.get_child(index) if index != null else null
@@ -351,6 +355,7 @@ func go_button_press():
 	emit_signal("turn_taken")
 
 func cut_from_order(box):
+	box.change_rect_color(Color(.5,.1,.5,1)) #set any already selected box back to default color
 	var userCommitted = false
 	var foundAction
 	for action in executionOrder: #box, move, user, target

@@ -14,7 +14,6 @@ func assemble(one, two):
 	DisplayHolder.box_move($Productbox, productName)
 	$Productbox.set_uses(Moves.get_uses(productName))
 	Inventory.identify_product($Productbox)
-	#$Productbox/Tooltip.position = Vector2(-100, 85)
 
 func _on_Button_pressed():
 	Inventory.remove_component($Leftbox.get_node("Name").text)

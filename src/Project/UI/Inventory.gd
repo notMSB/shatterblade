@@ -51,7 +51,7 @@ var mode = iModes.craft
 
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
 	if global.itemDict.empty():
-		global.itemDict = {"wing": 0, "fang": 0, "claw": 0, "sap": 0, "venom": 0, "fur": 0, "blade": 0, "bone": 0, "garbage": 0, "darkness": 0, "moves": ["Health Potion", "Coin", "Coin"]}
+		global.itemDict = {"wing": 0, "fang": 0, "claw": 0, "sap": 0, "venom": 0, "fur": 0, "blade": 0, "bone": 0, "garbage": 0, "darkness": 0, "moves": ["Resource Seed", "Health Seed", "Health Potion"]}
 	MOVESPACES += Boons.call_boon("prep_inventory")
 	dHolder = $HolderHolder/DisplayHolder
 	make_grid()
@@ -167,6 +167,7 @@ func set_text(tag, value, visibility = true):
 	tag.visible = visibility
 
 func make_grid():
+	dHolder.Moves = Moves
 	for item in global.itemDict:
 		if item == MOVEHOLDER:
 			for move in global.itemDict[MOVEHOLDER]:
@@ -234,7 +235,9 @@ func quick_repair(moveBox, componentBox):
 func check_swap(selectedBox):
 	if !otherSelection:
 		otherSelection = selectedBox
-	elif otherSelection == selectedBox: deselect_multi([selectedBox])
+	elif otherSelection == selectedBox: 
+		deselect_multi([selectedBox])
+		if get_node("../Map").selectedMapBox: get_node("../Map").end_map_move()
 	else:
 		var canOffer = false 
 		var checkingOffering = false
@@ -349,6 +352,7 @@ func swap_boxes(one, two, check = false):
 	if one.name == "Offerbox": finalize_offering(one)
 	elif two.name == "Offerbox": finalize_offering(two)
 	if tHolder.visible: reset_and_update_itemDict() #make sure quick panels are accurate while trading
+	if get_node("../Map").selectedMapBox: get_node("../Map").end_map_move()
 
 func finalize_offering(offeringBox):
 	if offeringBox.get_node("Name").text != "X":

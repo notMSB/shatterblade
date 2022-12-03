@@ -10,6 +10,7 @@ enum timings {before, after}
 enum moveType {none, basic, item, special, magic, trick}
 enum equipType {any, none, relic, gear}
 enum targetType {enemy, enemies, enemyTargets, ally, allies, user, everyone, none}
+enum statBoosts {health, resource}
 
 func _ready():
 	moveList = {
@@ -57,14 +58,14 @@ func _ready():
 	"Dodge": {"target": targetType.ally, "resVal": 20, "status": "Dodgy", "value": 1, "slot": equipType.gear, "type": moveType.magic},
 	"Growth": {"target": targetType.ally, "resVal": 10, "effect": funcref(self, "change_attribute"), "args": ["moveTarget", "strength", 3], "description": "Ally strength +3", "slot": equipType.gear, "type": moveType.magic, "uselimit": 1},
 	"Hide": {"target": targetType.ally, "resVal": 5, "effect": funcref(self, "switch_intents"), "args": ["moveUser", "moveTarget"], "slot": equipType.gear, "type": moveType.magic, "quick": true, "description": "Enemy attacks intended for user change to target"},
-	"Restore": {"target": targetType.ally, "resVal": 5, "healing": 5, "slot": equipType.gear, "type": moveType.magic, "quick": true},
+	"Restore": {"target": targetType.ally, "resVal": 5, "healing": 5, "slot": equipType.gear, "type": moveType.magic, "quick": true, "mapUsable": true},
 	"Invisibility": {"target": targetType.ally, "resVal": 15, "status": "Stealth", "value": 2, "slot": equipType.gear, "type": moveType.magic, "quick": true},
 	"Midnight Flare": {"target": targetType.none, "resVal": 20, "quick": true, "slot": equipType.gear, "type": moveType.magic, "effect": funcref(self, "midnight_flare"), "args": [], "description": "All enemies target the lowest health ally."},
 	"Defensive Pact": {"target": targetType.ally, "resVal": 10, "damage": 5 ,"effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 15], "description": "Adds 15 shield", "slot": equipType.gear, "type": moveType.magic},
 	
 	"Coldsteel": {"target": targetType.enemy, "damage": 5, "resVal": 3, "status": "Chill", "value": 25, "hits": 2, "slot": equipType.gear, "type": moveType.trick},
 	"Crusher Claw": {"target": targetType.enemy, "damage": 8, "resVal": 2, "timing": timings.before, "effect": funcref(self, "crusher_claw"), "args": ["moveTarget", 1], "description": "Extra hit if the target has shields or dodge", "slot": equipType.gear, "type": moveType.trick},
-	"Piercing Sting": {"target": targetType.enemy, "damage": 11, "resVal": 5, "status": "Poison", "value": 6, "slot": equipType.gear, "type": moveType.trick, "uses": 5},
+	"Piercing Sting": {"target": targetType.enemy, "damage": 11, "resVal": 4, "status": "Poison", "value": 6, "slot": equipType.gear, "type": moveType.trick, "uses": 5},
 	"Quick Attack": {"target": targetType.enemy, "damage": 6, "resVal": 2, "quick": true, "slot": equipType.gear, "type": moveType.trick},
 	"Sucker Punch": {"target": targetType.enemy, "damage": 7, "resVal": 3, "timing": timings.before, "effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 1], "description": "Extra hit if enemy targets user", "slot": equipType.gear, "type": moveType.trick},
 	"Bonemerang": {"target": targetType.enemy, "damage": 4, "resVal": 1, "quick": true, "cycle": ["Catch"], "slot": equipType.gear, "type": moveType.trick, "uses": 12, "description": "Must be caught or else it is lost"},
@@ -82,7 +83,7 @@ func _ready():
 	"Speed Potion": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "give_status"), "args": ["moveUser", "Dodgy", funcref(self, "get_enemy_targeters")], "description": "Gives 1 dodge for every enemy targeting user", "slot": equipType.gear, "type": moveType.item, "quick": true},
 	"Throwing Knife": {"target": targetType.enemy, "damage": 4, "resVal": 0, "slot": equipType.gear, "type": moveType.item, "uses": 5, "quick": true},
 	"Brass Knuckles": {"target": targetType.enemy, "status": "Stun", "value": 1, "resVal": 0, "slot": equipType.gear, "type": moveType.item},
-	"Health Potion": {"target": targetType.ally, "resVal": 0, "healing": 15, "slot": equipType.gear, "type": moveType.item},
+	"Health Potion": {"target": targetType.ally, "resVal": 0, "healing": 15, "slot": equipType.gear, "type": moveType.item, "mapUsable": true},
 	"Poison Potion": {"target": targetType.enemy, "resVal": 0, "status": "Poison", "value": 10, "slot": equipType.gear, "type": moveType.item},
 	"Leather Buckler": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 10], "description": "Adds 10 shield", "slot": equipType.gear, "type": moveType.item, "quick": true},
 	"Storm of Steel": {"target": targetType.enemy, "damage": 2, "resVal": 0, "slot": equipType.gear, "type": moveType.item, "hits": 10, "barrage": true},
@@ -95,6 +96,9 @@ func _ready():
 	"Rock+": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 4, "quick": true, "cursed": true},
 	"Stick": {"slot": equipType.none, "type": moveType.none, "uselimit": 1, "cycle": true, "target": targetType.enemy, "damage": 8, "cursed": true},
 	"Stick+": {"slot": equipType.none, "type": moveType.none, "uselimit": 1, "cycle": true, "target": targetType.enemy, "damage": 12, "cursed": true},
+	
+	"Health Seed": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "unusable": true, "unequippable": true, "price": 6, "mapUsable": true, "statBoost": statBoosts.health, "uses": 1, "obtainable": true, "rarity": rarities.uncommon, "description": "Raises max health of unit by 5."},
+	"Resource Seed": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "unusable": true, "unequippable": true, "price": 6, "mapUsable": true, "statBoost": statBoosts.resource, "uses": 1, "obtainable": true, "rarity": rarities.uncommon, "description": "Raises resource capacity of unit."},
 	
 	"Coin": {"slot": equipType.none, "type": moveType.none, "unusable": true, "unequippable": true ,"price": 1},
 	"Silver": {"slot": equipType.none, "type": moveType.none, "unusable": true, "unequippable": true ,"price": 10, "obtainable": true, "rarity": rarities.uncommon},
@@ -195,7 +199,7 @@ func get_description(moveName):
 #Effects
 func get_enemy_targeters(unit):
 	var targeters = []
-	for enemy in Battle.get_team(false):
+	for enemy in Battle.get_team(false, true, unit.real):
 		if typeof(enemy.storedTarget) != TYPE_STRING:
 			if enemy.storedTarget == unit:
 				targeters.append(enemy)

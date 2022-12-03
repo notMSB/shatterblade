@@ -20,7 +20,7 @@
 size = 34
 font_data = ExtResource( 2 )
 
-[sub_resource type="DynamicFont" id=2]
+[sub_resource type="DynamicFont" id=4]
 size = 34
 font_data = ExtResource( 2 )
 
@@ -58,6 +58,7 @@ script = ExtResource( 14 )
 script = ExtResource( 15 )
 
 [node name="Debug" type="Node2D" parent="."]
+visible = false
 script = ExtResource( 1 )
 Party = ExtResource( 3 )
 Inventory = ExtResource( 4 )
@@ -150,7 +151,7 @@ custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 4 )
 text = "Difficulty"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -167,6 +168,8 @@ align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Party" parent="." instance=ExtResource( 3 )]
 
 [connection signal="pressed" from="Debug/Party" to="Debug" method="_on_Party_pressed"]
 [connection signal="pressed" from="Debug/Inventory" to="Debug" method="_on_Inventory_pressed"]

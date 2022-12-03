@@ -1,5 +1,7 @@
 extends "res://src/Project/Units/Unit.gd"
 
+var baseAP = 0
+var ap = 0
 var maxAP = 100
 var energy = 6
 var maxEnergy = 6
@@ -10,7 +12,10 @@ var boxHolder
 var allowedType
 var types
 var title
+var displayName = ""
 var discounts = {} #probably only works with reload for now
+
+enum statBoosts {health, resource}
 
 func _ready():
 	isPlayer = true
@@ -18,7 +23,7 @@ func _ready():
 
 func update_resource(resValue, type, isGain: bool):
 	if type == types.special:
-		if isGain: ap = min(ap + resValue, maxap)
+		if isGain: ap = min(ap + resValue, maxAP)
 		else: ap -= resValue
 	elif type == types.magic:
 		if isGain: mana = min(mana + resValue, maxMana)
@@ -28,6 +33,25 @@ func update_resource(resValue, type, isGain: bool):
 		else: energy -= resValue
 	#else: #unused
 	update_box_bars()
+
+func boost_stat(stat):
+	match stat:
+		statBoosts.health:
+			maxHealth += 5
+			currentHealth += 5
+			update_hp()
+		statBoosts.resource:
+			match allowedType:
+				types.special: 
+					baseAP += 5
+					ap += 5
+				types.magic:
+					maxMana += 20
+					mana += 20
+				types.trick: 
+					maxEnergy += 1
+					energy += 1
+			update_box_bars()
 
 func update_box_bars(): #this one needs a refactor at some point
 	for box in boxHolder.get_children():
@@ -45,6 +69,7 @@ func update_box_bars(): #this one needs a refactor at some point
 			#box.trackerBar.value = charges[box.resValue]
 			#box.trackerBar.get_child(0).text = str(charges[box.resValue], "/", maxCharges[box.resValue])
 			pass
+		break
 
 func set_discount(discounts2D):
 	for discountArray in discounts2D:

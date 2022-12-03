@@ -13,7 +13,6 @@ func disassemble(weaponName):
 	for i in components.size():
 		if i == 0: DisplayHolder.box_move($LeftComponent, components[i])
 		elif i == 1: DisplayHolder.box_move($RightComponent, components[i])
-	#$Weapon/Tooltip.position = Vector2(0, 85)
 
 func fix_and_reset():
 	originalBox.repair_uses()

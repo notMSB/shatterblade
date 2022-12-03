@@ -74,6 +74,7 @@ PlayerMove = ExtResource( 6 )
 [node name="SectionHolder" type="Node2D" parent="HolderHolder"]
 
 [node name="PointHolder" type="Node2D" parent="HolderHolder"]
+position = Vector2( -500, 0 )
 
 [node name="TownHolder" type="Node2D" parent="HolderHolder"]
 
