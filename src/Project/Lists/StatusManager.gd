@@ -106,7 +106,8 @@ func evaluate_statuses(unit, type, args = []):
 						elif String(argument) == "value": newArgs.append(cond["value"])
 						elif String(argument) == "intent": newArgs.append(unit.storedTarget)
 						else: newArgs.append(argument)
-				info = statusInfo["effect"].call_funcv(newArgs)
+				var newInfo = statusInfo["effect"].call_funcv(newArgs)
+				if newInfo != null: info = newInfo
 				if !statusInfo.has("system") and cond.has("value"): #If there is no system for subtracting turns automatically, subtract one manually after proc
 					cond["value"] -= 1
 					if cond["value"] <= 0:

@@ -245,10 +245,11 @@ func give_status(unit, status, value = 0, stack = null, altZero = false): #for w
 			if altZero: StatusManager.add_status(unit, status, 0) #altzero decides whether a 0 means a status goes on forever or not at all
 
 func take_recoil(unit, damage, modifier):
-	if modifier >= 0:
-		unit.take_damage(ceil(damage * modifier))
-	else:
-		unit.heal(ceil(damage * modifier * -1))
+	if unit.currentHealth > 0: #thorns weirdness
+		if modifier >= 0:
+			unit.take_damage(ceil(damage * modifier))
+		else:
+			unit.heal(ceil(damage * modifier * -1))
 
 func change_attribute(unit, attribute, amount, multiplier = 1):
 	if typeof(multiplier) == TYPE_ARRAY: #for when i am getting weird with passing arguments

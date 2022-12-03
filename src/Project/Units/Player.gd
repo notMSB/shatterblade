@@ -2,7 +2,7 @@ extends "res://src/Project/Units/Unit.gd"
 
 var baseAP = 0
 var ap = 0
-var maxAP = 100
+var maxAP = 50
 var energy = 6
 var maxEnergy = 6
 var mana = 120

@@ -406,7 +406,7 @@ func convert_unit(target):
 
 func toggle_previews(toggle):
 	for unit in $Units.get_children():
-		unit.ui.get_node("BattleElements/HPBar/PreviewRect").visible = toggle
+		unit.ui.get_node("BattleElements/PreviewRect").visible = toggle
 
 func preview_turn():
 	previewBattleDone = false
@@ -462,7 +462,10 @@ func execute_move(real = true):
 	elif chosenMove["target"] == targetType.enemyTargets:
 		var tempTargets = get_team(!moveUser.isPlayer, true, real)
 		for unit in tempTargets:
-			if (typeof(unit.storedTarget) == TYPE_STRING and unit.storedTarget == "Party") or unit.storedTarget == moveTarget.storedTarget:
+			if typeof(unit.storedTarget) == TYPE_STRING:
+				if unit.storedTarget == "Party" or "Everyone":
+					targets.append(unit)
+			elif unit.storedTarget == moveTarget.storedTarget:
 				targets.append(unit)
 	elif chosenMove["target"] == targetType.allies:
 		targets = get_team(moveUser.isPlayer, true, real)
@@ -556,7 +559,7 @@ func execute_move(real = true):
 		if usedMoveBox != null:
 			Boons.call_boon("check_move", [usedMoveBox, moveTarget.currentHealth, moveUser, real])
 	else:
-		Boons.call_specific("check_move", [null, null, moveUser], "Lion")
+		Boons.call_specific("check_move", [null, null, moveUser, real], "Lion")
 	yield(get_tree().create_timer(0), "timeout") #needed to prevent a crash
 
 func can_activate_effect(moveData, damage):

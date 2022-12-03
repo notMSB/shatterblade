@@ -98,14 +98,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PreviewRect" type="ColorRect" parent="BattleElements/HPBar"]
-margin_top = -0.877998
-margin_bottom = 37.122
-color = Color( 0.447059, 0, 0, 0.392157 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="Text" type="Label" parent="BattleElements/HPBar"]
 margin_right = 196.0
 margin_bottom = 36.0
@@ -113,6 +105,16 @@ custom_fonts/font = SubResource( 2 )
 text = "1/1"
 align = 1
 valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PreviewRect" type="ColorRect" parent="BattleElements"]
+margin_left = -50.0
+margin_top = 123.0
+margin_right = -50.0
+margin_bottom = 161.0
+color = Color( 0.447059, 0, 0, 0.392157 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

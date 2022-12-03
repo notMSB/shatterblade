@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://src/Assets/Enemies/test.png" type="Texture" id=1]
 [ext_resource path="res://src/Project/UI/UnitUI.gd" type="Script" id=2]
@@ -7,6 +7,12 @@
 
 [sub_resource type="DynamicFont" id=1]
 font_data = ExtResource( 3 )
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0, 1, 0.368627, 0.470588 )
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0, 0, 0, 1 )
 
 [sub_resource type="DynamicFont" id=2]
 size = 20
@@ -75,17 +81,9 @@ margin_left = -60.0
 margin_top = 15.0
 margin_right = 60.0
 margin_bottom = 40.0
+custom_styles/fg = SubResource( 4 )
+custom_styles/bg = SubResource( 5 )
 percent_visible = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="PreviewRect" type="ColorRect" parent="BattleElements/HPBar"]
-margin_left = 2.0
-margin_top = -0.877998
-margin_right = 2.0
-margin_bottom = 24.0
-color = Color( 0.447059, 0, 0, 0.392157 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -97,6 +95,16 @@ custom_fonts/font = SubResource( 2 )
 text = "1/1"
 align = 1
 valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PreviewRect" type="ColorRect" parent="BattleElements"]
+margin_left = -60.0
+margin_top = 15.0
+margin_right = -60.0
+margin_bottom = 40.0
+color = Color( 0.447059, 0, 0, 0.784314 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
