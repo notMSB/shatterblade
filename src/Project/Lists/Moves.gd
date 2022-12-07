@@ -53,7 +53,7 @@ func _ready():
 	"Belch": {"target": targetType.enemy, "resVal": 20, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Poison", funcref(self, "get_unit_poison")], "description": "Poisons enemy as much as the user is poisoned", "slot": equipType.gear, "type": moveType.magic},
 	"Mass Infection": {"target": targetType.everyone, "damaging": true, "resVal": 30, "status": "Poison", "value": 10, "slot": equipType.gear, "type": moveType.magic, "uses": 6, "condition": funcref(self, "is_damaged")},
 	"Dark Spikes": {"target": targetType.enemy, "damage": 6, "resVal": 20, "barrage": true, "hits": 3, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", 1], "killeffect": funcref(self, "change_attribute"), "killargs": ["moveUser", "shield", 12], "description": "12 shield on kill, 100% recoil", "slot": equipType.gear, "type": moveType.magic},
-	"Seeker Volley": {"target": targetType.enemy, "damage": 5, "resVal": 20, "barrage": true, "hits": 4, "slot": equipType.gear, "type": moveType.magic, "condition": funcref(self, "is_damaged"), "description": "Only targets damaged enemies if possible."},
+	"Seeker Volley": {"target": targetType.enemy, "damage": 3, "resVal": 20, "barrage": true, "hits": 4, "slot": equipType.gear, "type": moveType.magic, "condition": funcref(self, "is_damaged"), "description": "Only targets damaged enemies if possible."},
 	
 	"Dodge": {"target": targetType.ally, "resVal": 20, "status": "Dodgy", "value": 1, "slot": equipType.gear, "type": moveType.magic},
 	"Growth": {"target": targetType.ally, "resVal": 10, "effect": funcref(self, "change_attribute"), "args": ["moveTarget", "strength", 3], "description": "Ally strength +3", "slot": equipType.gear, "type": moveType.magic, "uselimit": 1},

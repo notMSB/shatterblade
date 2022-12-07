@@ -337,6 +337,8 @@ func toggle_action_button(toggle, buttonText = ""):
 	$ActionButton.text = buttonText
 
 func swap_boxes(one, two, check = false):
+	one.get_node("Tooltip").visible = false
+	two.get_node("Tooltip").visible = false
 	var temp = [one.get_node("Name").text, one.maxUses, one.currentUses]
 	flip_values(one, [two.get_node("Name").text, two.maxUses, two.currentUses])
 	flip_values(two, temp)

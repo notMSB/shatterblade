@@ -289,9 +289,7 @@ func finish_event(checkName):
 		calledEvent = null #clearing this out is needed because it's checked to process event outcomes
 
 func toggle_map_use(box):
-	if box.get_parent().name != "MoveBoxes" and box.resValue > 0 or inventoryWindow.tHolder.visible: #for moves that need to be equipped to be used, or when the trader is active
-		pass
-	else:
+	if !(box.get_parent().name != "MoveBoxes" and box.resValue > 0 or inventoryWindow.tHolder.visible): #for moves that need to be equipped to be used, or when the trader is active
 		selectedMapBox = box
 		selectedMapMove = box.moves[box.moveIndex]
 		for child in get_node("HolderHolder/DisplayHolder").get_children():

@@ -59,6 +59,17 @@ func call_specific(callName, args = [], boonName = ""): #todo: reconcile this an
 			break
 	return returnVal if returnVal else 0
 
+func generate_tooltip(boonName):
+	var tip = ""
+	match boonName:
+		"Scales": tip = "Difficulty: ** \n Condition: Win battles without reusing a box. \n Effect: Generates a new box with rotating items for use in battle. \n Upgrade: Rotating items become stronger."
+		"Crown": tip = "Difficulty: * \n Condition: Kill enemies with the crown. \n Effect: You get the crown. It's very normal. Enjoy! \n Upgrade: The Crown hits all enemies."
+		"Column": tip = "Difficulty: *** \n Condition: Win battles in which less than half the party has less health from where they started. \n Effect: One turn of 5 shield to every party member. \n Upgrade: 5 shield to the party every turn."
+		"Lion": tip = "Difficulty: *** \n Condition: Kill enemies without using attacks. \n Effect: 1 turn of thorns to every party member. \n Upgrade: The thorns become permanent."
+		"Cup": tip = "Difficulty: ** \n Condition: Split kills as evenly as possible among party members. \n Effect: The first damaging move used in battle has an extra hit. \n Upgrade: Every party member's first damaging move has an extra hit."
+		"Wings": tip = "Difficulty: ***** \n Condition: Kill enemies with exact lethal. \n Effect: Killing with exact lethal using an attack restores a use to the weapon involved. \n Upgrade: Once per battle, missing exact lethal counts it anyway and deals the excess damage to the next enemy."
+	return tip
+
 func set_text():
 	var vText = ""
 	if chosen == v.j: vText += "Justice"

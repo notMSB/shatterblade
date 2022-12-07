@@ -113,7 +113,24 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Random" type="Button" parent="ColorRect/UI"]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 884.0
+margin_top = 626.0
+margin_right = 1046.0
+margin_bottom = 694.0
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 4 )
+text = "Random"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Choices" type="Node2D" parent="."]
 
 [connection signal="pressed" from="ColorRect/UI/Difficulty" to="." method="_on_Difficulty_pressed"]
 [connection signal="pressed" from="ColorRect/UI/Start" to="." method="_on_Start_pressed"]
+[connection signal="pressed" from="ColorRect/UI/Random" to="." method="_on_Random_pressed"]

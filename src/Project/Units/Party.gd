@@ -18,6 +18,8 @@ const MOVES_AVAILABLE = 2
 
 enum types {fighter, mage, rogue, none, other}
 
+var totalBoons = 0
+
 var chosenBoon = null
 var tempParty = []
 
@@ -56,8 +58,10 @@ func create_options():
 		Boons.chosen = i
 		var vBoons = Boons.get_virtue_boons()
 		for j in vBoons.size():
+			totalBoons += 1
 			var newSelect = BoonSelect.instance()
 			var boonName = vBoons[j]
+			newSelect.set_tooltip(Boons.generate_tooltip(boonName))
 			$Choices.add_child(newSelect)
 			newSelect.name = boonName
 			newSelect.get_node("Button").text = boonName
@@ -79,7 +83,6 @@ func create_options():
 		choice.position.y = 165 + 85 * currentMember
 		choice.position.x = 98 + 400 * currentType
 		currentMember += 1
-		
 
 func area_break():
 	var currentType = 0
@@ -152,13 +155,15 @@ func create_unit(choice):
 			unit.maxEnergy = partyMembers[choice.unitName]["stats"][1]
 			unit.energy = unit.maxEnergy
 			unit.allowedType = Moves.moveType.trick
+	partyMembers.erase(choice.unitName)
 	return unit
 
-func select_pressed(boonSelect):
+func select_pressed(boonSelect, reroll = false):
 	if boonSelect.name == chosenBoon:
-		set_button_color(boonSelect.get_node("Button"), types.none)
-		chosenBoon = null
-		$ColorRect/UI/BoonText.text = "0/1 Boon Selected"
+		if !reroll:
+			set_button_color(boonSelect.get_node("Button"), types.none)
+			chosenBoon = null
+			$ColorRect/UI/BoonText.text = "0/1 Boon Selected"
 	else:
 		if chosenBoon != null: set_button_color($Choices.get_node(chosenBoon).get_node("Button"), types.none)
 		chosenBoon = boonSelect.name
@@ -243,4 +248,25 @@ func _on_Start_pressed(): #make units, put in global party, set boon
 	$ColorRect/UI.visible = false
 	$ColorRect.margin_bottom = 460 #For between areas
 	visible = false
-	
+
+func _on_Random_pressed():
+	var reroll = false
+	if chosenBoon and tempParty.size() == PARTYSIZE:
+		reroll = true
+		var i = tempParty.size() - 1
+		while i >= 0:
+			tempParty[i]._on_Button_pressed()
+			i-=1
+	if !chosenBoon or reroll:
+		var randomBoon = randi() % totalBoons
+		select_pressed($Choices.get_child(randomBoon), reroll)
+	if tempParty.size() < PARTYSIZE:
+		var availableMembers = []
+		var i = totalBoons
+		while i < $Choices.get_child_count():
+			if !tempParty.has($Choices.get_child(i)): availableMembers.append($Choices.get_child(i))
+			i+=1
+		while tempParty.size() < PARTYSIZE:
+			var rando = randi() % availableMembers.size()
+			availableMembers[rando]._on_Button_pressed()
+			availableMembers.remove(rando)
