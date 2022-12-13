@@ -28,7 +28,7 @@ var statusList = {
 	
 	"Venomous": {"activation": statusActivations.usingAttack, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 2]},
 	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "adjust_damage"), "args": ["damage", -1]},
-	"Thorns": {"activation": statusActivations.gettingHit, "system": false ,"effect": funcref(self, "counter_attack"), "args": ["attacker", 5]},
+	"Thorns": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5]},
 	"Constricting": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "constrict_attack"), "args": ["unit", "intent"], "targetlock": true, "hittable": true},
 }
 
@@ -50,16 +50,17 @@ func remove_hittables(unit):
 func countdown_turns(unit, turnStart): 
 	for list in unit.statuses:
 		for cond in list:
-			var status = statusList[cond["name"]]
-			if status.has("system"): #Pass if there is no countdown system
-				if status["system"] and (turnStart == status.has("subtractEarly")): #Points usually subtract at turn end
-					if cond["value"] < 10: cond["value"] = 0
-					else: cond["value"] -= ceil(cond["value"] *.5)
-				elif !status["system"] and (turnStart != status.has("subtractLate")): #Turns usually subtract at turn start
-					cond["value"] -= 1
-				if cond["value"] <= 0:
-					remove_status(unit, list, cond) #Remove the status if there's no more points or turns
-				unit.update_status_ui()
+			if cond.has("value"): #do not countdown turns when there are no turns
+				var status = statusList[cond["name"]]
+				if status.has("system"): #Pass if there is no countdown system
+					if status["system"] and (turnStart == status.has("subtractEarly")): #Points usually subtract at turn end
+						if cond["value"] < 10: cond["value"] = 0
+						else: cond["value"] -= ceil(cond["value"] *.5)
+					elif !status["system"] and (turnStart != status.has("subtractLate")): #Turns usually subtract at turn start
+						cond["value"] -= 1
+					if cond["value"] <= 0:
+						remove_status(unit, list, cond) #Remove the status if there's no more points or turns
+					unit.update_status_ui()
 
 func add_status(unit, status, value = 0): #If value is not sent, status does not time out
 	var addedStatus = find_status(unit, status) #need to see if it's on already

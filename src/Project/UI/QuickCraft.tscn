@@ -5,7 +5,7 @@
 [ext_resource path="res://src/Project/UI/MoveBox.gd" type="Script" id=3]
 [ext_resource path="res://src/Assets/Enemies/test.png" type="Texture" id=4]
 
-[sub_resource type="DynamicFont" id=3]
+[sub_resource type="DynamicFont" id=1]
 size = 12
 font_data = ExtResource( 1 )
 
@@ -13,11 +13,11 @@ font_data = ExtResource( 1 )
 size = 12
 font_data = ExtResource( 1 )
 
-[sub_resource type="DynamicFont" id=4]
+[sub_resource type="DynamicFont" id=3]
 size = 14
 font_data = ExtResource( 1 )
 
-[sub_resource type="DynamicFont" id=1]
+[sub_resource type="DynamicFont" id=4]
 size = 24
 font_data = ExtResource( 1 )
 
@@ -55,7 +55,7 @@ margin_left = -38.2001
 margin_top = -19.1893
 margin_right = 1.79987
 margin_bottom = 4.81073
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 1 )
 text = "X"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -66,7 +66,7 @@ margin_left = -38.2001
 margin_top = -3.1893
 margin_right = 1.79987
 margin_bottom = 20.8107
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -118,7 +118,7 @@ __meta__ = {
 [node name="Tooltip" type="Node2D" parent="Leftbox"]
 visible = false
 position = Vector2( -40, -30 )
-z_index = 5
+z_index = 10
 
 [node name="Background" type="ColorRect" parent="Leftbox/Tooltip"]
 margin_left = -120.0
@@ -144,7 +144,7 @@ margin_left = -112.0
 margin_top = -157.0
 margin_right = 113.0
 margin_bottom = -22.0
-custom_fonts/font = SubResource( 4 )
+custom_fonts/font = SubResource( 3 )
 text = "aaaaaaaaaaaaaa"
 align = 1
 valign = 1
@@ -184,7 +184,7 @@ margin_left = -38.2001
 margin_top = -19.1893
 margin_right = 1.79987
 margin_bottom = 4.81073
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 1 )
 text = "X"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -195,7 +195,7 @@ margin_left = -38.2001
 margin_top = -3.1893
 margin_right = 1.79987
 margin_bottom = 20.8107
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -273,7 +273,7 @@ margin_left = -112.0
 margin_top = -157.0
 margin_right = 113.0
 margin_bottom = -22.0
-custom_fonts/font = SubResource( 4 )
+custom_fonts/font = SubResource( 3 )
 text = "aaaaaaaaaaaaaa"
 align = 1
 valign = 1
@@ -314,7 +314,7 @@ margin_left = -38.2001
 margin_top = -19.1893
 margin_right = 1.79987
 margin_bottom = 4.81073
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 1 )
 text = "X"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -325,7 +325,7 @@ margin_left = -38.2001
 margin_top = -3.1893
 margin_right = 1.79987
 margin_bottom = 20.8107
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -376,7 +376,7 @@ __meta__ = {
 [node name="Tooltip" type="Node2D" parent="Productbox"]
 visible = false
 position = Vector2( -100, 185 )
-z_index = 5
+z_index = 20
 
 [node name="Background" type="ColorRect" parent="Productbox/Tooltip"]
 margin_left = -120.0
@@ -402,7 +402,7 @@ margin_left = -112.0
 margin_top = -157.0
 margin_right = 113.0
 margin_bottom = -22.0
-custom_fonts/font = SubResource( 4 )
+custom_fonts/font = SubResource( 3 )
 text = "aaaaaaaaaaaaaa"
 align = 1
 valign = 1
@@ -414,7 +414,7 @@ __meta__ = {
 [node name="Button" type="Button" parent="."]
 margin_right = 280.0
 margin_bottom = 80.0
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = SubResource( 4 )
 text = "+              ="
 flat = true
 __meta__ = {

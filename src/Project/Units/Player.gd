@@ -39,7 +39,7 @@ func boost_stat(stat):
 		statBoosts.health:
 			maxHealth += 5
 			currentHealth += 5
-			update_hp()
+			update_hp(true)
 		statBoosts.resource:
 			match allowedType:
 				types.special: 
