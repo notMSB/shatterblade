@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=2]
+[gd_scene load_steps=25 format=2]
 
 [ext_resource path="res://src/Project/Map.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/UI/Favor.tscn" type="PackedScene" id=2]
@@ -26,6 +26,16 @@ font_data = ExtResource( 13 )
 
 [sub_resource type="DynamicFont" id=2]
 size = 20
+font_data = ExtResource( 13 )
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0.192157, 0.32549, 0.737255, 1 )
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0.647059, 0.647059, 0.647059, 0.294118 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 24
 font_data = ExtResource( 13 )
 
 [node name="Map" type="Node2D"]
@@ -169,3 +179,25 @@ margin_right = 280.0
 margin_bottom = 1000.0
 rect_min_size = Vector2( 280, 1000 )
 color = Color( 0, 0.478431, 0.478431, 1 )
+
+[node name="XPBar" type="ProgressBar" parent="."]
+margin_left = 171.0
+margin_top = 525.0
+margin_right = 1110.0
+margin_bottom = 554.0
+custom_styles/fg = SubResource( 4 )
+custom_styles/bg = SubResource( 5 )
+percent_visible = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="XPBar"]
+margin_right = 937.0
+margin_bottom = 30.0
+custom_fonts/font = SubResource( 3 )
+text = "0/5"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}

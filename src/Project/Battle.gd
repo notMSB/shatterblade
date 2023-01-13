@@ -291,7 +291,9 @@ func set_intent(unit, target = false):
 	if typeof(targetText) != TYPE_STRING:
 		targetText = targetText.battleName
 	if actionDamage: targetText = str(targetText, " (", actionDamage, ")")
-	unit.update_info(str(unit.storedAction, " -> ", targetText))
+	var dHolder = global.storedParty[0].ui.get_parent()
+	dHolder.box_move(unit.ui.get_node("MoveBox"), unit.storedAction)
+	unit.update_info(str(" -> ", targetText))
 	yield(get_tree().create_timer(.25), "timeout")
 
 func get_team(gettingPlayers, onlyAlive = false, real = true):
@@ -600,6 +602,8 @@ func activate_effect(effectName = "effect", argsName = "args"):
 
 func evaluate_completion(deadUnit):
 	if deadUnit.real:
+		var map = get_node("../Map")
+		map.increment_xp(deadUnit.maxHealth)
 		deadEnemies += 1
 		previewDeadEnemies += 1
 		if deadEnemies >= enemyNum:

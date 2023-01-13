@@ -125,6 +125,8 @@ func generate_encounter(rating, isDay, biome, dungeonEnemy = null, seenElite = f
 		if enemyList[nextEnemy].has("elite"): 
 			validEnemies.erase(nextEnemy) #only one elite per encounter
 			strongestEnemy -= 1
+			var remainingSpaces = MAXENCOUNTERSIZE - encounter.size()
+			if rating > remainingSpaces * strongestEnemy: rating = remainingSpaces * strongestEnemy #needed to prevent 5stacks
 		rating -= enemyList[nextEnemy]["difficulty"]
 	return encounter
 

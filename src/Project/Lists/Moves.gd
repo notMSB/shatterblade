@@ -23,7 +23,7 @@ func _ready():
 	
 	
 	"Careful Strike": {"target": targetType.enemy, "damage": 8, "resVal": 20, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5], "description": "Deals damage and then blocks for 5", "slot": equipType.gear, "type": moveType.special},
-	"Cleave": {"target": targetType.enemies, "damage": 12, "resVal": 30, "slot": equipType.gear, "type": moveType.special},
+	"Cleave": {"target": targetType.enemies, "damage": 9, "resVal": 30, "slot": equipType.gear, "type": moveType.special},
 	"Dive Bomb": {"target": targetType.enemy, "damage": 16, "resVal": 15, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .2], "description": "20% recoil", "slot": equipType.gear, "type": moveType.special},
 	"Pierce": {"target": targetType.enemyTargets, "damage": 10, "resVal": 15, "slot": equipType.gear, "type": moveType.special},
 	"Poison Strike": {"target": targetType.enemy, "damage": 1, "resVal": 15, "status": "Poison", "value": 5, "quick": true, "slot": equipType.gear, "type": moveType.special},

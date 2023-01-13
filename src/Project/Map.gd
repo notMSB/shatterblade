@@ -32,6 +32,8 @@ const RIGHTBOUND = 960
 
 const NIGHTLENGTH = 50
 const TOTALSECTIONS = 2
+const BASEXP = 5
+const XPINCREMENT = 5
 
 var bottomRight
 var columnNum
@@ -110,6 +112,7 @@ func _ready():
 	#print(columnNum)
 	make_points(Vector2(INCREMENT,INCREMENT*.5))
 	setup_battle()
+	$XPBar.max_value = BASEXP
 	for display in $HolderHolder/DisplayHolder.get_children():
 		display.set_battle()
 		for tracker in display.get_node("Trackers").get_children():
@@ -208,6 +211,7 @@ func check_delay():
 		activate_battle(temp)
 
 func activate_battle(newOpponents = null):
+	
 	#if inventoryWindow.visible:
 		#delayBattle = newOpponents
 	if currentDungeon:
@@ -225,6 +229,7 @@ func check_for_elite(opponents):
 	for enemy in opponents:
 		if Enemies.enemyList[enemy].has("elite"):
 			seenElite = true
+			return
 
 func get_difficulty_mod():
 	var nightMod = 0 if isDay else 1
@@ -658,6 +663,14 @@ func analyze_points(one, two):
 			one.lines.append(pointLine) #add line to points
 			two.lines.append(pointLine)
 
+func increment_xp(amount):
+	var newValue = $XPBar.value + amount
+	while newValue >= $XPBar.max_value:
+		newValue -= $XPBar.max_value
+		$XPBar.max_value += XPINCREMENT
+	$XPBar.value = newValue
+	$XPBar/Label.text = str($XPBar.value, "/", $XPBar.max_value)
+
 func subtract_time(diff, refillAllMana = false):
 	distanceTraveled = diff
 	time -= diff
@@ -675,8 +688,7 @@ func set_time_text():
 	timeNode.get_node("Area").text = "Area " + String(currentArea + 1)
 	timeNode.get_node("Biome").text = biomeName[0].to_upper()+biomeName.substr(1, -1)
 	if isDay: 
-		timeNode.get_node("State").text = "Day " + String(currentDay + 1)
-		timeNode.get_node("Hour").text = String(time - 50)
+		timeNode.get_node("State").text = "Day " + String(currentDay + 1) + " - " + String(time - 50)
 	else: 
 		timeNode.get_node("State").text = "Night " + String(currentDay + 1)
 		timeNode.get_node("Hour").text = String(time)

@@ -62,7 +62,7 @@ func set_name(text):
 	$Name.text = str(text)
 
 func _on_Button_pressed():
-	if !Map.get_node("Events").visible:
+	if true:#!Map.get_node("Events").visible:
 		if Map.activePoint == self:
 			Map.activePoint.toggle_activation(false)
 			toggle_activation(true)
