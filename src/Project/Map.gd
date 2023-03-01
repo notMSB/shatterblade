@@ -91,7 +91,6 @@ func _ready():
 	biomesList = Enemies.b
 	availableBiomes = range(0, biomesList.size()-1) #exclude the "none" at the end
 	set_biome()
-	$HolderHolder/DisplayHolder.Moves = Moves
 	Trading.assign_component_values(currentBiome, "Scorpion") #todo: change this when new mascots are added
 	setup_inventory()
 	
@@ -113,6 +112,7 @@ func _ready():
 	make_points(Vector2(INCREMENT,INCREMENT*.5))
 	setup_battle()
 	$XPBar.max_value = BASEXP
+	battleWindow.setup_party()
 	for display in $HolderHolder/DisplayHolder.get_children():
 		display.set_battle()
 		for tracker in display.get_node("Trackers").get_children():
@@ -152,8 +152,7 @@ func setup_inventory():
 	get_parent().add_child(inventoryWindow)
 
 func setup_battle():
-	battleWindow = Battle.instance()
-	get_parent().add_child(battleWindow)
+	battleWindow = get_parent().get_node("Battle")
 	battleWindow.visible = false
 
 func activate_inventory():

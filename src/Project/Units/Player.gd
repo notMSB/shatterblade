@@ -10,7 +10,7 @@ var maxMana = 120
 var boxHolder
 
 var allowedType
-var types
+enum types {none, basic, item, special, magic, trick}
 var title
 var displayName = ""
 var discounts = {} #probably only works with reload for now
@@ -19,7 +19,6 @@ enum statBoosts {health, resource}
 
 func _ready():
 	isPlayer = true
-	types = Battle.Moves.moveType
 
 func update_resource(resValue, type, isGain: bool):
 	if type == types.special:

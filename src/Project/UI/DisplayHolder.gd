@@ -13,7 +13,7 @@ const PLAYERINCREMENT = 80
 const UNITYSTART = 200
 const XINCREMENT = 300
 
-var Moves
+onready var Moves = get_node("/root/Game/Data/Moves")
 
 func setup_player(unit, playerCount):
 	var display = PlayerProfile.instance()

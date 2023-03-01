@@ -11,11 +11,11 @@
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=9]
 [ext_resource path="res://src/Project/Map.tscn" type="PackedScene" id=10]
 
-[sub_resource type="DynamicFont" id=2]
+[sub_resource type="DynamicFont" id=1]
 size = 24
 font_data = ExtResource( 9 )
 
-[sub_resource type="DynamicFont" id=4]
+[sub_resource type="DynamicFont" id=2]
 size = 34
 font_data = ExtResource( 9 )
 
@@ -50,7 +50,7 @@ __meta__ = {
 margin_top = 10.0
 margin_right = 1280.0
 margin_bottom = 46.0
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 1 )
 text = "0/1 Boon Selected"
 align = 1
 __meta__ = {
@@ -61,7 +61,7 @@ __meta__ = {
 margin_top = 590.0
 margin_right = 1280.0
 margin_bottom = 706.0
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 1 )
 text = "0/2 Members Selected"
 align = 1
 __meta__ = {
@@ -74,11 +74,11 @@ margin_left = 244.0
 margin_top = 626.0
 margin_right = 396.0
 margin_bottom = 694.0
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 4 )
 text = "Difficulty"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -102,11 +102,11 @@ margin_left = 564.0
 margin_top = 626.0
 margin_right = 716.0
 margin_bottom = 694.0
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 4 )
 disabled = true
 text = "Start"
 __meta__ = {
@@ -119,11 +119,11 @@ margin_left = 884.0
 margin_top = 626.0
 margin_right = 1046.0
 margin_bottom = 694.0
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 4 )
 text = "Random"
 __meta__ = {
 "_edit_use_anchors_": false

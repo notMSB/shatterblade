@@ -3,14 +3,13 @@ extends Node2D
 export (PackedScene) var Player
 export (PackedScene) var Enemy
 
-onready var Moves = get_node("../Data/Moves")
-onready var StatusManager = get_node("../Data/StatusManager")
-onready var Enemies = get_node("../Data/Enemies")
-onready var Formations = get_node("../Data/Formations")
-onready var Boons = get_node("../Data/Boons")
+onready var Moves = get_node("/root/Game/Data/Moves")
+onready var StatusManager = get_node("/root/Game/Data/StatusManager")
+onready var Enemies = get_node("/root/Game/Data/Enemies")
+onready var Formations = get_node("/root/Game/Data/Formations")
+onready var Boons = get_node("/root/Game/Data/Boons")
 
-var partyNum = 1
-var enemyNum = 1
+var enemyNum = 0
 var deadEnemies = 0
 var previewDeadEnemies = 0
 
@@ -23,8 +22,6 @@ var turnCount = 0
 
 var currentUnit
 var menuNode
-
-var descriptionNode
 
 var chosenMove
 var moveName
@@ -43,7 +40,7 @@ var previewBattleDone = false
 var autoPreview = true
 var rewardUnit
 
-var opponents = ["Rat"]
+var opponents = []
 
 var executionOrder = [] #box, move, user, target
 enum e {box, move, user, target}
@@ -52,40 +49,12 @@ var targetType
 func _ready(): #Generate units and add to turn order
 	Moves.Battle = self
 	StatusManager.Battle = self
-	if !get_parent().mapMode: battleDone = false
+	#if !get_parent().mapMode: battleDone = false
 	targetType = Moves.targetType
 	randomize() #funny rng
 	if opponents.size() == 0: #Random formation
 		opponents = Formations.formationList[randi() % Formations.formationList.size()]
 		enemyNum = opponents.size()
-	if global.storedParty.size() > 0: partyNum = global.storedParty.size()
-	var unitNum = partyNum
-	if !battleDone: unitNum += enemyNum
-	for i in unitNum:
-		var createdUnit
-		if i < partyNum: #player
-			createdUnit = setup_player(i)
-		else: #enemy
-			createdUnit = Enemy.instance()
-			if opponents.size() > i - partyNum:
-				var enemy = Enemies.enemyList[opponents[i - partyNum]]
-				if get_parent().hardMode: createdUnit.make_stats(enemy["stats"][1])
-				else: createdUnit.make_stats(enemy["stats"][0])
-				createdUnit.identity = str(opponents[i - partyNum])
-				createdUnit.battleName = str(createdUnit.identity, String(i))
-				if enemy.has("passives"): createdUnit.passives = enemy["passives"]
-				if enemy.has("specials"): 
-					createdUnit.moves = enemy["specials"]
-					if get_parent().hardMode and enemy.has("hardSpecials"): createdUnit.moves.append_array(enemy["hardSpecials"])
-					createdUnit.allMoves.append_array(createdUnit.moves)
-			else:
-				createdUnit.make_stats(400)
-				createdUnit.battleName = str("E", String(i))
-		StatusManager.initialize_statuses(createdUnit)
-		$Units.add_child(createdUnit)
-	for unit in $Units.get_children():
-		$BattleUI.setup_display(unit, opponents.size())
-	
 	if !battleDone:
 		Boons.call_boon("start_battle", [get_partyHealth()])
 		for unit in $Units.get_children():
@@ -97,11 +66,14 @@ func _ready(): #Generate units and add to turn order
 				for passive in unit.passives:
 					StatusManager.add_status(unit, passive, unit.passives[passive])
 		play_turn(false)
-	if !get_parent().mapMode:
-		descriptionNode = $BattleUI/Description
-	else:
-		descriptionNode = get_node("../Map/Description")
-	$BattleUI/Description.visible = !get_parent().mapMode
+
+func setup_party():
+	for i in global.storedParty.size():
+		var createdUnit = setup_player(i)
+		StatusManager.initialize_statuses(createdUnit)
+		$Units.add_child(createdUnit)
+	for unit in $Units.get_children():
+		$BattleUI.setup_display(unit)
 
 func setup_player(index, setDisplay = false):
 	var createdUnit = Player.instance()

@@ -45,7 +45,6 @@ var partyMembers = {
 
 func _ready():
 	#randomize()
-	$DisplayHolder.Moves = Moves
 	if global.storedParty.size() > 0:
 		for member in global.storedParty:
 			member.queue_free()

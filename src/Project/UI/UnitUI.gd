@@ -22,7 +22,7 @@ func _on_Button_pressed():
 		if !fixTargets:
 			Battle.target_chosen(get_index())
 		else:
-			Battle.target_chosen(get_index() + Battle.partyNum)
+			Battle.target_chosen(get_index() + global.storedParty.size())
 
 func position_preview_rect(projectedHP = null, isPlayer = false):
 	var multiplier = 120 if isPlayer else 200

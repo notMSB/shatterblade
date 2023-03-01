@@ -1,5 +1,6 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
+[ext_resource path="res://src/Project/Battle.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/Project/Units/Party.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/Project/Lists/StatusManager.gd" type="Script" id=7]
 [ext_resource path="res://src/Project/Quests.gd" type="Script" id=8]
@@ -41,3 +42,7 @@ script = ExtResource( 14 )
 script = ExtResource( 15 )
 
 [node name="Party" parent="." instance=ExtResource( 3 )]
+position = Vector2( -3.95581, 0 )
+
+[node name="Battle" parent="." instance=ExtResource( 1 )]
+visible = false
