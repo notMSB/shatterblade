@@ -1,0 +1,27 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://src/Project/UI/PlayerProfile.tscn" type="PackedScene" id=1]
+[ext_resource path="res://src/Project/UI/PlayerMove.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/Project/UI/UnitUI.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=4]
+[ext_resource path="res://src/Project/Lists/Crafting.gd" type="Script" id=5]
+
+[node name="Crafting" type="Node2D"]
+script = ExtResource( 5 )
+MoveBox = ExtResource( 2 )
+
+[node name="DisplayHolder" type="Node2D" parent="."]
+visible = false
+script = ExtResource( 4 )
+UnitUI = ExtResource( 3 )
+PlayerProfile = ExtResource( 1 )
+PlayerMove = ExtResource( 2 )
+
+[node name="EquipmentHolder" type="Node2D" parent="."]
+visible = false
+
+[node name="RelicHolder" type="Node2D" parent="."]
+visible = false
+
+[node name="ScalesHolder" type="Node2D" parent="."]
+visible = false

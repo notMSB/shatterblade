@@ -91,11 +91,11 @@ func _ready():
 	"Bone Attack": {"slot": equipType.none, "resVal": 0 ,"type": moveType.none, "uselimit": 1, "fleeting": true, "target": targetType.enemy, "damage": 7, "quick": true, "uses": 1},
 	"Concoction": {"target": targetType.enemies, "damage": 8, "resVal": 0, "quick": true, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .5], "description": "50% recoil", "slot": equipType.gear, "type": moveType.item},
 	"Dark Matter": {"target": targetType.everyone, "damage": 15, "resVal": 0, "slot": equipType.gear, "type": moveType.item},
-	
+		
 	"Rock": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 2, "quick": true, "cursed": true},
 	"Rock+": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 4, "quick": true, "cursed": true},
-	"Stick": {"slot": equipType.none, "type": moveType.none, "uselimit": 1, "cycle": true, "target": targetType.enemy, "damage": 8, "cursed": true},
-	"Stick+": {"slot": equipType.none, "type": moveType.none, "uselimit": 1, "cycle": true, "target": targetType.enemy, "damage": 12, "cursed": true},
+	"Stick": {"slot": equipType.none, "type": moveType.none, "uselimit": 1, "cycle": ["Rock"], "target": targetType.enemy, "damage": 8, "cursed": true},
+	"Stick+": {"slot": equipType.none, "type": moveType.none, "uselimit": 1, "cycle": ["Rock"], "target": targetType.enemy, "damage": 12, "cursed": true},
 	
 	"Health Seed": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "unusable": true, "unequippable": true, "price": 6, "mapUsable": true, "statBoost": statBoosts.health, "uses": 1, "obtainable": true, "rarity": rarities.uncommon, "description": "Raises max health of unit by 5."},
 	"Resource Seed": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "unusable": true, "unequippable": true, "price": 6, "mapUsable": true, "statBoost": statBoosts.resource, "uses": 1, "obtainable": true, "rarity": rarities.uncommon, "description": "Raises resource capacity of unit."},

@@ -16,7 +16,9 @@ func check_mode():
 		fixTargets = true
 
 func _on_Button_pressed():
-	if !Battle.visible:
+	if checkNode.name == "Puzzle":
+		checkNode.choose_type(self)
+	elif !Battle.visible:
 		Battle.get_node("../Map").use_map_move(global.storedParty[get_index()])
 	else:
 		if !fixTargets:

@@ -34,7 +34,7 @@ func create_boon(boonName):
 	var babby = Node2D.new()
 	add_child(babby)
 	babby.name = boonName
-	babby.set_script(load(PATH + v.keys()[chosen] + "/" + boonName + ".gd"))
+	babby.set_script(load(PATH + boonName + ".gd"))
 	babby.Boons = self
 
 func call_boon(callName, args = []): #callName is a string representing a function in the individual boon scripts

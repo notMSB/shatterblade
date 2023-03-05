@@ -1,9 +1,10 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://src/Assets/Enemies/test.png" type="Texture" id=1]
 [ext_resource path="res://src/Project/UI/UnitUI.gd" type="Script" id=2]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=3]
 [ext_resource path="res://src/Project/UI/BoxHolder.gd" type="Script" id=4]
+[ext_resource path="res://src/Project/UI/PuzzleMenu.gd" type="Script" id=5]
 
 [sub_resource type="DynamicFont" id=1]
 font_data = ExtResource( 3 )
@@ -20,6 +21,9 @@ font_data = ExtResource( 3 )
 
 [sub_resource type="DynamicFont" id=3]
 size = 12
+font_data = ExtResource( 3 )
+
+[sub_resource type="DynamicFont" id=6]
 font_data = ExtResource( 3 )
 
 [node name="PlayerProfile" type="Node2D"]
@@ -168,4 +172,88 @@ __meta__ = {
 
 [node name="Trackers" type="Node2D" parent="."]
 
+[node name="PuzzleMenu" type="Node2D" parent="."]
+visible = false
+script = ExtResource( 5 )
+
+[node name="Background" type="ColorRect" parent="PuzzleMenu"]
+margin_left = -60.0
+margin_top = -40.0
+margin_right = 60.0
+margin_bottom = 40.0
+color = Color( 0.533333, 0.305882, 0.305882, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="OptionButton" type="OptionButton" parent="PuzzleMenu/Background"]
+margin_top = 6.0
+margin_right = 119.0
+margin_bottom = 26.0
+text = "None"
+align = 2
+items = [ "None", null, false, 0, null, "Fighter", null, false, 1, null, "Mage", null, false, 2, null, "Rogue", null, false, 3, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HP Input" type="SpinBox" parent="PuzzleMenu/Background"]
+margin_top = 32.0
+margin_right = 123.0
+margin_bottom = 56.0
+min_value = 1.0
+value = 1.0
+rounded = true
+align = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Resource Input" type="SpinBox" parent="PuzzleMenu/Background"]
+margin_left = 1.0
+margin_top = 59.0
+margin_right = 123.0
+margin_bottom = 83.0
+align = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ClassText" type="Label" parent="PuzzleMenu/Background"]
+margin_left = 6.0
+margin_top = 6.0
+margin_right = 194.0
+margin_bottom = 103.0
+custom_fonts/font = SubResource( 6 )
+text = "Class:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HealthText" type="Label" parent="PuzzleMenu/Background"]
+margin_left = 6.0
+margin_top = 34.0
+margin_right = 194.0
+margin_bottom = 131.0
+custom_fonts/font = SubResource( 6 )
+text = "Health:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ResText" type="Label" parent="PuzzleMenu/Background"]
+margin_left = 6.0
+margin_top = 62.0
+margin_right = 194.0
+margin_bottom = 159.0
+custom_fonts/font = SubResource( 6 )
+text = "Resource:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
+[connection signal="item_selected" from="PuzzleMenu/Background/OptionButton" to="PuzzleMenu" method="_on_OptionButton_item_selected"]
+[connection signal="value_changed" from="PuzzleMenu/Background/HP Input" to="PuzzleMenu" method="_on_HP_Input_value_changed"]
+[connection signal="value_changed" from="PuzzleMenu/Background/Resource Input" to="PuzzleMenu" method="_on_Resource_Input_value_changed"]

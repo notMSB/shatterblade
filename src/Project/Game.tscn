@@ -1,7 +1,9 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://src/Project/Battle.tscn" type="PackedScene" id=1]
+[ext_resource path="res://src/Project/Lists/Crafting.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/Project/Units/Party.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/Project/Puzzle.tscn" type="PackedScene" id=4]
 [ext_resource path="res://src/Project/Lists/StatusManager.gd" type="Script" id=7]
 [ext_resource path="res://src/Project/Quests.gd" type="Script" id=8]
 [ext_resource path="res://src/Project/Lists/Formations.gd" type="Script" id=9]
@@ -9,13 +11,13 @@
 [ext_resource path="res://src/Project/UI/Trading.gd" type="Script" id=11]
 [ext_resource path="res://src/Project/Units/Enemies.gd" type="Script" id=12]
 [ext_resource path="res://src/Project/Game.gd" type="Script" id=13]
-[ext_resource path="res://src/Project/Units/Crafting.gd" type="Script" id=14]
 [ext_resource path="res://src/Project/Boons/Boons.gd" type="Script" id=15]
 
 [node name="Game" type="Node2D"]
 script = ExtResource( 13 )
 
 [node name="Data" type="Node2D" parent="."]
+z_index = 5
 
 [node name="Moves" type="Node2D" parent="Data"]
 script = ExtResource( 10 )
@@ -35,13 +37,15 @@ script = ExtResource( 11 )
 [node name="Quests" type="Node2D" parent="Data"]
 script = ExtResource( 8 )
 
-[node name="Crafting" type="Node2D" parent="Data"]
-script = ExtResource( 14 )
-
 [node name="Boons" type="Node2D" parent="Data"]
 script = ExtResource( 15 )
 
+[node name="Crafting" parent="Data" instance=ExtResource( 2 )]
+
+[node name="Puzzle" parent="." instance=ExtResource( 4 )]
+
 [node name="Party" parent="." instance=ExtResource( 3 )]
+visible = false
 position = Vector2( -3.95581, 0 )
 
 [node name="Battle" parent="." instance=ExtResource( 1 )]

@@ -109,23 +109,29 @@ func _on_mouse_exited():
 
 func _on_Button_pressed():
 	boxModeScene = set_mode_scene()
-	if boxModeScene.name == "Inventory": #inventory
-		var map = boxModeScene.get_node("../Map")
-		if map.battleWindow.visible == true:
-			pass #cannot click inventory items in battle
-		elif !(isCursed and get_parent().name == "MoveBoxes") and canMove: 
-			if mapUse:
-				map.toggle_map_use(self)
+	match boxModeScene.name:
+		"Inventory": #inventory
+			var map = boxModeScene.get_node("../Map")
+			if map.battleWindow.visible == true:
+				pass #cannot click inventory items in battle
+			elif !(isCursed and get_parent().name == "MoveBoxes") and canMove: 
+				if mapUse:
+					map.toggle_map_use(self)
+				else:
+					for child in map.get_node("HolderHolder/DisplayHolder").get_children():
+						child.get_node("Button").visible = false
+				boxModeScene.select_box(self)
+			#else: boxModeScene.set_description($Name.text)
+		"Battle":
+			#boxModeScene.set_description($Name.text)
+			if buttonMode:
+				boxModeScene.evaluate_targets(moves[moveIndex], user, self)
 			else:
-				for child in map.get_node("HolderHolder/DisplayHolder").get_children():
-					child.get_node("Button").visible = false
-			boxModeScene.select_box(self)
-		#else: boxModeScene.set_description($Name.text)
-	elif boxModeScene.name == "Battle":
-		#boxModeScene.set_description($Name.text)
-		if buttonMode:
-			boxModeScene.evaluate_targets(moves[moveIndex], user, self)
-		else:
-			boxModeScene.cut_from_order(self)
-	else: #map scene
-		pass
+				boxModeScene.cut_from_order(self)
+		"Puzzle":
+			boxModeScene.show_grid(self)
+		"Data": #crafting grid
+			$Tooltip.visible = false
+			boxModeScene.get_node("../Puzzle").set_box(moves[0])
+		_: #map scene
+			pass

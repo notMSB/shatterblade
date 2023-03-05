@@ -40,8 +40,6 @@ var previewBattleDone = false
 var autoPreview = true
 var rewardUnit
 
-var opponents = []
-
 var executionOrder = [] #box, move, user, target
 enum e {box, move, user, target}
 var targetType
@@ -52,9 +50,6 @@ func _ready(): #Generate units and add to turn order
 	#if !get_parent().mapMode: battleDone = false
 	targetType = Moves.targetType
 	randomize() #funny rng
-	if opponents.size() == 0: #Random formation
-		opponents = Formations.formationList[randi() % Formations.formationList.size()]
-		enemyNum = opponents.size()
 	if !battleDone:
 		Boons.call_boon("start_battle", [get_partyHealth()])
 		for unit in $Units.get_children():
@@ -68,6 +63,7 @@ func _ready(): #Generate units and add to turn order
 		play_turn(false)
 
 func setup_party():
+	$BattleUI.set_holder()
 	for i in global.storedParty.size():
 		var createdUnit = setup_player(i)
 		StatusManager.initialize_statuses(createdUnit)
@@ -89,7 +85,7 @@ func setup_player(index, setDisplay = false):
 		$BattleUI.setup_display(createdUnit, 0)
 	return createdUnit
 
-func create_enemies(enemyDifficulty):
+func create_enemies(enemyDifficulty, opponents):
 	var createdUnit
 	var enemy
 	var i = 0
@@ -131,8 +127,7 @@ func welcome_back(newOpponents = null, currentArea = 0): #reusing an existing ba
 		else:
 			set_ui(unit, true)
 	turnIndex = -1
-	if newOpponents: opponents = newOpponents
-	yield(create_enemies(currentArea), "completed")
+	yield(create_enemies(currentArea, newOpponents), "completed")
 	if autoPreview: toggle_previews(true)
 	play_turn(false)
 
