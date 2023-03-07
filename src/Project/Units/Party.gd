@@ -46,8 +46,6 @@ var partyMembers = {
 func _ready():
 	#randomize()
 	if global.storedParty.size() > 0:
-		for member in global.storedParty:
-			member.queue_free()
 		global.storedParty.clear()
 	create_options()
 

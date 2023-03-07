@@ -33,15 +33,15 @@ func updateInfo(targetName = null):
 		savedTargetName = targetName
 	$Info.text = str(usageOrder, ": ", savedTargetName)
 
-func set_mode_scene(): #returns battle, inventory, or map
+func set_mode_scene():
 	if CheckScene.name == "DisplayHolder": 
 		CheckScene = CheckScene.get_node("../../")
 	elif CheckScene.name == "Events" or CheckScene.name == "RepairScroll" or CheckScene.name == "CraftScroll" or CheckScene.name == "HolderHolder": 
 		CheckScene = CheckScene.get_node("../")
-	if CheckScene.name == "Map":
+	if CheckScene.name == "Map" or CheckScene.name == "Puzzle":
 		if CheckScene.battleWindow.visible == true:
 			return CheckScene.battleWindow
-		else:
+		if CheckScene.name == "Map":
 			return CheckScene.inventoryWindow
 	return CheckScene
 
@@ -55,7 +55,7 @@ func repair_uses():
 	set_uses()
 
 func set_uses(var newMax = null):
-	if newMax: 
+	if newMax != null:
 		maxUses = newMax
 		currentUses = newMax
 		$Uses.max_value = newMax

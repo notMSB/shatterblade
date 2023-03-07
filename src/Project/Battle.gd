@@ -569,8 +569,8 @@ func activate_effect(effectName = "effect", argsName = "args"):
 
 func evaluate_completion(deadUnit):
 	if deadUnit.real:
-		var map = get_node("../Map")
-		map.increment_xp(deadUnit.maxHealth)
+		var map = get_node_or_null("../Map")
+		if map: map.increment_xp(deadUnit.maxHealth)
 		deadEnemies += 1
 		previewDeadEnemies += 1
 		if deadEnemies >= enemyNum:

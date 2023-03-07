@@ -186,10 +186,11 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="OptionButton" type="OptionButton" parent="PuzzleMenu/Background"]
-margin_top = 6.0
-margin_right = 119.0
-margin_bottom = 26.0
+[node name="OptionButton" type="OptionButton" parent="PuzzleMenu"]
+margin_left = -60.0
+margin_top = -34.0
+margin_right = 59.0
+margin_bottom = -14.0
 text = "None"
 align = 2
 items = [ "None", null, false, 0, null, "Fighter", null, false, 1, null, "Mage", null, false, 2, null, "Rogue", null, false, 3, null ]
@@ -198,10 +199,11 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HP Input" type="SpinBox" parent="PuzzleMenu/Background"]
-margin_top = 32.0
-margin_right = 123.0
-margin_bottom = 56.0
+[node name="HP Input" type="SpinBox" parent="PuzzleMenu"]
+margin_left = -60.0
+margin_top = -8.0
+margin_right = 63.0
+margin_bottom = 16.0
 min_value = 1.0
 value = 1.0
 rounded = true
@@ -210,43 +212,43 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Resource Input" type="SpinBox" parent="PuzzleMenu/Background"]
-margin_left = 1.0
-margin_top = 59.0
-margin_right = 123.0
-margin_bottom = 83.0
+[node name="Resource Input" type="SpinBox" parent="PuzzleMenu"]
+margin_left = -59.0
+margin_top = 19.0
+margin_right = 63.0
+margin_bottom = 43.0
 align = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ClassText" type="Label" parent="PuzzleMenu/Background"]
-margin_left = 6.0
-margin_top = 6.0
-margin_right = 194.0
-margin_bottom = 103.0
+[node name="ClassText" type="Label" parent="PuzzleMenu"]
+margin_left = -54.0
+margin_top = -34.0
+margin_right = 134.0
+margin_bottom = 63.0
 custom_fonts/font = SubResource( 6 )
 text = "Class:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HealthText" type="Label" parent="PuzzleMenu/Background"]
-margin_left = 6.0
-margin_top = 34.0
-margin_right = 194.0
-margin_bottom = 131.0
+[node name="HealthText" type="Label" parent="PuzzleMenu"]
+margin_left = -54.0
+margin_top = -6.0
+margin_right = 134.0
+margin_bottom = 91.0
 custom_fonts/font = SubResource( 6 )
 text = "Health:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ResText" type="Label" parent="PuzzleMenu/Background"]
-margin_left = 6.0
-margin_top = 62.0
-margin_right = 194.0
-margin_bottom = 159.0
+[node name="ResText" type="Label" parent="PuzzleMenu"]
+margin_left = -54.0
+margin_top = 22.0
+margin_right = 134.0
+margin_bottom = 119.0
 custom_fonts/font = SubResource( 6 )
 text = "Resource:"
 __meta__ = {
@@ -254,6 +256,6 @@ __meta__ = {
 }
 
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
-[connection signal="item_selected" from="PuzzleMenu/Background/OptionButton" to="PuzzleMenu" method="_on_OptionButton_item_selected"]
-[connection signal="value_changed" from="PuzzleMenu/Background/HP Input" to="PuzzleMenu" method="_on_HP_Input_value_changed"]
-[connection signal="value_changed" from="PuzzleMenu/Background/Resource Input" to="PuzzleMenu" method="_on_Resource_Input_value_changed"]
+[connection signal="item_selected" from="PuzzleMenu/OptionButton" to="PuzzleMenu" method="_on_OptionButton_item_selected"]
+[connection signal="value_changed" from="PuzzleMenu/HP Input" to="PuzzleMenu" method="_on_HP_Input_value_changed"]
+[connection signal="value_changed" from="PuzzleMenu/Resource Input" to="PuzzleMenu" method="_on_Resource_Input_value_changed"]

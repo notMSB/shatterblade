@@ -32,7 +32,7 @@ PlayerProfile = ExtResource( 1 )
 PlayerMove = ExtResource( 2 )
 
 [node name="EnemyHolder" type="Node2D" parent="HolderHolder"]
-position = Vector2( 0, -64 )
+position = Vector2( 0, -128 )
 
 [node name="Enemy 0" type="Node2D" parent="HolderHolder/EnemyHolder"]
 position = Vector2( -450, 0 )
@@ -408,6 +408,18 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="GoButton" type="Button" parent="."]
+visible = false
+modulate = Color( 0.984314, 0.945098, 0, 1 )
+margin_left = 586.0
+margin_top = 446.0
+margin_right = 694.0
+margin_bottom = 514.0
+text = "START BATTLE"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="item_selected" from="HolderHolder/EnemyHolder/Enemy 0/Choice" to="HolderHolder/EnemyHolder/Enemy 0" method="_on_Choice_item_selected"]
 [connection signal="item_selected" from="HolderHolder/EnemyHolder/Enemy 1/Choice" to="HolderHolder/EnemyHolder/Enemy 1" method="_on_Choice_item_selected"]
 [connection signal="item_selected" from="HolderHolder/EnemyHolder/Enemy 2/Choice" to="HolderHolder/EnemyHolder/Enemy 2" method="_on_Choice_item_selected"]
@@ -419,3 +431,4 @@ __meta__ = {
 [connection signal="item_selected" from="HolderHolder/BoonHolder/Boon 2/Choice" to="HolderHolder/BoonHolder/Boon 2" method="_on_Choice_item_selected"]
 [connection signal="item_selected" from="HolderHolder/BoonHolder/Boon 2/Level" to="HolderHolder/BoonHolder/Boon 2" method="_on_Level_item_selected"]
 [connection signal="value_changed" from="EnemyLevel/Level" to="." method="_on_enemyLevel_value_changed"]
+[connection signal="pressed" from="GoButton" to="." method="_on_GoButton_pressed"]

@@ -61,7 +61,8 @@ func generate_equipment():
 				setup_box(products[j][i], "EquipmentHolder", i+1, j+1)
 
 func generate_relics():
-	var i = 0
+	setup_box("X", "RelicHolder", 0, 0)
+	var i = 1
 	for move in Moves.moveList:
 		var moveData = Moves.moveList[move]
 		if moveData.has("slot") and moveData["slot"] == Moves.equipType.relic:

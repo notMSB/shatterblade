@@ -18,7 +18,8 @@ var currentPlayer
 
 func set_holder():
 	var rootNode = get_node("/root/Game")
-	playerHolder = rootNode.get_node("Map/HolderHolder/DisplayHolder")
+	if rootNode.mapMode: playerHolder = rootNode.get_node("Map/HolderHolder/DisplayHolder")
+	else: playerHolder = rootNode.get_node("Puzzle/HolderHolder/DisplayHolder")
 
 func setup_display(unit, totalEnemies = 0):
 	var display

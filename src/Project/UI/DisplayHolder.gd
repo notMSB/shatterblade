@@ -146,7 +146,6 @@ func sort_order(a, b):
 func setup_enemy(unit, enemyCount, totalEnemies):
 	var display = UnitUI.instance()
 	add_child(display)
-	display.check_mode()
 	#display.get_node("Name").text = unit.name
 	display.get_node("BattleElements/HP").text = String(unit.currentHealth)
 	if unit.shield > 0:

@@ -5,3 +5,7 @@ var hardMode = false
 
 func _ready():
 	$Data/Crafting.generate_grids()
+
+func _on_Toggle_pressed():
+	$Party.visible = !$Party.visible
+	$Puzzle.visible = !$Puzzle.visible

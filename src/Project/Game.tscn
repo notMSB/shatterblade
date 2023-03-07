@@ -43,10 +43,22 @@ script = ExtResource( 15 )
 [node name="Crafting" parent="Data" instance=ExtResource( 2 )]
 
 [node name="Puzzle" parent="." instance=ExtResource( 4 )]
+visible = false
 
 [node name="Party" parent="." instance=ExtResource( 3 )]
-visible = false
 position = Vector2( -3.95581, 0 )
+
+[node name="Toggle" type="Button" parent="."]
+margin_left = 380.0
+margin_top = 16.0
+margin_right = 487.0
+margin_bottom = 78.0
+text = "Toggle"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Battle" parent="." instance=ExtResource( 1 )]
 visible = false
+
+[connection signal="pressed" from="Toggle" to="." method="_on_Toggle_pressed"]

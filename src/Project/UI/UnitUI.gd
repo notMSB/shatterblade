@@ -2,7 +2,6 @@ extends Node2D
 
 var Battle
 var checkNode
-var fixTargets = false
 
 func _ready():
 	checkNode = $"../../../"
@@ -11,20 +10,11 @@ func _ready():
 func set_battle():
 	Battle = checkNode.battleWindow
 
-func check_mode():
-	if Battle.get_parent().mapMode:
-		fixTargets = true
-
 func _on_Button_pressed():
-	if checkNode.name == "Puzzle":
-		checkNode.choose_type(self)
-	elif !Battle.visible:
+	if !Battle.visible:
 		Battle.get_node("../Map").use_map_move(global.storedParty[get_index()])
 	else:
-		if !fixTargets:
-			Battle.target_chosen(get_index())
-		else:
-			Battle.target_chosen(get_index() + global.storedParty.size())
+		Battle.target_chosen(get_index() + global.storedParty.size())
 
 func position_preview_rect(projectedHP = null, isPlayer = false):
 	var multiplier = 120 if isPlayer else 200

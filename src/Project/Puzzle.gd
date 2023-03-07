@@ -4,6 +4,7 @@ export (PackedScene) var Player
 
 onready var Boons = get_node("../Data/Boons")
 onready var Enemies = get_node("../Data/Enemies")
+onready var battleWindow = get_node("../Battle")
 
 const FIRSTMOVEBOX = 2 # 0/1 used for relics
 const LASTMOVEBOX = 6
@@ -15,6 +16,7 @@ const SCALESMOVES = ["Rock", "Stick"]
 var selection
 var enemyDifficulty = 0
 
+var units = []
 var playerBoons = [0, 0, 0]
 var boonLevels = [0, 0, 0]
 var opponents = [DEFAULTOPTION, DEFAULTOPTION, DEFAULTOPTION, DEFAULTOPTION]
@@ -25,9 +27,13 @@ func _ready():
 		unit.displayName = "Player"
 		unit.moves = ["X", "X", "X", "X", "X"]
 		var display = $HolderHolder/DisplayHolder.setup_player(unit, i)
+		unit.ui = display
+		unit.battleName = str("P", i)
 		display.get_node("PuzzleMenu").visible = true
 		display.get_node("MoveBoxes").visible = false
 		display.get_node("MoveBoxes").get_child(LASTMOVEBOX).visible = false
+		display.set_battle()
+		units.append(unit)
 	
 	for boonSelector in $HolderHolder/BoonHolder.get_children():
 		for boon in Boons.boonList:
@@ -56,6 +62,17 @@ func set_box(boxName):
 			toggle_holder(selection.get_index(), false)
 			if SCALESMOVES.has(boxName): box_scales_move(selection, boxName)
 			else: $HolderHolder/DisplayHolder.box_move(selection, boxName)
+			selection.set_uses(Moves.get_uses(boxName))
+			var moveInfo = Moves.moveList[boxName] #Now, make sure attack/defend is done right
+			if (selection.get_index() <= 1 #X or attack/defend
+			and (moveInfo["type"] == Moves.moveType.basic or moveInfo["slot"] == Moves.equipType.any)): 
+				if selection.get_index() == 0: #attack
+					$HolderHolder/DisplayHolder.box_move(selection, "Attack")
+				else: #defend
+					$HolderHolder/DisplayHolder.box_move(selection, "Defend")
+			elif moveInfo.has("morph"): #power glove
+				$HolderHolder/DisplayHolder.box_move(selection, moveInfo["morph"][selection.get_index()])
+			selection.get_node("Tooltip").visible = false
 			$"../Data/Crafting".color_box(selection, boxName)
 			selection = null
 			visible = true
@@ -69,6 +86,7 @@ func choose_type(display):
 		else: $HolderHolder/DisplayHolder.box_move(box, "X")
 		box.get_node("ColorRect").color = Color(.53,.3,.3,1) #Default
 		i+=1
+	check_ready()
 
 func box_scales_move(box, moveName = SCALESMOVES[0]):
 	for i in playerBoons.size():
@@ -93,11 +111,12 @@ func set_boon(selectorIndex, boonIndex):
 func set_boon_level(selectorIndex, value):
 	boonLevels[selectorIndex] = value
 	var path = str("HolderHolder/BoonHolder/Boon ", selectorIndex, "/Choice")
-	if get_node(path).get_item_text(selectorIndex) == "Scales":
+	if get_node(path).get_item_text(playerBoons[selectorIndex]) == "Scales":
 		for display in $HolderHolder/DisplayHolder.get_children():
 			box_scales_move(display.get_node("MoveBoxes").get_child(FIRSTMOVEBOX))
 
 func check_special_boons(boonIndex, enabled:bool):
+	var Moves = get_node("../Data/Moves")
 	var boonName = $"HolderHolder/BoonHolder/Boon 0/Choice".get_item_text(boonIndex)
 	if boonName == "Scales":
 		for display in $HolderHolder/DisplayHolder.get_children():
@@ -108,10 +127,12 @@ func check_special_boons(boonIndex, enabled:bool):
 				var index = FIRSTMOVEBOX + i if !enabled else LASTMOVEBOX - i
 				var boxName = boxes.get_child(index+1).moves[0] if !enabled else boxes.get_child(index-1).moves[0]
 				$HolderHolder/DisplayHolder.box_move(boxes.get_child(index), boxName)
+				boxes.get_child(index).set_uses(Moves.get_uses(boxName))
 				$"../Data/Crafting".color_box(boxes.get_child(index), boxName)
 				i += 1
 			if enabled:
 				box_scales_move(boxes.get_child(FIRSTMOVEBOX))
+				boxes.get_child(FIRSTMOVEBOX).set_uses(-1)
 				display.get_node("MoveBoxes").get_child(FIRSTMOVEBOX).get_node("ColorRect").color = Color(.53,.3,.3,1)
 			else:
 				$HolderHolder/DisplayHolder.box_move(boxes.get_child(LASTMOVEBOX), "X")
@@ -129,7 +150,7 @@ func set_enemy(selectorIndex, enemyName):
 		if(ResourceLoader.exists(spritePath)):
 			sprite.texture = load(spritePath)
 			sprite.flip_h = true
-	print(opponents)
+	check_ready()
 
 func set_enemy_bar(enemySelector):
 	var enemyName = enemySelector.get_node("Choice").get_text()
@@ -140,7 +161,63 @@ func set_enemy_bar(enemySelector):
 		enemySelector.get_node("HPBar").value = enemyHP
 		enemySelector.get_node("HPBar/Text").text = str(enemyHP, "/", enemyHP)
 
+func check_ready():
+	var validPlayers = false
+	var validOpponents = false
+	for display in $HolderHolder/DisplayHolder.get_children():
+		if display.get_node("MoveBoxes").visible:
+			validPlayers = true
+			break
+	for enemyName in opponents:
+		if enemyName != DEFAULTOPTION:
+			validOpponents = true
+			break
+	$GoButton.visible = true if validPlayers and validOpponents else false
+
+func toggle_visibilities(toggle):
+	$HolderHolder/EnemyHolder.visible = toggle
+	$HolderHolder/BoonHolder.visible = toggle
+	$EnemyLevel.visible = toggle
+	$GoButton.visible = toggle
+	for unit in units: unit.ui.get_node("PuzzleMenu").visible = toggle
+
 func _on_enemyLevel_value_changed(value):
 	enemyDifficulty = value
 	for enemySelector in $HolderHolder/EnemyHolder.get_children():
 		set_enemy_bar(enemySelector)
+
+func _on_GoButton_pressed():
+	global.storedParty.clear()
+	for unit in units:
+		if unit.ui.get_node("MoveBoxes").visible:
+			global.storedParty.append(unit)
+			unit.maxHealth = unit.ui.get_node("PuzzleMenu/HP Input").value
+			unit.currentHealth = unit.maxHealth
+			unit.allowedType = unit.ui.get_node("PuzzleMenu").type + OFFSET
+			for tracker in unit.ui.get_node("Trackers").get_children():
+				unit.ui.get_node("Trackers").remove_child(tracker)
+				tracker.queue_free()
+			battleWindow.get_node("BattleUI").setup_display(unit)
+		else:
+			unit.ui.visible = false
+	for i in playerBoons.size():
+		print(playerBoons[i])
+		if playerBoons[i] != 0:
+			var chosenBoon = $HolderHolder/BoonHolder.get_child(i).get_node("Choice").get_text()
+			Boons.playerBoons.append(chosenBoon)
+			Boons.create_boon(chosenBoon)
+			if boonLevels[i] > 0: Boons.get_node(chosenBoon).level += boonLevels[i]
+			
+	
+	var newOpponents = []
+	for enemyName in opponents:
+		if enemyName != DEFAULTOPTION: newOpponents.append(enemyName)
+	battleWindow.get_node("BattleUI").set_holder()
+	for child in battleWindow.get_node("Units").get_children():
+		battleWindow.get_node("Units").remove_child(child)
+		child.queue_free()
+	for unit in global.storedParty:
+		 battleWindow.get_node("Units").add_child(unit)
+	battleWindow.visible = true
+	toggle_visibilities(false)
+	battleWindow.welcome_back(newOpponents)
