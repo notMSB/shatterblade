@@ -304,7 +304,7 @@ func add_to_player(itemName):
 				box.set_uses(Moves.get_uses(itemName))
 				reset_and_update_itemDict()
 				return
-	add_item(itemName) #if no player slots open, add to inventory
+	add_item(itemName, true) #if no player slots open, add to inventory
 
 func isValidMove(boxName):
 	if Moves.moveList.has(boxName):

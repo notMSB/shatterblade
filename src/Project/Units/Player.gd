@@ -50,18 +50,20 @@ func boost_stat(stat):
 				types.trick: 
 					maxEnergy += 1
 					energy += 1
-			update_box_bars()
+			update_box_bars(true)
 
-func update_box_bars(): #this one needs a refactor at some point
+func update_box_bars(newMax = false): #this one needs a refactor at some point
 	for box in boxHolder.get_children():
 		if !box.trackerBar: continue
 		if allowedType == types.special:
 			box.trackerBar.value = ap
 			box.trackerBar.get_child(0).text = str(ap, "/", maxAP)
 		elif allowedType == types.magic:
+			if newMax: box.trackerBar.max_value = maxMana
 			box.trackerBar.value = mana
 			box.trackerBar.get_child(0).text = str(mana, "/", maxMana)
 		elif allowedType == types.trick:
+			if newMax: box.trackerBar.max_value = maxEnergy
 			box.trackerBar.value = energy
 			box.trackerBar.get_child(0).text = str(energy, "/", maxEnergy)
 		else: #unused

@@ -4,44 +4,44 @@ export (PackedScene) var MoveBox
 
 onready var Moves = $"../Moves"
 
-const XSTART = 45
-const YSTART = 25
-const XINCREMENT = 80
-const YINCREMENT = 60
+const XSTART = 41
+const YSTART = 21
+const XINCREMENT = 79
+const YINCREMENT = 59
 
 #components
-enum c {wing, fang, claw, sap, venom, fur, blade, bone, garbage, darkness, tentacle}
+enum c {wing, fang, claw, sap, venom, fur, bone, garbage, darkness, blade, tentacle}
 
 var products = {
 	c.wing: {c.wing: "Speed Potion", c.fang: "Vampire", c.claw: "Dive Bomb", c.sap: "Dodge",
-			 c.venom: "Venoshock", c.fur: "Hide", c.blade: "Triple Hit", c.bone: "Flex",
-			 c.garbage: "Goblin Dodge", c.darkness: "Invisibility", c.tentacle: "X"},
+			 c.venom: "Venoshock", c.fur: "Hide", c.bone: "Flex", c.garbage: "Goblin Dodge", 
+			 c.darkness: "Invisibility", c.blade: "Triple Hit", c.tentacle: "Sideswipe"},
 	
 	c.fang: {c.fang: "Throwing Knife", c.claw: "Take Down", c.sap: "Taste Test", c.venom: "Poison Strike",
-			 c.fur: "Cleave", c.blade: "Power Attack", c.bone: "Frostfang", c.garbage: "Tasty Bite", 
-			 c.darkness: "Feeding Frenzy", c.tentacle: "X"},
+			 c.fur: "Cleave", c.bone: "Frostfang", c.garbage: "Tasty Bite", c.darkness: "Feeding Frenzy", 
+			 c.blade: "Power Attack", c.tentacle: "Below Blow"},
 	
-	c.claw: {c.claw: "Brass Knuckles", c.sap: "Eye Poke", c.venom: "Taunt", c.fur: "Quick Attack",
-			  c.blade: "Crusher Claw", c.bone: "Turtle Up", c.garbage: "Back Rake", c.darkness: "Breaker Slash", c.tentacle: "X"},
+	c.claw: {c.claw: "Brass Knuckles", c.sap: "Eye Poke", c.venom: "Taunt", c.fur: "Quick Attack", c.bone: "Turtle Up", 
+			 c.garbage: "Back Rake", c.darkness: "Breaker Slash", c.blade: "Crusher Claw", c.tentacle: "Grapple"},
 	
-	c.sap: {c.sap: "Health Potion", c.venom: "Growth", c.fur: "Protect", c.blade: "Pierce",
-			c.bone: "Bonemerang", c.garbage: "Spit Shine", c.darkness: "Midnight Flare", c.tentacle: "X"},
+	c.sap: {c.sap: "Health Potion", c.venom: "Growth", c.fur: "Protect", c.bone: "Bonemerang", 
+			c.garbage: "Spit Shine", c.darkness: "Midnight Flare", c.blade: "Pierce", c.tentacle: "Remedy"},
 	
-	c.venom: {c.venom: "Poison Potion", c.fur: "Restore", c.blade: "Piercing Sting", c.bone: "Plague",
-			  c.garbage: "Belch", c.darkness: "Mass Infection", c.tentacle: "Constrict"},
+	c.venom: {c.venom: "Poison Potion", c.fur: "Restore", c.bone: "Plague", c.garbage: "Belch", 
+			  c.darkness: "Mass Infection", c.blade: "Piercing Sting", c.tentacle: "Constrict"},
 	
-	c.fur: {c.fur: "Leather Buckler", c.blade: "Sucker Punch", c.bone: "Careful Strike", c.garbage: "Play Dead",
-			c.darkness: "Defensive Pact", c.tentacle: "X"},
+	c.fur: {c.fur: "Leather Buckler", c.bone: "Careful Strike", c.garbage: "Play Dead", c.darkness: "Defensive Pact", 
+			c.blade: "Sucker Punch", c.tentacle: "Bulwark"},
 	
-	c.blade: {c.blade: "Storm of Steel", c.bone: "Coldsteel", c.garbage: "Shiv", c.darkness: "Dark Spikes", c.tentacle: "X"},
+	c.bone: {c.bone: "Bone Zone", c.garbage: "Bone Club", c.darkness: "Seeker Volley", c.blade: "Coldsteel", c.tentacle: "Frigid Waters"},
 	
-	c.bone: {c.bone: "Bone Zone", c.garbage: "Bone Club", c.darkness: "Seeker Volley", c.tentacle: "X"},
+	c.garbage: {c.garbage: "Concoction", c.darkness: "Dark Dive", c.blade: "Shiv",  c.tentacle: "Meat Harvest"},
 	
-	c.garbage: {c.garbage: "Concoction", c.darkness: "Dark Dive", c.tentacle: "X"},
+	c.darkness: {c.darkness: "Dark Matter", c.blade: "Dark Spikes",  c.tentacle: "Eldritch Forces"},
 	
-	c.darkness: {c.darkness: "Dark Matter", c.tentacle: "X"},
+	c.blade: {c.blade: "Storm of Steel", c.tentacle: "Deep Cut"},
 	
-	c.tentacle: {c.tentacle: "X"}
+	c.tentacle: {c.tentacle: "Tentacle Jar"}
 }
 
 func generate_grids():
@@ -51,6 +51,10 @@ func generate_grids():
 
 func generate_equipment():
 	setup_box("X", "EquipmentHolder", 0, 0)
+	setup_box("X", "EquipmentHolder", 14, 0)
+	setup_box("X", "EquipmentHolder", 15, 0)
+	setup_box("X", "EquipmentHolder", 12, 0)
+	setup_box("X", "EquipmentHolder", 13, 0)
 	for i in c.size():
 		setup_box(c.keys()[i], "EquipmentHolder", i+1, 0)
 		setup_box(c.keys()[i], "EquipmentHolder", 0, i+1)
@@ -69,6 +73,7 @@ func generate_relics():
 			if !moveData.has("unequippable") and moveData.has("rarity"):
 				setup_box(move, "RelicHolder", i, 0)
 				i+=1
+	setup_box("Crown", "RelicHolder", 0, 4)
 
 func generate_scales():
 	setup_box("Rock", "ScalesHolder", 0, 0)

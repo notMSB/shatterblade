@@ -662,9 +662,11 @@ func analyze_points(one, two):
 			one.lines.append(pointLine) #add line to points
 			two.lines.append(pointLine)
 
-func increment_xp(amount):
+func increment_xp(amount, rewardUnit):
 	var newValue = $XPBar.value + amount
 	while newValue >= $XPBar.max_value:
+		var rewards = [Enemies.enemyList[rewardUnit.identity]["rewards"][0]]
+		inventoryWindow.add_multi(rewards)
 		newValue -= $XPBar.max_value
 		$XPBar.max_value += XPINCREMENT
 	$XPBar.value = newValue

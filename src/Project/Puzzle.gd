@@ -45,6 +45,7 @@ func _ready():
 
 func show_grid(box):
 	visible = false
+	$"../Toggle".visible = false
 	selection = box
 	toggle_holder(box.get_index(), true)
 
@@ -61,6 +62,7 @@ func set_box(boxName):
 		if type <= 0 or type == allowedType:
 			toggle_holder(selection.get_index(), false)
 			if SCALESMOVES.has(boxName): box_scales_move(selection, boxName)
+			elif boxName == "Crown": check_crown(selection)
 			else: $HolderHolder/DisplayHolder.box_move(selection, boxName)
 			selection.set_uses(Moves.get_uses(boxName))
 			var moveInfo = Moves.moveList[boxName] #Now, make sure attack/defend is done right
@@ -76,6 +78,7 @@ func set_box(boxName):
 			$"../Data/Crafting".color_box(selection, boxName)
 			selection = null
 			visible = true
+			$"../Toggle".visible = true
 
 func choose_type(display):
 	var i = 0
@@ -114,6 +117,18 @@ func set_boon_level(selectorIndex, value):
 	if get_node(path).get_item_text(playerBoons[selectorIndex]) == "Scales":
 		for display in $HolderHolder/DisplayHolder.get_children():
 			box_scales_move(display.get_node("MoveBoxes").get_child(FIRSTMOVEBOX))
+	elif get_node(path).get_item_text(playerBoons[selectorIndex]) == "Crown":
+		for display in $HolderHolder/DisplayHolder.get_children():
+			for box in display.get_node("MoveBoxes").get_children():
+				if box.moves[0] == "Crown" or box.moves[0] == "Crown+": check_crown(box)
+
+func check_crown(box):
+	var level = 0
+	for boonIndex in playerBoons.size():
+		var boonName = $"HolderHolder/BoonHolder/Boon 0/Choice".get_item_text(playerBoons[boonIndex])
+		if boonName == "Crown": level = boonLevels[boonIndex]
+	if level == 0: $HolderHolder/DisplayHolder.box_move(box, "Crown")
+	else: $HolderHolder/DisplayHolder.box_move(box, "Crown+")
 
 func check_special_boons(boonIndex, enabled:bool):
 	var Moves = get_node("../Data/Moves")
@@ -200,8 +215,16 @@ func _on_GoButton_pressed():
 			battleWindow.get_node("BattleUI").setup_display(unit)
 		else:
 			unit.ui.visible = false
+		if unit.allowedType == unit.types.special: unit.baseAP = unit.ui.get_node("PuzzleMenu/Resource Input").value
+		elif unit.allowedType == unit.types.magic:
+			unit.maxMana = unit.ui.get_node("PuzzleMenu/Resource Input").value
+			unit.mana = unit.ui.get_node("PuzzleMenu/Resource Input").value
+		elif unit.allowedType == unit.types.trick:
+			unit.maxEnergy = unit.ui.get_node("PuzzleMenu/Resource Input").value
+			unit.energy = unit.ui.get_node("PuzzleMenu/Resource Input").value
+		unit.update_box_bars(true)
+	
 	for i in playerBoons.size():
-		print(playerBoons[i])
 		if playerBoons[i] != 0:
 			var chosenBoon = $HolderHolder/BoonHolder.get_child(i).get_node("Choice").get_text()
 			Boons.playerBoons.append(chosenBoon)

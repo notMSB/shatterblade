@@ -155,7 +155,7 @@ func get_partyHealth():
 func play_turn(notFirstTurn = true):
 	if battleDone:
 		if gameOver: return get_tree().change_scene("res://src/Project/Lose.tscn")
-		var rewards = [Enemies.enemyList[rewardUnit.identity]["rewards"][0]]
+		var rewards = []
 		for enemy in get_team(false):
 			if Enemies.enemyList[enemy.identity].has("elite"): rewards.append("Health Potion")
 		return done(rewards)
@@ -258,9 +258,10 @@ func set_intent(unit, target = false):
 	if typeof(targetText) != TYPE_STRING:
 		targetText = targetText.battleName
 	if actionDamage: targetText = str(targetText, " (", actionDamage, ")")
-	var dHolder = global.storedParty[0].ui.get_parent()
-	dHolder.box_move(unit.ui.get_node("MoveBox"), unit.storedAction)
-	unit.update_info(str(" -> ", targetText))
+	if unit.real:
+		var dHolder = global.storedParty[0].ui.get_parent()
+		dHolder.box_move(unit.ui.get_node("MoveBox"), unit.storedAction)
+		unit.update_info(str(" -> ", targetText))
 	yield(get_tree().create_timer(.25), "timeout")
 
 func get_team(gettingPlayers, onlyAlive = false, real = true):
@@ -570,7 +571,7 @@ func activate_effect(effectName = "effect", argsName = "args"):
 func evaluate_completion(deadUnit):
 	if deadUnit.real:
 		var map = get_node_or_null("../Map")
-		if map: map.increment_xp(deadUnit.maxHealth)
+		if map: map.increment_xp(deadUnit.maxHealth, deadUnit)
 		deadEnemies += 1
 		previewDeadEnemies += 1
 		if deadEnemies >= enemyNum:
@@ -598,7 +599,7 @@ func evaluate_revives():
 			unit.ui.visible = true
 			unit.update_hp()
 
-func done(rewards):
+func done(rewards = []):
 	#$BattleUI.toggle_trackers(false)
 	if !get_parent().mapMode:
 		return get_tree().reload_current_scene()
@@ -608,7 +609,7 @@ func done(rewards):
 		for i in global.storedParty.size():
 			set_ui(global.storedParty[i])
 			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], map.inventoryWindow)
-		map.inventoryWindow.add_multi(rewards)
+		if !rewards.empty(): map.inventoryWindow.add_multi(rewards)
 		#map.inventoryWindow.add_item(reward)
 		toggle_previews(false)
 		visible = false
