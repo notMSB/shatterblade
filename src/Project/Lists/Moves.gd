@@ -36,9 +36,9 @@ func _ready():
 	"Feeding Frenzy": {"target": targetType.enemy, "damage": 8, "resVal": 15, "timing": timings.before, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveTarget", .99, 1], "description": "Extra hit if enemy is damaged.", "slot": equipType.gear, "type": moveType.special},
 	"Breaker Slash": {"target": targetType.enemy, "damage": 9, "resVal": 20, "timing": timings.before, "effect": funcref(self, "hits_for_durability"), "args": ["usedMoveBox", .5, 1], "description": "Extra hit if this weapon is at half or less uses", "slot": equipType.gear, "type": moveType.special},
 	"Dark Dive": {"target": targetType.enemy, "damage": 12, "resVal": 15, "timing": timings.before, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser", .25, 1], "secondEffect": funcref(self, "take_recoil"), "secondArgs": ["moveUser", "damageCalc", .30], "description": "Extra hit if user is below 25% HP. 30% recoil.", "slot": equipType.gear, "type": moveType.special},
-	"Grapple": {"target": targetType.enemy, "damage": 6, "resVal": 2, "slot": equipType.gear, "type": moveType.special},
-	"Deep Cut": {"target": targetType.enemy, "damage": 6, "resVal": 2, "slot": equipType.gear, "type": moveType.special},
-	"Meat Harvest": {"target": targetType.enemy, "damage": 6, "resVal": 2, "slot": equipType.gear, "type": moveType.special},
+	"Grapple": {"target": targetType.enemy, "damage": 4, "resVal": 15, "status": "Stun", "value": 1, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "give_status"), "args": ["moveUser", "Stun", 2], "description": "Stuns both the user and the target."},
+	"Deep Cut": {"target": targetType.enemyTargets, "damage": 19, "resVal": 30, "slot": equipType.gear, "type": moveType.special, "charge": true, "cycle": ["Charge"]},
+	"Meat Harvest": {"target": targetType.enemy, "damage": 6, "resVal": 2, "timing": timings.before, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "damage_amp"), "args": ["moveUser:currentHealth", .5], "secondEffect": funcref(self, "take_recoil"), "secondArgs": ["moveUser", "damageCalc", .50], "description": "Damage increased by 50% current health. 50% Recoil."},
 	
 	"Flex": {"target": targetType.user, "resVal": 25, "status": "Double Damage", "value": 1, "quick": true, "slot": equipType.gear, "type": moveType.special},
 	"Protect": {"target": targetType.ally, "resVal": 5, "effect": funcref(self, "switch_intents"), "args": ["moveTarget", "moveUser"], "quick": true, "slot": equipType.gear, "type": moveType.special, "description": "Enemy attacks intended for target change to user"},
@@ -274,8 +274,6 @@ func is_unit_poisoned(unit): #a little overly specific
 	if StatusManager.find_status(unit, "Poison"): return 1
 	else: return 0
 
-
-
 func get_unit_poison(unit): #kinda redundant, definitely a stopgap
 	var poisonedUnit
 	if unit == Battle.moveTarget: poisonedUnit = Battle.moveUser
@@ -315,4 +313,5 @@ func fill_boxes(player, moveName):
 			box.set_uses(-1)
 			box.timesUsed = 0
 
-
+func damage_amp(value, modifier = 1):
+	Battle.damageBuff = floor(value * modifier)
