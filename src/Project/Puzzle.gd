@@ -46,6 +46,7 @@ func _ready():
 func show_grid(box):
 	visible = false
 	$"../Toggle".visible = false
+	$"../Table".visible = false
 	selection = box
 	toggle_holder(box.get_index(), true)
 
@@ -79,6 +80,7 @@ func set_box(boxName):
 			selection = null
 			visible = true
 			$"../Toggle".visible = true
+			$"../Table".visible = true
 
 func choose_type(display):
 	var i = 0

@@ -2,13 +2,14 @@ extends Node2D
 
 export (PackedScene) var MoveBox
 
-const XSTART = 200
-const YSTART = 536
+const XSTART = 50
+const YSTART = 645
 const TRADEXSTART = 440
 const TRADEYSTART = 80
 
 const XINCREMENT = 80
 const YINCREMENT = 60
+const GAPSIZE = 305
 
 const XMAX = 12
 const YMAX = 1
@@ -16,8 +17,6 @@ const CRAFTBOXES = 3
 const DEFAULTCOLOR = Color(.53,.3,.3,1)
 const MOVEHOLDER = "moves"
 var MOVESPACES = 4
-
-var descriptionNode
 
 onready var iHolder = $HolderHolder/InventoryHolder
 onready var tHolder = $HolderHolder/TradeHolder
@@ -69,11 +68,6 @@ func _ready(): #Broken with relics as a standalone scene, but works when the Map
 				identify_product(box)
 	else:
 		dHolder = get_node_or_null("../Map/HolderHolder/DisplayHolder")
-	if !get_parent().mapMode:
-		descriptionNode = $Description
-	else:
-		descriptionNode = get_node("../Map/Description")
-	$Description.visible = !get_parent().mapMode
 
 func welcome_back():
 	toggle_trade_visibility(true)
@@ -173,17 +167,18 @@ func make_grid():
 	for item in global.itemDict:
 		if item == MOVEHOLDER:
 			for move in global.itemDict[MOVEHOLDER]:
-				identify_product(make_inventorybox(move))
+				identify_product(make_inventorybox(move, true))
 		else:
 			for i in global.itemDict[item]:
-				make_inventorybox(item)
+				make_inventorybox(item, true)
 	while YMAX > boxesCount.y: #fill out the rest of the grid
-		make_inventorybox("X")
+		make_inventorybox("X", true)
 
-func make_inventorybox(boxName):
+func make_inventorybox(boxName, useGap = false):
 	var box = MoveBox.instance()
 	iHolder.add_child(box)
 	box.position.x = XSTART + (boxesCount.x * XINCREMENT)
+	if boxesCount.x >= XMAX * .5 and useGap: box.position.x += GAPSIZE
 	box.position.y = YSTART + (boxesCount.y * YINCREMENT)
 	box.get_node("Name").text = boxName
 	box.get_node("Info").text = String(Trading.get_item_value(boxName))
@@ -219,7 +214,6 @@ func deselect_box(box):
 	#else: print("no box")
 
 func deselect_multi(boxes):
-	set_description("X")
 	for box in boxes:
 		deselect_box(box)
 	otherSelection = null
@@ -331,9 +325,6 @@ func check_offering(offeringBox):
 			return false
 	#toggle_action_button(true, "Offer")
 	return true
-
-func set_description(boxMoveName):
-	descriptionNode.text = Moves.get_description(boxMoveName)
 
 func toggle_action_button(toggle, buttonText = ""):
 	$ActionButton.visible = toggle

@@ -1,6 +1,6 @@
 [gd_scene load_steps=13 format=2]
 
-[ext_resource path="res://src/Project/UI/PlayerProfile.tscn" type="PackedScene" id=1]
+[ext_resource path="res://src/Project/UI/CircleProfile.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/Project/UI/PlayerMove.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/Project/UI/UnitUI.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=4]
@@ -11,11 +11,11 @@
 [ext_resource path="res://src/Project/UI/EnemySelector.gd" type="Script" id=9]
 [ext_resource path="res://src/Project/UI/BoonSelector.gd" type="Script" id=10]
 
-[sub_resource type="DynamicFont" id=2]
+[sub_resource type="DynamicFont" id=1]
 size = 20
 font_data = ExtResource( 8 )
 
-[sub_resource type="DynamicFont" id=3]
+[sub_resource type="DynamicFont" id=2]
 size = 24
 font_data = ExtResource( 8 )
 
@@ -69,7 +69,7 @@ __meta__ = {
 [node name="Text" type="Label" parent="HolderHolder/EnemyHolder/Enemy 0/HPBar"]
 margin_right = 196.0
 margin_bottom = 36.0
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 1 )
 text = "1/1"
 align = 1
 valign = 1
@@ -112,7 +112,7 @@ __meta__ = {
 [node name="Text" type="Label" parent="HolderHolder/EnemyHolder/Enemy 1/HPBar"]
 margin_right = 196.0
 margin_bottom = 36.0
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 1 )
 text = "1/1"
 align = 1
 valign = 1
@@ -155,7 +155,7 @@ __meta__ = {
 [node name="Text" type="Label" parent="HolderHolder/EnemyHolder/Enemy 2/HPBar"]
 margin_right = 196.0
 margin_bottom = 36.0
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 1 )
 text = "1/1"
 align = 1
 valign = 1
@@ -198,7 +198,7 @@ __meta__ = {
 [node name="Text" type="Label" parent="HolderHolder/EnemyHolder/Enemy 3/HPBar"]
 margin_right = 196.0
 margin_bottom = 36.0
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 1 )
 text = "1/1"
 align = 1
 valign = 1
@@ -243,7 +243,7 @@ margin_left = 342.0
 margin_top = 18.0
 margin_right = 487.0
 margin_bottom = 48.0
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 2 )
 text = "Boon 1:"
 align = 1
 __meta__ = {
@@ -255,7 +255,7 @@ margin_left = 342.0
 margin_top = 58.0
 margin_right = 487.0
 margin_bottom = 88.0
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 2 )
 text = "Level:"
 align = 1
 __meta__ = {
@@ -297,7 +297,7 @@ margin_left = 414.0
 margin_top = 18.0
 margin_right = 559.0
 margin_bottom = 48.0
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 2 )
 text = "Boon 2:"
 align = 1
 __meta__ = {
@@ -309,7 +309,7 @@ margin_left = 414.0
 margin_top = 58.0
 margin_right = 559.0
 margin_bottom = 88.0
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 2 )
 text = "Level:"
 align = 1
 __meta__ = {
@@ -351,7 +351,7 @@ margin_left = 326.0
 margin_top = 18.0
 margin_right = 471.0
 margin_bottom = 48.0
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 2 )
 text = "Boon 3:"
 align = 1
 __meta__ = {
@@ -363,7 +363,7 @@ margin_left = 326.0
 margin_top = 58.0
 margin_right = 471.0
 margin_bottom = 88.0
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 2 )
 text = "Level:"
 align = 1
 __meta__ = {
@@ -391,7 +391,7 @@ margin_left = 523.0
 margin_top = 46.0
 margin_right = 668.0
 margin_bottom = 76.0
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 2 )
 text = "Enemy Level:"
 align = 1
 __meta__ = {
@@ -400,10 +400,10 @@ __meta__ = {
 
 [node name="Divider" type="ColorRect" parent="."]
 margin_left = -13.0
-margin_top = 533.0
+margin_top = 455.0
 margin_right = 1305.0
-margin_bottom = 549.0
-color = Color( 0.85098, 0.541176, 0.541176, 1 )
+margin_bottom = 482.0
+color = Color( 0, 0, 0, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

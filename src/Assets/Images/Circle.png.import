@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Defend.png-c5d13fed2f1867577f7e0105a85592ba.stex"
+path="res://.import/Circle.png-55da6b516958a3e57adb1cc7851685a6.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://src/Assets/Icons/Moves/Defend.png"
-dest_files=[ "res://.import/Defend.png-c5d13fed2f1867577f7e0105a85592ba.stex" ]
+source_file="res://src/Assets/Images/Circle.png"
+dest_files=[ "res://.import/Circle.png-55da6b516958a3e57adb1cc7851685a6.stex" ]
 
 [params]
 

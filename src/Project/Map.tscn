@@ -4,7 +4,7 @@
 [ext_resource path="res://src/Project/UI/Favor.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=3]
 [ext_resource path="res://src/Project/UI/UnitUI.tscn" type="PackedScene" id=4]
-[ext_resource path="res://src/Project/UI/PlayerProfile.tscn" type="PackedScene" id=5]
+[ext_resource path="res://src/Project/UI/CircleProfile.tscn" type="PackedScene" id=5]
 [ext_resource path="res://src/Project/UI/PlayerMove.tscn" type="PackedScene" id=6]
 [ext_resource path="res://src/Project/Point.tscn" type="PackedScene" id=7]
 [ext_resource path="res://src/Project/Line.tscn" type="PackedScene" id=8]
@@ -19,23 +19,19 @@
 [ext_resource path="res://src/Project/Temple.tscn" type="PackedScene" id=17]
 [ext_resource path="res://src/Project/UI/QuickCraft.tscn" type="PackedScene" id=18]
 [ext_resource path="res://src/Project/UI/QuickRepair.tscn" type="PackedScene" id=19]
-
-[sub_resource type="DynamicFont" id=1]
-size = 20
-font_data = ExtResource( 13 )
+[ext_resource path="res://src/Assets/Images/Circle.png" type="Texture" id=20]
 
 [sub_resource type="DynamicFont" id=2]
 size = 20
 font_data = ExtResource( 13 )
 
-[sub_resource type="StyleBoxFlat" id=4]
+[sub_resource type="StyleBoxFlat" id=3]
 bg_color = Color( 0.192157, 0.32549, 0.737255, 1 )
 
-[sub_resource type="StyleBoxFlat" id=5]
+[sub_resource type="StyleBoxFlat" id=4]
 bg_color = Color( 0.647059, 0.647059, 0.647059, 0.294118 )
 
-[sub_resource type="DynamicFont" id=3]
-size = 24
+[sub_resource type="DynamicFont" id=5]
 font_data = ExtResource( 13 )
 
 [node name="Map" type="Node2D"]
@@ -54,10 +50,11 @@ QuickCraft = ExtResource( 18 )
 QuickRepair = ExtResource( 19 )
 
 [node name="ReferenceRect" type="ReferenceRect" parent="."]
+visible = false
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 1280.0
-margin_bottom = 459.0
+margin_bottom = 457.0
 border_color = Color( 1, 1, 1, 1 )
 editor_only = false
 __meta__ = {
@@ -66,7 +63,7 @@ __meta__ = {
 
 [node name="Background" type="ColorRect" parent="."]
 margin_right = 1277.0
-margin_bottom = 460.0
+margin_bottom = 457.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -92,29 +89,9 @@ position = Vector2( -500, 0 )
 
 [node name="TempleHolder" type="Node2D" parent="HolderHolder"]
 
-[node name="Description" type="Label" parent="."]
-visible = false
-margin_top = 360.0
-margin_right = 1277.0
-margin_bottom = 487.0
-custom_fonts/font = SubResource( 1 )
-align = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ColorRect" type="ColorRect" parent="Description"]
-modulate = Color( 0, 0, 0, 1 )
-show_behind_parent = true
-margin_right = 1282.0
-margin_bottom = 129.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="CraftPanel" type="ColorRect" parent="."]
 margin_right = 280.0
-margin_bottom = 460.0
+margin_bottom = 457.0
 color = Color( 0, 0.478431, 0.478431, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -122,7 +99,7 @@ __meta__ = {
 
 [node name="CraftScroll" type="ScrollContainer" parent="."]
 margin_right = 290.0
-margin_bottom = 460.0
+margin_bottom = 457.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -150,7 +127,7 @@ __meta__ = {
 modulate = Color( 0, 0, 0, 1 )
 show_behind_parent = true
 margin_right = 350.0
-margin_bottom = 500.0
+margin_bottom = 478.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -160,7 +137,7 @@ __meta__ = {
 [node name="RepairPanel" type="ColorRect" parent="."]
 margin_left = 1000.0
 margin_right = 1280.0
-margin_bottom = 460.0
+margin_bottom = 457.0
 color = Color( 0, 0.478431, 0.478431, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -169,7 +146,7 @@ __meta__ = {
 [node name="RepairScroll" type="ScrollContainer" parent="."]
 margin_left = 1000.0
 margin_right = 1280.0
-margin_bottom = 460.0
+margin_bottom = 457.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -180,24 +157,39 @@ margin_bottom = 1000.0
 rect_min_size = Vector2( 280, 1000 )
 color = Color( 0, 0.478431, 0.478431, 1 )
 
+[node name="XPBorder" type="ColorRect" parent="."]
+modulate = Color( 0, 0, 0, 1 )
+show_behind_parent = true
+margin_top = 455.0
+margin_right = 1282.0
+margin_bottom = 482.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="XPBar" type="ProgressBar" parent="."]
-margin_left = 171.0
-margin_top = 525.0
-margin_right = 1110.0
-margin_bottom = 554.0
-custom_styles/fg = SubResource( 4 )
-custom_styles/bg = SubResource( 5 )
+margin_top = 461.0
+margin_right = 1280.0
+margin_bottom = 478.0
+custom_styles/fg = SubResource( 3 )
+custom_styles/bg = SubResource( 4 )
 percent_visible = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="XPBar"]
-margin_right = 937.0
-margin_bottom = 30.0
-custom_fonts/font = SubResource( 3 )
+margin_right = 1280.0
+margin_bottom = 20.0
+custom_fonts/font = SubResource( 5 )
 text = "0/5"
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Circle" type="Sprite" parent="."]
+visible = false
+position = Vector2( 637, 598 )
+scale = Vector2( 0.45, 0.45 )
+texture = ExtResource( 20 )

@@ -5,9 +5,10 @@ export (PackedScene) var PlayerProfile
 export (PackedScene) var PlayerMove
 
 const DEFAULTMOVES = 2
-const PLAYERXSTART = 580
-const PLAYERYSTART = 599
-const STARTXINCREMENT = 120
+const PLAYERXSTART = 572
+const PLAYERYSTART = 530
+const STARTXINCREMENT = 135
+const STARTYINCREMENT = 135
 const PLAYERINCREMENT = 80
 
 const UNITYSTART = 200
@@ -21,7 +22,15 @@ func setup_player(unit, playerCount):
 	display.get_node("Name").text = unit.displayName
 	unit.isPlayer = true
 	display.position.x = PLAYERXSTART + (playerCount % 2 * STARTXINCREMENT)
-	display.position.y = PLAYERYSTART + PLAYERINCREMENT if playerCount > 1 else PLAYERYSTART
+	display.position.y = PLAYERYSTART + STARTYINCREMENT if playerCount > 1 else PLAYERYSTART
+	if playerCount % 2 != 0: display.get_node("Sprite").flip_h = true
+	else: display.get_node("Name").align = 2 #Right
+	if playerCount >= 2: 
+		display.get_node("Sprite").flip_v = true
+		display.get_node("BattleElements/HPBar").rect_position.y = -66
+		display.get_node("BattleElements/PreviewRect").rect_position.y = -66
+	else:
+		display.get_node("Name").rect_position.y += 65
 	
 	add_moves(unit, display, playerCount)
 	
@@ -29,6 +38,9 @@ func setup_player(unit, playerCount):
 
 func add_moves(unit, display, playerCount):
 	unit.boxHolder = display.get_node("MoveBoxes")
+	var movesIncrement = 13 if playerCount >= 2 else -7
+	unit.boxHolder.position.y += movesIncrement
+	display.get_node("Trackers").position.y += movesIncrement
 	for i in DEFAULTMOVES + unit.moves.size():
 		create_move(unit, playerCount, i)
 	cleanup_moves(unit)
@@ -49,6 +61,9 @@ func create_move(unit, playerCount, posIndex):
 		else:
 			if move == "X": move = "Defend"
 			moveBox.position.y += PLAYERINCREMENT*.25
+			moveBox.get_node("ColorRect").margin_bottom = 20
+			moveBox.get_node("ReferenceRect").margin_bottom = 20
+			moveBox.get_node("Sprite").position.y = 0
 	else: #set up other moves
 		if unit.moves.size() < posIndex - DEFAULTMOVES + 1:
 			move = "X"

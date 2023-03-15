@@ -48,6 +48,7 @@ func _ready():
 	if global.storedParty.size() > 0:
 		global.storedParty.clear()
 	create_options()
+	$ColorRect/UI/MemberText.text = str("0/", PARTYSIZE, " Members Selected")
 
 func create_options():
 	for i in 3:
@@ -80,7 +81,7 @@ func create_options():
 		var choice = PartyChoice.instance()
 		$Choices.add_child(choice)
 		setup_member(choice, member, currentType)
-		choice.position.y = 165 + 85 * currentMember
+		choice.position.y = 190 + 85 * currentMember
 		choice.position.x = 98 + 400 * currentType
 		currentMember += 1
 
@@ -133,7 +134,7 @@ func choose_member(selection):
 		if tempParty.size() > PARTYSIZE:
 			set_button_color(tempParty[0].get_node("Button"), partyMembers[tempParty[0].unitName]["type"])
 			tempParty.pop_front()
-		$ColorRect/UI/MemberText.text = str(tempParty.size(), "/2 Members Selected")
+		$ColorRect/UI/MemberText.text = str(tempParty.size(), "/", PARTYSIZE, " Members Selected")
 		check_start()
 
 func create_unit(choice):

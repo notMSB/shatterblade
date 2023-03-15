@@ -50,10 +50,20 @@ position = Vector2( -3.95581, 0 )
 
 [node name="Toggle" type="Button" parent="."]
 margin_left = 380.0
-margin_top = 16.0
+margin_top = 48.0
 margin_right = 487.0
-margin_bottom = 78.0
+margin_bottom = 110.0
 text = "Toggle"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Table" type="Button" parent="."]
+margin_left = 780.0
+margin_top = 48.0
+margin_right = 887.0
+margin_bottom = 110.0
+text = "Crafting Table"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -62,3 +72,4 @@ __meta__ = {
 visible = false
 
 [connection signal="pressed" from="Toggle" to="." method="_on_Toggle_pressed"]
+[connection signal="pressed" from="Table" to="." method="_on_Table_pressed"]

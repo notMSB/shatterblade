@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Defend.png-c5d13fed2f1867577f7e0105a85592ba.stex"
+path="res://.import/QC.png-5d4ea4f7ec578ec27cc60e89f788bb58.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://src/Assets/Icons/Moves/Defend.png"
-dest_files=[ "res://.import/Defend.png-c5d13fed2f1867577f7e0105a85592ba.stex" ]
+source_file="res://src/Assets/Images/QC.png"
+dest_files=[ "res://.import/QC.png-5d4ea4f7ec578ec27cc60e89f788bb58.stex" ]
 
 [params]
 

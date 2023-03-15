@@ -105,9 +105,10 @@ func _ready():
 		for display in $HolderHolder/DisplayHolder.get_children():
 			set_display_color(display)
 	bottomRight = Vector2($ReferenceRect.margin_right, $ReferenceRect.margin_bottom)
+	timeNode.position.x -= 30
 	timeNode.position.y += bottomRight.y
 	favorNode.position.y += bottomRight.y + 5
-	favorNode.position.x += bottomRight.x - 150
+	favorNode.position.x += bottomRight.x - 125
 	set_boon_text()
 	columnNum = int(ceil(bottomRight.x/INCREMENT) - 1) #ceil-1 instead of floor prevents strangeness with exact divisions
 	#print(columnNum)
@@ -164,9 +165,9 @@ func activate_inventory():
 
 func set_display_color(display):
 	var unitType = global.storedParty[display.get_index()].allowedType
-	if unitType == Moves.moveType.special: display.get_node("ColorRect").color = Color(.9,.3,.3,1) #R
-	elif unitType == Moves.moveType.magic: display.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
-	elif unitType == Moves.moveType.trick: display.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
+	if unitType == Moves.moveType.special: display.get_node("Sprite").modulate = Color(.9,.3,.3,1) #R
+	elif unitType == Moves.moveType.magic: display.get_node("Sprite").modulate = Color(.3,.3,.9,1) #B
+	elif unitType == Moves.moveType.trick: display.get_node("Sprite").modulate = Color(.3,.7,.3,1) #G
 
 func activate_point(point):
 	var type = point.pointType
@@ -747,6 +748,7 @@ func create_quick_craft(one, two, totalRows, quickIncrement):
 	newQuick.assemble(one, two)
 
 func set_quick_repairs():
+	
 	var quickIncrement = 80
 	var totalRows = 0
 	var weaponList = inventoryWindow.get_all_gear()

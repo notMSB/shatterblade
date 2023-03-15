@@ -20,8 +20,8 @@ func _on_Button_pressed():
 			Battle.target_chosen(get_index() + global.storedParty.size())
 
 func position_preview_rect(projectedHP = null, isPlayer = false):
-	var multiplier = 120 if isPlayer else 200
-	var differential = 60 if isPlayer else 50
+	var multiplier = 132 if isPlayer else 200
+	var differential = 66 if isPlayer else 50
 	if projectedHP == null: projectedHP = $BattleElements/HPBar.value
 	projectedHP = max(projectedHP, 0)
 	var previewRect = get_node_or_null("BattleElements/PreviewRect")
