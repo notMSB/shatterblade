@@ -71,6 +71,7 @@ func heal(healVal):
 	update_hp()
 
 func update_hp(newMax = false):
+	
 	if newMax:
 		ui.get_node("BattleElements/HPBar").max_value = maxHealth
 	if ui != null:

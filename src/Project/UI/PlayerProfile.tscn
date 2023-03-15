@@ -9,17 +9,17 @@
 [sub_resource type="DynamicFont" id=1]
 font_data = ExtResource( 3 )
 
-[sub_resource type="StyleBoxFlat" id=4]
+[sub_resource type="StyleBoxFlat" id=2]
 bg_color = Color( 0, 1, 0.368627, 0.470588 )
 
-[sub_resource type="StyleBoxFlat" id=5]
+[sub_resource type="StyleBoxFlat" id=3]
 bg_color = Color( 0, 0, 0, 1 )
 
-[sub_resource type="DynamicFont" id=2]
+[sub_resource type="DynamicFont" id=4]
 size = 20
 font_data = ExtResource( 3 )
 
-[sub_resource type="DynamicFont" id=3]
+[sub_resource type="DynamicFont" id=5]
 size = 12
 font_data = ExtResource( 3 )
 
@@ -95,8 +95,8 @@ margin_left = -60.0
 margin_top = 15.0
 margin_right = 60.0
 margin_bottom = 40.0
-custom_styles/fg = SubResource( 4 )
-custom_styles/bg = SubResource( 5 )
+custom_styles/fg = SubResource( 2 )
+custom_styles/bg = SubResource( 3 )
 percent_visible = false
 __meta__ = {
 "_edit_use_anchors_": false
@@ -105,7 +105,7 @@ __meta__ = {
 [node name="Text" type="Label" parent="BattleElements/HPBar"]
 margin_right = 120.0
 margin_bottom = 24.0
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = SubResource( 4 )
 text = "1/1"
 align = 1
 valign = 1
@@ -139,8 +139,8 @@ margin_left = 35.0
 margin_top = -39.0
 margin_right = 54.0
 margin_bottom = -15.0
-custom_colors/font_color = Color( 0.847059, 0.870588, 0.133333, 1 )
 custom_fonts/font = SubResource( 1 )
+custom_colors/font_color = Color( 0.847059, 0.870588, 0.133333, 1 )
 align = 2
 valign = 1
 __meta__ = {
@@ -164,7 +164,7 @@ margin_left = -61.5232
 margin_top = -21.0396
 margin_right = 63.4767
 margin_bottom = 179.96
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 5 )
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false

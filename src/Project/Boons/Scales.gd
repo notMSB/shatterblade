@@ -34,7 +34,7 @@ func level_up(invNode): #upgrade every rock and stick
 		var boxHolder = invNode.dHolder.get_child(i).get_node("MoveBoxes")
 		invNode.dHolder.box_move(boxHolder.get_child(2), "Rock+")
 
-func start_battle(_startingHealth):
+func start_battle(_startingHealth, _battle):
 	boxesOK = true
 
 func check_move(usedBox, _targetHealth, _moveUser, real):
@@ -47,7 +47,7 @@ func check_move(usedBox, _targetHealth, _moveUser, real):
 				#print("Repeat")
 				boxesOK = false
 
-func end_battle(_endingHealth):
+func end_battle(_endingHealth, _battle):
 	if boxesOK: Boons.grant_favor(REWARD)
 	for box in usedBoxes:
 		box.get_node("Scales").visible = false

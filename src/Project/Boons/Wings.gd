@@ -7,14 +7,14 @@ var level = 0
 var usedMulligan
 var previewMulligan
 
-func start_battle(_startingHealth):
+func start_battle(_startingHealth, _battle):
 	usedMulligan = false
 	previewMulligan = false
 
 func start_preview(_previewUnits):
 	previewMulligan = usedMulligan
 
-func check_hit(usedBox, targetHealth, moveUser, real):
+func check_hit(usedBox, targetHealth, moveUser, real, _battle):
 	if moveUser.isPlayer:
 		if targetHealth == 0 and real:
 			#print("cool")

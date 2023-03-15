@@ -57,6 +57,7 @@ func create_options():
 		for j in vBoons.size():
 			totalBoons += 1
 			var newSelect = BoonSelect.instance()
+			newSelect.get_node("Button").set_scale(Vector2(.75,.75))
 			var boonName = vBoons[j]
 			newSelect.set_tooltip(Boons.generate_tooltip(boonName))
 			$Choices.add_child(newSelect)
@@ -64,10 +65,12 @@ func create_options():
 			newSelect.get_node("Button").text = boonName
 			if !textLabeled:
 				newSelect.get_node("Price").text = Boons.set_text()
-				newSelect.get_node("Price").set_position(Vector2(645, -25))
+				newSelect.get_node("Price").set_position(Vector2(605, -25))
 				textLabeled = true
-			newSelect.position.x = (i * INCREMENT) + (150 * j) - 499
-			newSelect.position.y = 65
+			var xPos = (i * INCREMENT) + (120 * j) - 465
+			if j > 1: xPos -= 240
+			newSelect.position.x = xPos
+			newSelect.position.y = 30 if j <= 1 else 85
 	var currentType = 0
 	var currentMember = 0
 	for member in partyMembers:

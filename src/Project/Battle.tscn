@@ -71,6 +71,18 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Peek" type="Button" parent="."]
+visible = false
+modulate = Color( 0.984314, 0.945098, 0, 1 )
+margin_left = 290.0
+margin_top = 390.0
+margin_right = 398.0
+margin_bottom = 458.0
+text = "PEEK"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="BattleUI" type="Node2D" parent="."]
 script = ExtResource( 12 )
 ResourceTracker = ExtResource( 17 )
@@ -155,3 +167,4 @@ __meta__ = {
 
 [connection signal="pressed" from="GoButton" to="." method="go_button_press"]
 [connection signal="pressed" from="Preview" to="." method="_on_Preview_pressed"]
+[connection signal="pressed" from="Peek" to="." method="_on_Peek_pressed"]

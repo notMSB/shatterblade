@@ -9,7 +9,7 @@ onready var Inventory = Map.inventoryWindow
 const MAXLEVEL = 1
 
 const XSTART = -250
-const INCREMENT = 500
+const INCREMENT = 150
 const YSTART = 50
 
 func setup():
@@ -23,6 +23,7 @@ func setup():
 		get_price(newSelect, boonName)
 		newSelect.position.x = XSTART + (i * INCREMENT)
 		newSelect.position.y = YSTART
+		newSelect.set_tooltip(Boons.generate_tooltip(boonName))
 
 func find_node_and_price(boonName):
 	for select in $Holder.get_children():

@@ -21,12 +21,18 @@ func _ready():
 	boonList = {
 		"Scales": {"virtue": v.j, "costs": [30, 50], "hardCosts": [50, 75]},
 		"Crown": {"virtue": v.j, "costs": [30, 50], "hardCosts": [50, 75]},
+		"Sword": {"virtue": v.j, "costs": [30, 50], "hardCosts": [50, 75]},
+		"Blind": {"virtue": v.j, "costs": [30, 50], "hardCosts": [50, 75]},
 		
 		"Column": {"virtue": v.s, "costs": [30, 50], "hardCosts": [50, 75]},
 		"Lion": {"virtue": v.s, "costs": [30, 50], "hardCosts": [50, 75]},
+		"Infinite": {"virtue": v.s, "costs": [30, 50], "hardCosts": [50, 75]},
+		"Weak": {"virtue": v.s, "costs": [30, 50], "hardCosts": [50, 75]},
 		
 		"Cup": {"virtue": v.t, "costs": [30, 50], "hardCosts": [50, 75]},
 		"Wings": {"virtue": v.t, "costs": [30, 50], "hardCosts": [50, 75]},
+		"Tides": {"virtue": v.t, "costs": [30, 50], "hardCosts": [50, 75]},
+		"Mask": {"virtue": v.t, "costs": [30, 50], "hardCosts": [50, 75]},
 	}
 
 func create_boon(boonName):
@@ -37,7 +43,7 @@ func create_boon(boonName):
 	babby.set_script(load(PATH + boonName + ".gd"))
 	babby.Boons = self
 
-func call_boon(callName, args = []): #callName is a string representing a function in the individual boon scripts
+func call_boon(callName, args = [], signalBase = null): #callName is a string representing a function in the individual boon scripts
 	var subFunc
 	var checkVal
 	var returnVal
@@ -45,6 +51,7 @@ func call_boon(callName, args = []): #callName is a string representing a functi
 		subFunc = funcref(boon, callName)
 		if subFunc.is_valid(): checkVal = subFunc.call_funcv(args)
 		if checkVal != null: returnVal = checkVal
+	if signalBase: signalBase.boon_signal()
 	return returnVal if returnVal else 0
 
 func call_specific(callName, args = [], boonName = ""): #todo: reconcile this and above function
@@ -64,10 +71,18 @@ func generate_tooltip(boonName):
 	match boonName:
 		"Scales": tip = "Difficulty: ** \n Condition: Win battles without reusing a box. \n Effect: Generates a new box with rotating items for use in battle. \n Upgrade: Rotating items become stronger."
 		"Crown": tip = "Difficulty: * \n Condition: Kill enemies with the crown. \n Effect: You get the crown. It's very normal. Enjoy! \n Upgrade: The Crown hits all enemies."
+		"Sword": tip = "Difficulty: * \n Condition: Use damaging gear when it has maximum durability. \n Effect: The activated gear deals more damage, as if you have 2 extra strength. \n Upgrade: Repairs always restore gear to maximum durability."
+		"Blind": tip = "Difficulty: ***** \n Downside: Enemy intents and damage preview are disabled while active. \n Condition: Win battles without deactivating. \n Effect: +2 strength for the party while active. \n Upgrade: Killing blows while active grant the user +8 shield."
+		
 		"Column": tip = "Difficulty: *** \n Condition: Win battles in which less than half the party has less health from where they started. \n Effect: One turn of 5 shield to every party member. \n Upgrade: 5 shield to the party every turn."
 		"Lion": tip = "Difficulty: *** \n Condition: Kill enemies without using attacks. \n Effect: 1 turn of thorns to every party member. \n Upgrade: The thorns become permanent."
+		"Infinite": tip = "Difficulty: * \n Condition: Break your gear. \n Effect: Regain a component used in the crafting recipe for the broken gear. \n Upgrade: Breaking gear grants the user 10 shield."
+		"Weak": tip = "Difficulty: ***** \n Downside: On battle start, the lowest health member is named VIP. Their health is set to 1 and they have a turn of Provoke. \n Condition: Win battles where the VIP survives. \n Effect: If the VIP survives, they are fully healed. \n Upgrade: Stealth instead of Provoke. Others gain 1 Dodge."
+		
 		"Cup": tip = "Difficulty: ** \n Condition: Split kills as evenly as possible among party members. \n Effect: The first damaging move used in battle has an extra hit. \n Upgrade: Every party member's first damaging move has an extra hit."
 		"Wings": tip = "Difficulty: ***** \n Condition: Kill enemies with exact lethal. \n Effect: Killing with exact lethal using an attack restores a use to the weapon involved. \n Upgrade: Once per battle, missing exact lethal counts it anyway and deals the excess damage to the next enemy."
+		"Tides": tip = "Difficulty: ** \n Condition: Deplete more uses of gear than you have total party members in a turn. \n Effect: Upon achieving the condition, units gain 1 Dodge for using gear that turn. \n Upgrade: Achieving the condition also activates Double XP mode for the remainder of the turn."
+		"Mask": tip = "Difficulty: ***** \n Downside: Enemies gain more health equal to the amount of times you've filled up the XP bar. \n Condition: Fill up the XP bar. \n Effect: None. \n Upgrade: Gain a +3 damage bonus when targeting an enemy with more current health than the move user's max health."
 	return tip
 
 func set_text():

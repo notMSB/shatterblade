@@ -10,7 +10,7 @@ var previewUsers = []
 var killers = []
 var level = 0
 
-func start_battle(_startingHealth):
+func start_battle(_startingHealth, _battle):
 	moveUsers.clear()
 	killers.clear()
 	for member in global.storedParty:
@@ -22,7 +22,7 @@ func start_preview(previewUnits):
 	for i in moveUsers.size():
 		previewUsers.append(previewUnits[i])
 
-func before_move(moveUser, real): #returns a bonus to amount of hits the move has, level lets entire party get a hit
+func before_move(moveUser, _usedMoveBox, real, _moveTarget, _battle): #returns a bonus to amount of hits the move has, level lets entire party get a hit
 	var currentUsers = moveUsers if real else previewUsers
 	if !currentUsers.has(moveUser):
 		currentUsers.append(moveUser)
@@ -39,7 +39,7 @@ func check_move(_usedBox, targetHealth, moveUser, real):
 		#if level >= 1:
 			#moveUsers.erase(moveUser) #refresh bonus hit
 
-func end_battle(_endingHealth):
+func end_battle(_endingHealth, _battle):
 	var highest = 0
 	var lowest = MAXENEMIES
 	for entry in killers:

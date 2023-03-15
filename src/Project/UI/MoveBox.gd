@@ -50,8 +50,9 @@ func reduce_uses(amount):
 	currentUses = min(currentUses, maxUses) #in the event that an effect puts the current too high
 	set_uses()
 
-func repair_uses():
-	currentUses = min(maxUses, currentUses + ceil(maxUses * REPAIRVALUE)) #round up for odds
+func repair_uses(bonus = false):
+	if bonus: currentUses = maxUses
+	else: currentUses = min(maxUses, currentUses + ceil(maxUses * REPAIRVALUE)) #round up for odds
 	set_uses()
 
 func set_uses(var newMax = null):

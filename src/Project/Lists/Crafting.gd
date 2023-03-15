@@ -25,7 +25,7 @@ var products = {
 			 c.garbage: "Back Rake", c.darkness: "Breaker Slash", c.blade: "Crusher Claw", c.tentacle: "Grapple"},
 	
 	c.sap: {c.sap: "Health Potion", c.venom: "Growth", c.fur: "Protect", c.bone: "Bonemerang", 
-			c.garbage: "Spit Shine", c.darkness: "Midnight Flare", c.blade: "Pierce", c.tentacle: "Remedy"},
+			c.garbage: "Spit Shine", c.darkness: "Midnight Flare", c.blade: "Pierce", c.tentacle: "Cold Spring"},
 	
 	c.venom: {c.venom: "Poison Potion", c.fur: "Restore", c.bone: "Plague", c.garbage: "Belch", 
 			  c.darkness: "Mass Infection", c.blade: "Piercing Sting", c.tentacle: "Constrict"},
@@ -33,7 +33,7 @@ var products = {
 	c.fur: {c.fur: "Leather Buckler", c.bone: "Careful Strike", c.garbage: "Play Dead", c.darkness: "Defensive Pact", 
 			c.blade: "Sucker Punch", c.tentacle: "Bulwark"},
 	
-	c.bone: {c.bone: "Bone Zone", c.garbage: "Bone Club", c.darkness: "Seeker Volley", c.blade: "Coldsteel", c.tentacle: "Frigid Waters"},
+	c.bone: {c.bone: "Bone Zone", c.garbage: "Bone Club", c.darkness: "Seeker Volley", c.blade: "Coldsteel", c.tentacle: "Submersion"},
 	
 	c.garbage: {c.garbage: "Concoction", c.darkness: "Dark Dive", c.blade: "Shiv",  c.tentacle: "Meat Harvest"},
 	

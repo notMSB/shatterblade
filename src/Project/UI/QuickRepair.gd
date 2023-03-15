@@ -15,9 +15,10 @@ func disassemble(weaponName):
 		elif i == 1: DisplayHolder.box_move($RightComponent, components[i])
 
 func fix_and_reset():
-	originalBox.repair_uses()
+	originalBox.repair_uses(Inventory.repairBonus)
 	Map.set_quick_panels()
 	Inventory.reset_and_update_itemDict()
+	Inventory.set_box_value(originalBox, originalBox.moves[0])
 
 func _on_LeftButton_pressed():
 	if Inventory.remove_component($LeftComponent.get_node("Name").text):

@@ -74,6 +74,9 @@ var battleWindow
 var inventoryWindow
 enum pointTypes {none, start, battle, quest, visited, event, town, dungeon, repair, trader, temple, end} #Points to the left of "visited" turn off after being activated
 
+var mascotList = ["Scorpion", "Kraken"]
+var currentMascot
+
 var canEnd = false
 var checkedLines = []
 var nextCheck = []
@@ -91,7 +94,6 @@ func _ready():
 	biomesList = Enemies.b
 	availableBiomes = range(0, biomesList.size()-1) #exclude the "none" at the end
 	set_biome()
-	Trading.assign_component_values(currentBiome, "Scorpion") #todo: change this when new mascots are added
 	setup_inventory()
 	
 	if global.storedParty.size() > 0: 
@@ -143,6 +145,8 @@ func set_biome():
 		biomesList.city: $Background.color = Color("6f7300") #Yellow
 		biomesList.battlefield: $Background.color = Color("923e00") #Orange
 		biomesList.graveyard: $Background.color = Color("4e004e") #Purple
+	currentMascot = mascotList[randi() % (mascotList.size())]
+	Trading.assign_component_values(currentBiome, currentMascot)
 
 func set_boon_text():
 	favorNode.get_node("Virtue").text = Boons.set_text()
@@ -180,14 +184,14 @@ func activate_point(point):
 		townValue += currentDay
 		if townValue <= point.sectionNum: grab_event("Town")
 		else: pass #todo: event saying town is closed
+	elif type == pointTypes.battle or !isDay or point.sectionNum != currentDay: #no events at night
+		activate_battle()
 	elif type == pointTypes.trader:
 		grab_event("Store")
 	elif type == pointTypes.repair:
 		grab_event("Crafting")
 	elif type == pointTypes.temple:
 		grab_event("Temple")
-	elif type == pointTypes.battle or !isDay or point.sectionNum > currentDay: #no events at night
-		activate_battle()
 	elif type == pointTypes.event:
 		if point.pointQuest:
 			$Events/EventDescription.text = str(point.pointQuest["description"], "\nfor\n", point.pointQuest["prize"])
@@ -304,7 +308,9 @@ func use_map_move(unit):
 	if selectedMapBox.get_parent().name == "MoveBoxes": moveUser = global.storedParty[selectedMapBox.get_parent().get_parent().get_index()]
 	if moveUser == null or moveUser.mana >= Moves.moveList[selectedMapMove]["resVal"]:
 		if Moves.moveList[selectedMapMove].has("healing"):
-			unit.heal(Moves.moveList[selectedMapMove]["healing"])
+			if Moves.moveList[selectedMapMove]["target"] == Moves.targetType.allies:
+				for unit in global.storedParty: unit.heal(Moves.moveList[selectedMapMove]["healing"])
+			else: unit.heal(Moves.moveList[selectedMapMove]["healing"])
 		if Moves.moveList[selectedMapMove].has("statBoost"):
 			unit.boost_stat(Moves.moveList[selectedMapMove]["statBoost"])
 		selectedMapBox.reduce_uses(1)
@@ -379,10 +385,10 @@ func place_dungeons(possibleDungeons, borderPoints): #dungeons start in one sect
 			point.info["direction"] = point.sectionNum - entrySection #0 for entry 1 for exit
 			if entrySection == point.sectionNum: 
 				newDungeon.originLocation = point
-				point.set_name("Entry")
+				point.set_name(str(currentMascot, " Entry"))
 			else: 
 				newDungeon.exitLocation = point
-				point.set_name("Exit")
+				point.set_name(str(currentMascot, " Exit"))
 		dungeonLine.dungeonize()
 		newDungeon.setup(dungeonLine)
 		place_town(newDungeon.exitLocation, borderPoints[entrySection])
@@ -481,7 +487,6 @@ func add_new_member():
 	unit.update_hp()
 	unit.ui.get_node("Name").text = unit.displayName
 	set_display_color(unit.ui)
-	battleWindow.partyNum += 1
 	battleWindow.setup_player(global.storedParty.size()-1, true)
 	unit.ui.set_battle()
 	battleWindow.set_ui(unit)
@@ -662,9 +667,12 @@ func analyze_points(one, two):
 			one.lines.append(pointLine) #add line to points
 			two.lines.append(pointLine)
 
-func increment_xp(amount, rewardUnit):
-	var newValue = $XPBar.value + amount
+func increment_xp(amount, rewardUnit, double):
+	var increment = amount * 2 if double else amount
+	var newValue = $XPBar.value + increment
 	while newValue >= $XPBar.max_value:
+		Boons.call_boon("bar_filled", [])
+		battleWindow.currentLevel += 1
 		var rewards = [Enemies.enemyList[rewardUnit.identity]["rewards"][0]]
 		inventoryWindow.add_multi(rewards)
 		newValue -= $XPBar.max_value
@@ -691,8 +699,7 @@ func set_time_text():
 	if isDay: 
 		timeNode.get_node("State").text = "Day " + String(currentDay + 1) + " - " + String(time - 50)
 	else: 
-		timeNode.get_node("State").text = "Night " + String(currentDay + 1)
-		timeNode.get_node("Hour").text = String(time)
+		timeNode.get_node("State").text = "Night " + String(currentDay + 1) + " - " + String(time)
 
 func eval_darkness(pointA, pointB):
 	if pointA.sectionNum != currentDay and pointB.sectionNum != currentDay and !currentDungeon:

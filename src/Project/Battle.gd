@@ -38,7 +38,10 @@ var gameOver = false
 var battleDone = true
 var previewBattleDone = false
 var autoPreview = true
-var rewardUnit
+var doubleXP = false
+var canSee = true
+var enemyBonus = false
+var currentLevel = 0
 
 var executionOrder = [] #box, move, user, target
 enum e {box, move, user, target}
@@ -51,7 +54,7 @@ func _ready(): #Generate units and add to turn order
 	targetType = Moves.targetType
 	randomize() #funny rng
 	if !battleDone:
-		Boons.call_boon("start_battle", [get_partyHealth()])
+		Boons.call_boon("start_battle", [get_partyHealth(), self])
 		for unit in $Units.get_children():
 			if !unit.isPlayer: #Set enemy intents
 				set_intent(unit)
@@ -89,12 +92,13 @@ func create_enemies(enemyDifficulty, opponents):
 	var createdUnit
 	var enemy
 	var i = 0
+	if get_parent().hardMode: enemyDifficulty += 1
 	for opponent in opponents:
 		createdUnit = Enemy.instance()
 		enemy = Enemies.enemyList[opponent]
 		
-		if get_parent().hardMode: enemyDifficulty += 1
-		createdUnit.make_stats(enemy["stats"][enemyDifficulty])
+		if enemyBonus: createdUnit.make_stats(enemy["stats"][enemyDifficulty] + currentLevel)
+		else: createdUnit.make_stats(enemy["stats"][enemyDifficulty])
 		createdUnit.identity = opponent
 		createdUnit.spriteBase = enemy["sprite"]
 		createdUnit.battleName = str(createdUnit.identity, String(i))
@@ -113,21 +117,29 @@ func create_enemies(enemyDifficulty, opponents):
 	enemyNum = opponents.size()
 	yield(get_tree().create_timer(0), "timeout")
 
+func toggle_blind(toggle):
+	for enemy in get_team(false):
+		enemy.ui.get_node("Info").visible = toggle
+		enemy.ui.get_node("MoveBox").visible = toggle
+		if autoPreview != toggle: _on_Preview_pressed()
+		$Preview.visible = toggle
+		$Peek.visible = !toggle
+
 func welcome_back(newOpponents = null, currentArea = 0): #reusing an existing battle scene for a new battle
 	$BattleUI.toggle_trackers(true)
 	turnCount = 0
 	$BattleUI.enemyCount = 0
 	battleDone = false
 	previewBattleDone = false
-	rewardUnit = null
-	Boons.call_boon("start_battle", [get_partyHealth()])
 	for unit in $Units.get_children():
 		if !unit.isPlayer:
 			unit.cease_to_exist()
 		else:
 			set_ui(unit, true)
+	Boons.call_boon("start_battle", [get_partyHealth(), self])
 	turnIndex = -1
 	yield(create_enemies(currentArea, newOpponents), "completed")
+	if !canSee: toggle_blind(false)
 	if autoPreview: toggle_previews(true)
 	play_turn(false)
 
@@ -183,8 +195,9 @@ func play_turn(notFirstTurn = true):
 		for unit in global.storedParty:
 			for box in unit.boxHolder.get_children():
 				var boxName = box.get_node("Name").text
-				if  boxName == "Reload" or boxName == "Catch": box._on_Button_pressed()
+				if box.currentUses > 0 and (boxName == "Reload" or boxName == "Catch"): box._on_Button_pressed()
 		Boons.call_boon("start_turn")
+		doubleXP = false
 		if autoPreview: yield(preview_turn(), "completed")
 		$GoButton.visible = true
 		yield(self, "turn_taken")
@@ -307,6 +320,7 @@ func target_chosen(index = null):
 	moveUser.update_resource(usedMoveBox.resValue, chosenMove["type"], false)
 	$BattleUI.toggle_moveboxes(usedMoveBox.get_parent(), chosenMove.has("quick"), true, true) #If quick, check the resources. Otherwise, turn off boxes as appropriate
 	$BattleUI.toggle_buttons(false)
+	usedMoveBox = null
 	if autoPreview: yield(preview_turn(), "completed")
 
 func go_button_press():
@@ -423,6 +437,7 @@ func execute_move(real = true):
 	var timeoutVal = 0.5 if real else 0.0
 	if real: previewBattleDone = false
 	hitBonus = 0
+	damageBuff = 0
 	var targets = []
 	if chosenMove["target"] == targetType.enemies:
 		targets = get_team(!moveUser.isPlayer, true, real)
@@ -446,23 +461,25 @@ func execute_move(real = true):
 			return
 	
 	if moveUser.isPlayer:
-		hitBonus += Boons.call_boon("before_move", [moveUser, real])
+		hitBonus += Boons.call_boon("before_move", [moveUser, usedMoveBox, real, moveTarget, self])
 		moveUser.storedTarget = moveTarget
-		if usedMoveBox != null and real:
-			usedMoveBox.timesUsed += 1
+		if usedMoveBox != null:
+			if real: usedMoveBox.timesUsed += 1
 			if chosenMove["type"] > Moves.moveType.basic and chosenMove["target"] != targetType.none and usedMoveBox.maxUses > 0: #durability does not go down for reloads and moves without a classtype
 				if StatusManager.find_status(moveUser, "Durability Redirect"): #This whole nest is dedicated to the stabilizer
-					for box in moveUser.boxHolder.get_children():
-						if box.maxUses > 0 and !box.buttonMode: #buttonMode clause only relevant for multiple stabilizers on same character (why)
-							if box.get_index() > 1: usedMoveBox.reduce_uses(1) #if it gets past the relic slots it can't be used
-							if box.currentUses > 0:
-								box.reduce_uses(1)
-								break
-							else: #if it's broken mid-turn
-								continue
+					if real:
+						for box in moveUser.boxHolder.get_children():
+							if box.maxUses > 0 and !box.buttonMode: #buttonMode clause only relevant for multiple stabilizers on same character (why)
+								if box.get_index() > 1: usedMoveBox.reduce_uses(1) #if it gets past the relic slots it can't be used
+								if box.currentUses > 0:
+									box.reduce_uses(1)
+									break
+								else: #if it's broken mid-turn
+									continue
 				else:
-					usedMoveBox.reduce_uses(1)
-			if chosenMove["type"] == Moves.moveType.trick or chosenMove.has("cycle"):
+					if real: usedMoveBox.reduce_uses(1)
+					Boons.call_boon("uses_reduced", [moveUser, usedMoveBox, usedMoveBox.currentUses, real, self])
+			if real and (chosenMove["type"] == Moves.moveType.trick or chosenMove.has("cycle")):
 				$BattleUI.advance_box_move(usedMoveBox)
 	
 	#Actual effects of move handled here
@@ -475,7 +492,6 @@ func execute_move(real = true):
 	hits+= hitBonus
 	var bounceHits = true if chosenMove.has("barrage") else false
 	var i = 0
-	damageBuff = 0
 	if chosenMove.has("timing") and chosenMove["timing"] == Moves.timings.before: #Some moves activate effects before the damage
 		activate_effect()
 	while i < hits: #repeat for every hit, while loop enables it to be modified on the fly by move effects from outside this file
@@ -513,7 +529,7 @@ func execute_move(real = true):
 			if target.currentHealth <= 0:
 				if moveUser.isPlayer: #overkill only returns nonzero for a specific boon and level
 					StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.gettingKill, [damageCalc]) 
-					var overkill = Boons.call_boon("check_hit", [usedMoveBox, target.currentHealth, moveUser, real])
+					var overkill = Boons.call_boon("check_hit", [usedMoveBox, target.currentHealth, moveUser, real, self])
 					if overkill > 0:
 						var nextTarget = get_next_team_unit(target, real)
 						if nextTarget: nextTarget.take_damage(overkill)
@@ -571,12 +587,11 @@ func activate_effect(effectName = "effect", argsName = "args"):
 func evaluate_completion(deadUnit):
 	if deadUnit.real:
 		var map = get_node_or_null("../Map")
-		if map: map.increment_xp(deadUnit.maxHealth, deadUnit)
+		if map: map.increment_xp(deadUnit.maxHealth, deadUnit, doubleXP)
 		deadEnemies += 1
 		previewDeadEnemies += 1
 		if deadEnemies >= enemyNum:
 			battleDone = true
-			rewardUnit = deadUnit
 			#print("Battle Ready To Complete")
 	else:
 		previewDeadEnemies += 1
@@ -605,7 +620,7 @@ func done(rewards = []):
 		return get_tree().reload_current_scene()
 	else: #Map
 		var map = get_node("../Map")
-		Boons.call_boon("end_battle", [get_partyHealth()])
+		Boons.call_boon("end_battle", [get_partyHealth(), self])
 		for i in global.storedParty.size():
 			set_ui(global.storedParty[i])
 			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], map.inventoryWindow)
@@ -623,5 +638,11 @@ func _on_Preview_pressed():
 	autoPreview = !autoPreview
 	toggle_previews(autoPreview)
 	var textSet = "ON" if autoPreview else "OFF"
-	$Preview.text = "PREVIEW" + textSet
+	$Preview.text = "PREVIEW " + textSet
 	if autoPreview: yield(preview_turn(), "completed")
+
+
+func _on_Peek_pressed():
+	Boons.call_boon("peek", [])
+	toggle_blind(true)
+	canSee = true

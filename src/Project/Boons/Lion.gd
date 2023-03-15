@@ -5,7 +5,7 @@ var Boons
 const REWARD = 5
 var level = 0
 
-func start_battle(_startingHealth): #make thorns passive
+func start_battle(_startingHealth, _battle): #make thorns passive
 	for unit in global.storedParty:
 		if level < 1:
 			unit.passives["Thorns"] = 2

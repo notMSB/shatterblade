@@ -47,6 +47,7 @@ __meta__ = {
 [node name="UI" type="Node2D" parent="ColorRect"]
 
 [node name="BoonText" type="Label" parent="ColorRect/UI"]
+margin_left = 351.0
 margin_top = 10.0
 margin_right = 1280.0
 margin_bottom = 46.0
@@ -74,11 +75,11 @@ margin_left = 244.0
 margin_top = 626.0
 margin_right = 396.0
 margin_bottom = 694.0
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 2 )
 text = "Difficulty"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -102,11 +103,11 @@ margin_left = 564.0
 margin_top = 626.0
 margin_right = 716.0
 margin_bottom = 694.0
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 2 )
 disabled = true
 text = "Start"
 __meta__ = {
@@ -119,11 +120,11 @@ margin_left = 884.0
 margin_top = 626.0
 margin_right = 1046.0
 margin_bottom = 694.0
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 2 )
 text = "Random"
 __meta__ = {
 "_edit_use_anchors_": false

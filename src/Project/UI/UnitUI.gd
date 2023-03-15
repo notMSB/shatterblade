@@ -14,7 +14,10 @@ func _on_Button_pressed():
 	if !Battle.visible:
 		Battle.get_node("../Map").use_map_move(global.storedParty[get_index()])
 	else:
-		Battle.target_chosen(get_index() + global.storedParty.size())
+		if Battle.chosenMove["target"] == Battle.Moves.targetType.ally:
+			Battle.target_chosen(get_index())
+		else:
+			Battle.target_chosen(get_index() + global.storedParty.size())
 
 func position_preview_rect(projectedHP = null, isPlayer = false):
 	var multiplier = 120 if isPlayer else 200

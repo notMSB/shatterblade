@@ -17,7 +17,7 @@ var statusList = {
 	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.01, "value"]},
 	"Stun": {"activation": statusActivations.beforeTurn, "subtractLate": true, "system": false, "effect": funcref(self, "stunned"), "args": ["unit"]},
 	
-	"Provoke": {"activation": statusActivations.passive},
+	"Provoke": {"activation": statusActivations.passive, "system": false},
 	"Stealth": {"activation": statusActivations.passive, "system": false},
 	
 	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 1]},

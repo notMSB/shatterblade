@@ -49,9 +49,11 @@ enum iModes {default, craft, trade, offer}
 enum oModes {remove, repair, reward}
 var mode = iModes.craft
 
+var repairBonus = false
+
 func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
 	if global.itemDict.empty():
-		global.itemDict = {"wing": 0, "fang": 0, "claw": 0, "sap": 0, "venom": 0, "fur": 0, "blade": 0, "bone": 0, "garbage": 0, "darkness": 0, "moves": ["Resource Seed", "Health Seed", "Health Potion"]}
+		global.itemDict = {"wing": 0, "fang": 0, "claw": 0, "sap": 0, "venom": 0, "fur": 0, "blade": 0, "bone": 0, "garbage": 0, "darkness": 0, "tentacle": 0,"moves": ["Resource Seed", "Health Seed", "Health Potion"]}
 	MOVESPACES += Boons.call_boon("prep_inventory")
 	dHolder = $HolderHolder/DisplayHolder
 	make_grid()
@@ -227,7 +229,8 @@ func quick_repair(moveBox, componentBox):
 	if craftingRestriction.has(componentBox.get_node("Name").text):
 		if moveBox.currentUses < moveBox.maxUses: #do not repair a full weapon
 			clear_box(componentBox)
-			moveBox.repair_uses()
+			moveBox.repair_uses(repairBonus)
+			set_box_value(moveBox, moveBox.moves[0])
 			return true
 	else:
 		return false
@@ -418,6 +421,9 @@ func identify_product(box): #updates box color and trade value
 			box.get_node("ColorRect").visible = false
 		else:
 			box.get_node("ColorRect").color = DEFAULTCOLOR
+	set_box_value(box, boxName)
+
+func set_box_value(box, boxName):
 	var boxInfo = box.get_node("Info")
 	boxInfo.text = String(Trading.get_item_value(boxName, box))
 	boxInfo.visible = false if boxInfo.text == "0" else true
@@ -427,7 +433,7 @@ func get_all_gear():
 	for player in global.storedParty:
 		for box in player.boxHolder.get_children():
 			var boxName = box.get_node("Name").text
-			if Moves.moveList[boxName]["slot"] == Moves.equipType.gear and box.currentUses < box.maxUses:
+			if Moves.moveList[boxName]["slot"] == Moves.equipType.gear and box.currentUses < box.maxUses and box.currentUses > 0:
 				allGear.append(box)
 	for iBox in iHolder.get_children():
 		var iName = iBox.get_node("Name").text
@@ -484,6 +490,18 @@ func update_itemDict(itemName):
 			global.itemDict[itemName] += 1
 		else: #it's a move and goes in the holder
 			global.itemDict[MOVEHOLDER].append(itemName)
+
+func get_component_count():
+	var total = 0
+	for item in global.itemDict:
+		if item != "moves": #components only
+			if global.itemDict[item] >= 1:
+				total += global.itemDict[item]
+	return total
+
+func check_and_award_component(box):
+	#if get_component_count() <= 1: #potential balance fix that prevents component hoarding
+	add_item(Crafting.break_down(box.moves[0])[0])
 
 func exit(): #Save inventory and leave, todo: make the passives and discounts apply somewhere other than here
 	deselect_box(otherSelection)

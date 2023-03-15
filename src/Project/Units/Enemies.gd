@@ -19,7 +19,7 @@ onready var enemyList = {
 	"BIG RAT": {"stats": [9, 15, 20, 24, 31], "passives": {"Dodgy": 5}, "specials": ["Careful Strike", "Mass Infection"], 
 		"biome": b.plains, "rewards": ["fur"], "locations": [l.night], "difficulty": 3, "sprite": "Rat", "elite": true},
 	
-	"FFlower": {"stats": [8, 12, 16, 20, 24], "passives": {"Thorns": 2}, "specials": ["Growth"], "hardSpecials": ["Careful Strike"],
+	"FFlower": {"stats": [8, 12, 16, 20, 24], "passives": {"Thorns": 1}, "specials": ["Growth"], "hardSpecials": ["Careful Strike"],
 		"biome": b.forest, "rewards": ["sap"], "locations": [l.day], "difficulty": 1, "sprite": "Flower"},
 	"FWolf": {"stats": [11, 14, 18, 24, 27], "specials": ["Frostfang"], "hardSpecials": ["Take Down"],
 		"biome": b.forest, "rewards": ["claw"], "locations": [l.day], "difficulty": 2, "sprite": "Wolf"},
@@ -38,7 +38,7 @@ onready var enemyList = {
 		"biome": b.mountain, "rewards": ["wing"], "locations": [l.day], "difficulty": 2, "sprite": "Bird"},
 	"MWolf": {"stats": [18, 22, 26, 30, 34], "specials": ["Frostfang"], "hardSpecials": ["Take Down"],
 		"biome": b.mountain, "rewards": ["claw"], "locations": [l.day], "difficulty": 3, "sprite": "Wolf"},
-	"MFlower": {"stats": [8, 12, 16, 20, 24], "passives": {"Thorns": 2}, "specials": ["Growth"], "hardSpecials": ["Careful Strike"],
+	"MFlower": {"stats": [8, 12, 16, 20, 24], "passives": {"Thorns": 1}, "specials": ["Growth"], "hardSpecials": ["Careful Strike"],
 		"biome": b.mountain, "rewards": ["sap"], "locations": [l.night], "difficulty": 1, "sprite": "Flower"},
 	"MSnake": {"stats": [21, 26, 31, 36, 41], "passives": {"Venomous": 0}, "specials": ["Constrict"], "hardSpecials": ["Venoshock"],
 		"biome": b.mountain, "rewards": ["venom"], "locations": [l.night], "difficulty": 2, "sprite": "Snake"},
@@ -62,7 +62,7 @@ onready var enemyList = {
 		"biome": b.battlefield, "rewards": ["fang"], "locations": [l.day], "difficulty": 1, "sprite": "Bat"},
 	"BRat": {"stats": [10, 14, 18, 22, 26], "passives": {"Venomous": 0}, "specials": ["Careful Strike"], "hardSpecials": ["Triple Hit"],
 		"biome": b.battlefield, "rewards": ["fur"], "locations": [l.day], "difficulty": 2, "sprite": "Rat"},
-	"BFlower": {"stats": [13, 18, 23, 28, 33], "passives": {"Thorns": 2}, "specials": ["Plague"], "hardSpecials": ["Mass Infection"],
+	"BFlower": {"stats": [13, 18, 23, 28, 33], "passives": {"Thorns": 1}, "specials": ["Plague"], "hardSpecials": ["Mass Infection"],
 		"biome": b.battlefield, "rewards": ["sap"], "locations": [l.day], "difficulty": 3, "sprite": "Flower"},
 	"BGoblin": {"stats": [5, 10, 15, 20, 25], "passives": {"Dodgy": 1}, "specials": ["Dark Dive"], "hardSpecials": ["Dark Dive"],
 		"biome": b.battlefield, "rewards": ["garbage"], "locations": [l.night], "difficulty": 1, "sprite": "Goblin"},
@@ -84,20 +84,13 @@ onready var enemyList = {
 	"BIG SNAKE": {"stats": [37, 46, 55, 64, 73], "passives": {"Venomous": 0}, "specials": ["Constrict", "Venoshock"], "hardSpecials": ["Triple Hit"],
 		"biome": b.graveyard, "rewards": ["venom"], "locations": [l.night], "difficulty": 3, "sprite": "Snake", "elite": true},
 	
-	"Kraken": {"stats": [1, 1], "specials": [], "hardSpecials": [],
-		"biome": b.none, "rewards": ["blade"], "locations": [l.special], "difficulty": 2},
+	"Kraken": {"stats": [19, 27, 35, 43, 51], "specials": ["Eldritch Forces"], "hardSpecials": ["Meat Harvest"],
+		"biome": b.none, "rewards": ["tentacle"], "locations": [l.dungeon], "difficulty": 3, "sprite": "Kraken"},
 	"Phoenix": {"stats": [1, 1], "specials": [], "hardSpecials": [],
 		"biome": b.none, "rewards": ["blade"], "locations": [l.special], "difficulty": 2},
 	"Scorpion": {"stats": [17, 22, 27, 32, 37], "specials": ["Crusher Claw"], "hardSpecials": ["Piercing Sting"],
 		"biome": b.none, "rewards": ["blade"], "locations": [l.dungeon], "difficulty": 3, "sprite": "Scorpion"},
 }
-
-func get_dungeon_mascot():
-	var dungeonEnemies = []
-	for enemy in enemyList:
-		if enemyList[enemy]["locations"].has(l.dungeon):
-			dungeonEnemies.append(enemy)
-	return dungeonEnemies[randi() % dungeonEnemies.size()]
 
 func generate_encounter(rating, isDay, biome, dungeonEnemy = null, seenElite = false): #dungeon will bring its own list of valid enemies
 	var strongestEnemy = 3

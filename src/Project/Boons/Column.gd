@@ -6,7 +6,7 @@ const REWARD = 5
 var healthCheck = []
 var level = 0
 
-func start_battle(_startingHealth):
+func start_battle(_startingHealth, _battle):
 	healthCheck.clear()
 	for unit in global.storedParty:
 		unit.shield += 5
@@ -21,7 +21,7 @@ func start_turn():
 			unit.shield += 5
 			unit.update_hp()
 
-func end_battle(_endingHealth):
+func end_battle(_endingHealth, _battle):
 	var failures = 0
 	for i in global.storedParty.size():
 		if global.storedParty[i].currentHealth < healthCheck[i]:

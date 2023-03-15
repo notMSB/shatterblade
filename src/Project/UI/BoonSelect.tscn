@@ -11,7 +11,7 @@ font_data = ExtResource( 1 )
 size = 32
 font_data = ExtResource( 1 )
 
-[sub_resource type="DynamicFont" id=4]
+[sub_resource type="DynamicFont" id=3]
 size = 14
 font_data = ExtResource( 1 )
 
@@ -24,11 +24,11 @@ margin_left = 587.0
 margin_top = 19.0
 margin_right = 735.0
 margin_bottom = 87.0
+custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "name"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -74,7 +74,7 @@ margin_left = -112.0
 margin_top = -157.0
 margin_right = 113.0
 margin_bottom = -22.0
-custom_fonts/font = SubResource( 4 )
+custom_fonts/font = SubResource( 3 )
 text = "aaaaaaaaaaaaaa"
 align = 1
 valign = 1
