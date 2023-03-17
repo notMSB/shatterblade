@@ -14,7 +14,7 @@ func start_battle(_startingHealth, _battle):
 func start_preview(_previewUnits):
 	previewMulligan = usedMulligan
 
-func check_hit(usedBox, targetHealth, moveUser, real, _battle):
+func check_hit(usedBox, targetHealth, moveUser, real, _battle): #fix so that murdering your own party doesn't give favor
 	if moveUser.isPlayer:
 		if targetHealth == 0 and real:
 			#print("cool")

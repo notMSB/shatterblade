@@ -10,9 +10,10 @@ func _on_Toggle_pressed():
 	$Party.visible = !$Party.visible
 	$Puzzle.visible = !$Puzzle.visible
 
-
 func _on_Table_pressed():
 	$Data/Crafting/EquipmentHolder.visible = true
+	$Toggle.visible = false
+	$Table.visible = false
 	$Party.visible = false
 	$Puzzle.visible = false
 	

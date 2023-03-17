@@ -2,12 +2,15 @@ extends Node2D
 
 export (PackedScene) var Player
 export (PackedScene) var Enemy
+export (PackedScene) var LogEntry
 
 onready var Moves = get_node("/root/Game/Data/Moves")
 onready var StatusManager = get_node("/root/Game/Data/StatusManager")
 onready var Enemies = get_node("/root/Game/Data/Enemies")
 onready var Formations = get_node("/root/Game/Data/Formations")
 onready var Boons = get_node("/root/Game/Data/Boons")
+
+var Map
 
 var enemyNum = 0
 var deadEnemies = 0
@@ -33,11 +36,13 @@ var damageBuff
 var info
 var hits
 var hitBonus = 0
+var logIndex = 0
 
 var gameOver = false
 var battleDone = true
 var previewBattleDone = false
 var autoPreview = true
+var levelLock = false
 var doubleXP = false
 var canSee = true
 var enemyBonus = false
@@ -117,6 +122,9 @@ func create_enemies(enemyDifficulty, opponents):
 	enemyNum = opponents.size()
 	yield(get_tree().create_timer(0), "timeout")
 
+func set_map():
+	Map = get_node("../Map")
+
 func toggle_blind(toggle):
 	for enemy in get_team(false):
 		enemy.ui.get_node("Info").visible = toggle
@@ -195,10 +203,12 @@ func play_turn(notFirstTurn = true):
 		for unit in global.storedParty:
 			for box in unit.boxHolder.get_children():
 				var boxName = box.get_node("Name").text
-				if box.currentUses > 0 and (boxName == "Reload" or boxName == "Catch"): box._on_Button_pressed()
+				if box.currentUses > 0 and (boxName == "Reload" or boxName == "Catch") and !unit.isStunned: box._on_Button_pressed()
 		Boons.call_boon("start_turn")
 		doubleXP = false
-		if autoPreview: yield(preview_turn(), "completed")
+		log_turn()
+		logIndex = 0
+		if autoPreview: yield(preview_turn(), "completed")	
 		$GoButton.visible = true
 		yield(self, "turn_taken")
 		#print("might be able to eval status here")
@@ -206,6 +216,7 @@ func play_turn(notFirstTurn = true):
 		StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
 	else: #Enemy turn
+		if $BattleLog/Scroll/ColorRect.get_child_count() > logIndex and $BattleLog/Scroll/ColorRect.get_child(logIndex).logUser == currentUnit: focus_log()
 		if currentUnit.currentHealth > 0: #if you're dead stop doing moves
 			StatusManager.evaluate_statuses(currentUnit, StatusManager.statusActivations.beforeTurn)
 			Boons.call_boon("post_status_eval", [currentUnit, currentUnit.real])
@@ -321,6 +332,7 @@ func target_chosen(index = null):
 	$BattleUI.toggle_moveboxes(usedMoveBox.get_parent(), chosenMove.has("quick"), true, true) #If quick, check the resources. Otherwise, turn off boxes as appropriate
 	$BattleUI.toggle_buttons(false)
 	usedMoveBox = null
+	log_turn()
 	if autoPreview: yield(preview_turn(), "completed")
 
 func go_button_press():
@@ -333,10 +345,18 @@ func go_button_press():
 		chosenMove = moveData[1]
 		moveUser = moveData[2]
 		moveTarget = moveData[3]
+		focus_log()
+		if moveUser.currentHealth < 0: continue
 		yield(execute_move(), "completed")
 		if battleDone: break
 	executionOrder.clear()
 	emit_signal("turn_taken")
+
+func focus_log():
+	if logIndex > 0: $BattleLog/Scroll/ColorRect.get_child(logIndex - 1).recolor()
+	$BattleLog/Scroll/ColorRect.get_child(logIndex).focus()
+	if logIndex > 4: $BattleLog/Scroll.scroll_horizontal = 240 * logIndex
+	logIndex += 1
 
 func cut_from_order(box):
 	box.change_rect_color(Color(.5,.1,.5,1)) #set any already selected box back to default color
@@ -362,7 +382,9 @@ func cut_from_order(box):
 		$BattleUI.toggle_single(box, !userCommitted)  #If the user is already committed (non-quick), disable the box. Otherwise enable it.
 		if userCommitted: box.buttonMode = true #Needed or else the cut box stays disabled for the turn 
 		$BattleUI.toggle_moveboxes(foundAction[0].get_parent(), !userCommitted, true, checkChannel(foundAction[2])) #Checks to re-enable other actions due to earlier refund
+	log_turn()
 	if autoPreview: yield(preview_turn(), "completed")
+	
 
 func checkChannel(unit): #Channels can only be used as the first action of a turn. This checks if the unit has an action in the queue already.
 	for action in executionOrder:
@@ -383,10 +405,36 @@ func create_preview_units():
 	yield(get_tree().create_timer(0), "timeout")
 
 func convert_unit(target):
-	if !is_instance_valid(target): return null
-	elif target == null: return target
+	if !is_instance_valid(target): return target
+	if target == null: return target
 	elif typeof(target) == TYPE_STRING: return target
 	else: return $PreviewUnits.get_child(target.get_index())
+
+func log_turn():
+	var logIncrement = 240
+	var totalLogs = 0
+	for child in $BattleLog/Scroll/ColorRect.get_children():
+		$BattleLog/Scroll/ColorRect.remove_child(child)
+		child.queue_free()
+	
+	for i in executionOrder.size(): #box, move, user, target
+		var entry = LogEntry.instance()
+		$BattleLog/Scroll/ColorRect.add_child(entry)
+		entry.assemble(executionOrder[i][2], executionOrder[i][3], executionOrder[i][0].moves[0])
+		entry.position.x = logIncrement * totalLogs
+		totalLogs += 1
+	
+	for enemy in get_team(false, true):
+			if enemy.currentHealth > 0 and !enemy.isStunned:
+				var entry = LogEntry.instance()
+				$BattleLog/Scroll/ColorRect.add_child(entry)
+				if !canSee: entry.assemble(enemy, null, "X")
+				else: entry.assemble(enemy, enemy.storedTarget, enemy.storedAction)
+				entry.position.x = logIncrement * totalLogs
+				totalLogs += 1
+	if totalLogs > 5: $BattleLog/Scroll/_h_scroll.rect_position.y = 70
+	#$BattleLog/Scroll.update()
+	$BattleLog/Scroll/ColorRect.rect_min_size.x = max(1280, totalLogs * logIncrement)
 
 func toggle_previews(toggle):
 	for unit in $Units.get_children():
@@ -418,7 +466,7 @@ func preview_turn():
 		usedMoveBox = null
 		for enemy in get_team(false, true, false):
 			StatusManager.evaluate_statuses(enemy, StatusManager.statusActivations.beforeTurn)
-			if enemy.currentHealth > 0 and !enemy.isStunned: #poison could kill
+			if enemy.currentHealth > 0 and !enemy.isStunned:
 				moveUser = enemy
 				moveTarget = convert_unit(enemy.storedTarget)
 				moveName = enemy.storedAction
@@ -447,11 +495,9 @@ func execute_move(real = true):
 	elif chosenMove["target"] == targetType.enemyTargets:
 		var tempTargets = get_team(!moveUser.isPlayer, true, real)
 		for unit in tempTargets:
-			if typeof(unit.storedTarget) == TYPE_STRING:
-				if unit.storedTarget == "Party" or "Everyone":
+			if typeof(unit.storedTarget) == typeof(moveTarget.storedTarget):
+				if unit.storedTarget == moveTarget.storedTarget:
 					targets.append(unit)
-			elif unit.storedTarget == moveTarget.storedTarget:
-				targets.append(unit)
 	elif chosenMove["target"] == targetType.allies:
 		targets = get_team(moveUser.isPlayer, true, real)
 	else: #single target
@@ -586,8 +632,7 @@ func activate_effect(effectName = "effect", argsName = "args"):
 
 func evaluate_completion(deadUnit):
 	if deadUnit.real:
-		var map = get_node_or_null("../Map")
-		if map: map.increment_xp(deadUnit.maxHealth, deadUnit, doubleXP)
+		if Map: Map.increment_xp(deadUnit.maxHealth, deadUnit, doubleXP)
 		deadEnemies += 1
 		previewDeadEnemies += 1
 		if deadEnemies >= enemyNum:
@@ -619,12 +664,11 @@ func done(rewards = []):
 	if !get_parent().mapMode:
 		return get_tree().reload_current_scene()
 	else: #Map
-		var map = get_node("../Map")
 		Boons.call_boon("end_battle", [get_partyHealth(), self])
 		for i in global.storedParty.size():
 			set_ui(global.storedParty[i])
-			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], map.inventoryWindow)
-		if !rewards.empty(): map.inventoryWindow.add_multi(rewards)
+			$BattleUI.playerHolder.manage_and_color_boxes(global.storedParty[i], Map.inventoryWindow)
+		if !rewards.empty(): Map.inventoryWindow.add_multi(rewards)
 		#map.inventoryWindow.add_item(reward)
 		toggle_previews(false)
 		visible = false
@@ -641,8 +685,17 @@ func _on_Preview_pressed():
 	$Preview.text = "PREVIEW " + textSet
 	if autoPreview: yield(preview_turn(), "completed")
 
-
 func _on_Peek_pressed():
 	Boons.call_boon("peek", [])
 	toggle_blind(true)
 	canSee = true
+	log_turn()
+
+func _on_Lock_pressed():
+	levelLock = !levelLock
+	var textSet = ""
+	if levelLock:
+		textSet += "UN"
+		Map.get_node("XPBar").modulate = Color(1,.2,.2,1)
+	else: Map.get_node("XPBar").modulate = Color(1,1,1,1)
+	$Lock.text = textSet + "LOCK LEVEL"

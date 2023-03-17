@@ -7,7 +7,7 @@
 size = 34
 font_data = ExtResource( 2 )
 
-[sub_resource type="DynamicFont" id=3]
+[sub_resource type="DynamicFont" id=2]
 size = 20
 font_data = ExtResource( 2 )
 
@@ -20,7 +20,7 @@ modulate = Color( 0, 0, 0, 1 )
 show_behind_parent = true
 margin_top = 1.0
 margin_right = 1280.0
-margin_bottom = 541.0
+margin_bottom = 456.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -35,27 +35,29 @@ margin_left = 600.0
 margin_top = 140.0
 margin_right = 708.0
 margin_bottom = 208.0
+custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 1 )
 text = "Exit"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Description" type="Label" parent="."]
+visible = false
 margin_top = 19.0
 margin_right = 1277.0
 margin_bottom = 124.0
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 2 )
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ColorRect" type="ColorRect" parent="Description"]
+visible = false
 modulate = Color( 0, 0, 0, 1 )
 show_behind_parent = true
 margin_left = 1.0

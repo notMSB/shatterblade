@@ -1,5 +1,6 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=16 format=2]
 
+[ext_resource path="res://src/Project/UI/LogEntry.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=3]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=4]
 [ext_resource path="res://src/Project/UI/UnitUI.tscn" type="PackedScene" id=8]
@@ -27,6 +28,7 @@ font_data = ExtResource( 4 )
 script = ExtResource( 13 )
 Player = ExtResource( 10 )
 Enemy = ExtResource( 9 )
+LogEntry = ExtResource( 1 )
 
 [node name="FullBG" type="ColorRect" parent="."]
 margin_left = 1.0
@@ -38,10 +40,35 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="BattleLog" type="Node2D" parent="."]
+
+[node name="Panel" type="ColorRect" parent="BattleLog"]
+margin_right = 1280.0
+margin_bottom = 80.0
+color = Color( 0, 0.478431, 0.478431, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Scroll" type="ScrollContainer" parent="BattleLog"]
+margin_right = 1280.0
+margin_bottom = 80.0
+follow_focus = true
+scroll_vertical_enabled = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="BattleLog/Scroll"]
+margin_right = 1280.0
+margin_bottom = 200.0
+rect_min_size = Vector2( 1280, 200 )
+color = Color( 0, 0.478431, 0.478431, 1 )
+
 [node name="BattleBG" type="ColorRect" parent="."]
 self_modulate = Color( 0.0352941, 0.796078, 1, 1 )
 margin_left = -2.0
-margin_top = -3.0
+margin_top = 80.0
 margin_right = 1280.0
 margin_bottom = 460.0
 color = Color( 0.168627, 0.141176, 0.141176, 1 )
@@ -67,6 +94,17 @@ margin_top = 390.0
 margin_right = 398.0
 margin_bottom = 458.0
 text = "PREVIEW ON"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Lock" type="Button" parent="."]
+modulate = Color( 0.984314, 0.945098, 0, 1 )
+margin_left = 882.0
+margin_top = 390.0
+margin_right = 990.0
+margin_bottom = 458.0
+text = "LOCK LEVEL"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -167,4 +205,5 @@ __meta__ = {
 
 [connection signal="pressed" from="GoButton" to="." method="go_button_press"]
 [connection signal="pressed" from="Preview" to="." method="_on_Preview_pressed"]
+[connection signal="pressed" from="Lock" to="." method="_on_Lock_pressed"]
 [connection signal="pressed" from="Peek" to="." method="_on_Peek_pressed"]

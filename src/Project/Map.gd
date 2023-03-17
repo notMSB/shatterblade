@@ -159,6 +159,7 @@ func setup_inventory():
 func setup_battle():
 	battleWindow = get_parent().get_node("Battle")
 	battleWindow.visible = false
+	battleWindow.set_map()
 
 func activate_inventory():
 	inventoryWindow.welcome_back()
@@ -475,6 +476,7 @@ func regen_map(newMember = false):
 		set_time_text()
 		for unit in global.storedParty:
 			unit.currentHealth = unit.maxHealth
+			unit.mana = unit.maxMana
 			unit.update_hp()
 	else: print("Bad map gen settings")
 
@@ -672,12 +674,14 @@ func increment_xp(amount, rewardUnit, double):
 	var increment = amount * 2 if double else amount
 	var newValue = $XPBar.value + increment
 	while newValue >= $XPBar.max_value:
-		Boons.call_boon("bar_filled", [])
-		battleWindow.currentLevel += 1
-		var rewards = [Enemies.enemyList[rewardUnit.identity]["rewards"][0]]
-		inventoryWindow.add_multi(rewards)
-		newValue -= $XPBar.max_value
-		$XPBar.max_value += XPINCREMENT
+		if battleWindow.levelLock: newValue = $XPBar.max_value - 1
+		else:
+			Boons.call_boon("bar_filled", [])
+			battleWindow.currentLevel += 1
+			var rewards = [Enemies.enemyList[rewardUnit.identity]["rewards"][0]]
+			inventoryWindow.add_multi(rewards)
+			newValue -= $XPBar.max_value
+			$XPBar.max_value += XPINCREMENT
 	$XPBar.value = newValue
 	$XPBar/Label.text = str($XPBar.value, "/", $XPBar.max_value)
 
@@ -748,7 +752,6 @@ func create_quick_craft(one, two, totalRows, quickIncrement):
 	newQuick.assemble(one, two)
 
 func set_quick_repairs():
-	
 	var quickIncrement = 80
 	var totalRows = 0
 	var weaponList = inventoryWindow.get_all_gear()

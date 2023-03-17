@@ -20,6 +20,11 @@ func _on_Button_pressed():
 			Battle.target_chosen(get_index() + global.storedParty.size())
 
 func position_preview_rect(projectedHP = null, isPlayer = false):
+	if !isPlayer:
+		if projectedHP == 0 and Battle.Boons.playerBoons.has("Wings"): #might want to make this check faster down the line
+			$BattleElements/PreviewRect.color = Color(.447, .447, 0, .392)
+		else:
+			$BattleElements/PreviewRect.color = Color(.447, 0, 0, .392)
 	var multiplier = 132 if isPlayer else 200
 	var differential = 66 if isPlayer else 50
 	if projectedHP == null: projectedHP = $BattleElements/HPBar.value

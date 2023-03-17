@@ -13,21 +13,21 @@ var statusList = {
 	"Regen": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "regenerate"), "args": ["unit", 1]},
 	
 	"Poison": {"activation": statusActivations.beforeTurn, "subtractEarly": true, "system": true, "effect": funcref(self, "value_damage"), "args": ["unit", "value",]},
-	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -0.01, "value"]},
-	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.01, "value"]},
+	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -1, "value", "unit", "self"]},
+	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 1, "value", "unit", "self"]},
 	"Stun": {"activation": statusActivations.beforeTurn, "subtractLate": true, "system": false, "effect": funcref(self, "stunned"), "args": ["unit"]},
 	
 	"Provoke": {"activation": statusActivations.passive, "system": false},
 	"Stealth": {"activation": statusActivations.passive, "system": false},
 	
-	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 1]},
-	"Blocking": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "adjust_damage"), "args": ["damage", 0.5]},
+	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "multiply_damage"), "args": ["damage", 1]},
+	"Blocking": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "multiply_damage"), "args": ["damage", 0.5]},
 	"Durability Redirect": {"activation": statusActivations.passive, "system": false},
 	"Movecost Refund": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["usedMoveBox", "unit"]},
 	"Gain Mana": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["damage", "unit"]},
 	
 	"Venomous": {"activation": statusActivations.usingAttack, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 2]},
-	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "adjust_damage"), "args": ["damage", -1]},
+	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "multiply_damage"), "args": ["damage", -1]},
 	"Thorns": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5]},
 	"Constricting": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "constrict_attack"), "args": ["unit", "intent"], "targetlock": true, "hittable": true},
 }
@@ -54,8 +54,7 @@ func countdown_turns(unit, turnStart):
 				var status = statusList[cond["name"]]
 				if status.has("system"): #Pass if there is no countdown system
 					if status["system"] and (turnStart == status.has("subtractEarly")): #Points usually subtract at turn end
-						if cond["value"] < 10: cond["value"] = 0
-						else: cond["value"] -= ceil(cond["value"] *.5)
+						cond["value"] -= ceil(cond["value"] *.5)
 					elif !status["system"] and (turnStart != status.has("subtractLate")): #Turns usually subtract at turn start
 						cond["value"] -= 1
 					if cond["value"] <= 0:
@@ -79,15 +78,27 @@ func add_status(unit, status, value = 0): #If value is not sent, status does not
 	if unit.ui: unit.update_status_ui()
 	#print(unit.statuses)
 
+func reduce_status(unit, status, value):
+	var targetInfo = find_status(unit, status, true)
+	if targetInfo:
+		var targetList = targetInfo[0]
+		var targetStatus = targetInfo[1]
+		if !targetStatus: return
+		targetStatus["value"] -= floor(value)
+		if targetStatus["value"] <= 0:
+			remove_status(unit, targetList, targetStatus)
+		if unit.ui: unit.update_status_ui()
+
 func remove_status(unit, list, cond):
 	if !unit.isPlayer and statusList[cond["name"]].has("targetlock"): #If the status in the above list has target lock, remove the enemy's lock
 		unit.targetlock = false
 	list.erase(cond)
 
-func find_status(unit, status):
+func find_status(unit, status, returnList = false):
 	var list = unit.statuses[statusList[status]["activation"]]
 	for cond in list:
 		if cond["name"] == status:
+			if returnList: return [list, cond]
 			return cond
 
 func evaluate_statuses(unit, type, args = []):
@@ -106,6 +117,7 @@ func evaluate_statuses(unit, type, args = []):
 						elif String(argument) == "attacker": newArgs.append(Battle.moveUser)
 						elif String(argument) == "value": newArgs.append(cond["value"])
 						elif String(argument) == "intent": newArgs.append(unit.storedTarget)
+						elif String(argument) == "self": newArgs.append(cond["name"])
 						else: newArgs.append(argument)
 				var newInfo = statusInfo["effect"].call_funcv(newArgs)
 				if newInfo != null: info = newInfo
@@ -121,10 +133,24 @@ func evaluate_statuses(unit, type, args = []):
 
 #Effects
 
-func adjust_damage(damage, adjustment, value = 1):
+func multiply_damage(damage, adjustment, value = 1):
 	var multiplier = 1 if adjustment >= 0 else -1
 	var damageMod = floor(damage * value * abs(adjustment)) #abs needed since floor/ceil round negative numbers oppositely
 	return max(0, damage + (damageMod * multiplier))
+
+func adjust_damage(damage, direction, value, user, statusName):
+	var newDamage = damage + value * direction
+	if direction > 0:
+		if value > damage:
+			newDamage = damage * 2
+			reduce_status(user, statusName, damage)
+			return newDamage
+	else:
+		if newDamage < 0:
+			reduce_status(user, statusName, damage)
+			return 0
+	reduce_status(user, statusName, value)
+	return newDamage
 
 func refund_resource(refundVal, user):
 	user.update_resource(refundVal, user.types.magic, true)

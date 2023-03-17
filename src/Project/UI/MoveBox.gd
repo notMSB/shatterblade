@@ -139,5 +139,7 @@ func _on_Button_pressed():
 			else:
 				boxModeScene.get_node("Crafting/EquipmentHolder").visible = false
 				boxModeScene.get_node("../Party").visible = true
+				boxModeScene.get_node("../Toggle").visible = true
+				boxModeScene.get_node("../Table").visible = true
 		_: #map scene
 			pass

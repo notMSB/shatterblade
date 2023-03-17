@@ -51,11 +51,11 @@ func _ready():
 	
 	
 	"Constrict": {"target": targetType.enemy, "damage": 5, "resVal": 20, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Stun", funcref(self, "is_unit_poisoned")], "description": "Stuns target if they are poisoned", "slot": equipType.gear, "type": moveType.magic},
-	"Frostfang": {"target": targetType.enemy, "damage": 10, "resVal": 20, "status": "Chill", "value": 50, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", .5, true], "description": "Multiplies target chill by 1.5 after the hit", "slot": equipType.gear, "type": moveType.magic},
+	"Frostfang": {"target": targetType.enemy, "damage": 5, "resVal": 20, "status": "Chill", "value": 5, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", .5, true], "description": "Multiplies target chill by 1.5 after the hit", "slot": equipType.gear, "type": moveType.magic},
 	"Plague": {"target": targetType.enemies, "damaging": true, "resVal": 30, "status": "Poison", "value": 5, "slot": equipType.gear, "type": moveType.magic, "uses": 6},
 	"Venoshock": {"target": targetType.enemy, "damaging": true, "resVal": 10, "status": "Poison", "value": 6, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", funcref(self, "get_unit_poison")],"description": "Shield 1 for every poison that enemy has.", "slot": equipType.gear, "type": moveType.magic},
 	"Belch": {"target": targetType.enemy, "resVal": 20, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Poison", funcref(self, "get_unit_poison")], "description": "Poisons enemy as much as the user is poisoned", "slot": equipType.gear, "type": moveType.magic},
-	"Mass Infection": {"target": targetType.everyone, "damaging": true, "resVal": 30, "status": "Poison", "value": 10, "slot": equipType.gear, "type": moveType.magic, "uses": 6, "condition": funcref(self, "is_damaged")},
+	"Mass Infection": {"target": targetType.everyone, "damaging": true, "resVal": 30, "status": "Poison", "value": 10, "slot": equipType.gear, "type": moveType.magic, "uses": 6, "condition": funcref(self, "is_damaged"), "Description": "Only affects damaged targets."},
 	"Dark Spikes": {"target": targetType.enemy, "damage": 6, "resVal": 20, "barrage": true, "hits": 3, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", 1], "killeffect": funcref(self, "change_attribute"), "killargs": ["moveUser", "shield", 12], "description": "12 shield on kill, 100% recoil", "slot": equipType.gear, "type": moveType.magic},
 	"Seeker Volley": {"target": targetType.enemy, "damage": 3, "resVal": 20, "barrage": true, "hits": 4, "slot": equipType.gear, "type": moveType.magic, "condition": funcref(self, "is_damaged"), "description": "Only targets damaged enemies if possible."},
 	
@@ -66,12 +66,12 @@ func _ready():
 	"Invisibility": {"target": targetType.ally, "resVal": 15, "status": "Stealth", "value": 2, "slot": equipType.gear, "type": moveType.magic, "quick": true},
 	"Midnight Flare": {"target": targetType.none, "resVal": 20, "quick": true, "slot": equipType.gear, "type": moveType.magic, "effect": funcref(self, "midnight_flare"), "args": [], "description": "All enemies target the lowest health ally."},
 	"Defensive Pact": {"target": targetType.ally, "resVal": 10, "damage": 5 ,"effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 15], "description": "Adds 15 shield", "slot": equipType.gear, "type": moveType.magic},
-	"Cold Spring": {"target": targetType.allies, "healing": 6, "resVal": 35, "slot": equipType.gear, "type": moveType.magic, "status": "Chill", "value": 50},
-	"Submersion": {"target": targetType.everyone, "status": "Chill", "value": 50, "slot": equipType.gear, "type": moveType.magic},
+	"Cold Spring": {"target": targetType.allies, "healing": 6, "resVal": 35, "slot": equipType.gear, "type": moveType.magic, "status": "Chill", "value": 10},
+	"Submersion": {"target": targetType.everyone, "status": "Chill", "value": 10, "slot": equipType.gear, "type": moveType.magic},
 	
-	"Coldsteel": {"target": targetType.enemy, "damage": 5, "resVal": 3, "status": "Chill", "value": 25, "hits": 2, "slot": equipType.gear, "type": moveType.trick},
+	"Coldsteel": {"target": targetType.enemy, "damage": 3, "resVal": 3, "hits": 2, "slot": equipType.gear, "type": moveType.trick, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", "damageCalc"], "description": "Each hit inflicts chill equal to total damage dealt."},
 	"Crusher Claw": {"target": targetType.enemy, "damage": 8, "resVal": 2, "timing": timings.before, "effect": funcref(self, "crusher_claw"), "args": ["moveTarget", 1], "description": "Extra hit if the target has shields or dodge", "slot": equipType.gear, "type": moveType.trick},
-	"Piercing Sting": {"target": targetType.enemy, "damage": 11, "resVal": 4, "status": "Poison", "value": 6, "slot": equipType.gear, "type": moveType.trick, "uses": 5},
+	"Piercing Sting": {"target": targetType.enemy, "damage": 11, "resVal": 4, "status": "Poison", "value": 6, "slot": equipType.gear, "type": moveType.trick},
 	"Quick Attack": {"target": targetType.enemy, "damage": 6, "resVal": 2, "quick": true, "slot": equipType.gear, "type": moveType.trick},
 	"Sucker Punch": {"target": targetType.enemy, "damage": 7, "resVal": 3, "timing": timings.before, "effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 1], "description": "Extra hit if enemy targets user", "slot": equipType.gear, "type": moveType.trick},
 	"Bonemerang": {"target": targetType.enemy, "damage": 4, "resVal": 1, "quick": true, "cycle": ["Catch"], "slot": equipType.gear, "type": moveType.trick, "uses": 12, "description": "Must be caught or else it is lost"},
@@ -100,7 +100,7 @@ func _ready():
 	"Bone Attack": {"slot": equipType.none, "resVal": 0 ,"type": moveType.none, "uselimit": 1, "fleeting": true, "target": targetType.enemy, "damage": 7, "quick": true, "uses": 1},
 	"Concoction": {"target": targetType.enemies, "damage": 8, "resVal": 0, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .5], "description": "50% recoil", "slot": equipType.gear, "type": moveType.item},
 	"Dark Matter": {"target": targetType.everyone, "damage": 15, "resVal": 0, "slot": equipType.gear, "type": moveType.item},
-	"Tentacle Jar": {"target": targetType.enemyTargets, "damage": 8, "status": "Chill", "value": 50, "slot": equipType.gear, "type": moveType.item},
+	"Tentacle Jar": {"target": targetType.enemyTargets, "damage": 8, "status": "Chill", "value": 6, "slot": equipType.gear, "type": moveType.item},
 	
 	"Rock": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 2, "quick": true, "cursed": true},
 	"Rock+": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick+"], "target": targetType.enemy, "damage": 4, "quick": true, "cursed": true},
