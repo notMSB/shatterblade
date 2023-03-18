@@ -9,7 +9,7 @@ func prep_inventory():
 	global.itemDict["moves"].append("Crown")
 
 func added_boon(invNode):
-	invNode.add_item("Crown")
+	invNode.add_item("Crown", true)
 
 func level_up(invNode): #find the crown and upgrade it
 	for i in global.storedParty.size():

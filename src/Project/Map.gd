@@ -215,7 +215,7 @@ func check_delay():
 		delayBattle = null
 		activate_battle(temp)
 
-func activate_battle(newOpponents = null):
+func activate_battle(newOpponents = null, isHunt = false):
 	
 	#if inventoryWindow.visible:
 		#delayBattle = newOpponents
@@ -226,6 +226,9 @@ func activate_battle(newOpponents = null):
 		var dayEncounter = isDay
 		if isDay and activePoint.sectionNum > currentDay: dayEncounter = false #if it's day but you're out of bounds it counts as night
 		newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + get_difficulty_mod(), dayEncounter, currentBiome, null, seenElite)
+	if isHunt: 
+		for i in currentArea: newOpponents.append(newOpponents[0]) #scale up hunts by area
+		if Enemies.enemyList[newOpponents[0]]["difficulty"] == 1: newOpponents.append(newOpponents[0])
 	battleWindow.visible = true
 	check_for_elite(newOpponents)
 	battleWindow.welcome_back(newOpponents, currentArea)
@@ -538,7 +541,7 @@ func organize_lines():
 			elif point.position.x >= endIndex.position.x: endIndex = point
 
 func classify_remaining_points():
-	Quests.setup(currentBiome)
+	Quests.setup(currentBiome, currentMascot)
 	var remainingPoints = []
 	for point in $HolderHolder/PointHolder.get_children():
 		if point.visible and point.pointType == pointTypes.none:

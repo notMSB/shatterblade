@@ -245,4 +245,4 @@ func _on_GoButton_pressed():
 		 battleWindow.get_node("Units").add_child(unit)
 	battleWindow.visible = true
 	toggle_visibilities(false)
-	battleWindow.welcome_back(newOpponents)
+	battleWindow.welcome_back(newOpponents, enemyDifficulty)

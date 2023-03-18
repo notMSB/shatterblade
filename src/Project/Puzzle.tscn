@@ -32,10 +32,10 @@ PlayerProfile = ExtResource( 1 )
 PlayerMove = ExtResource( 2 )
 
 [node name="EnemyHolder" type="Node2D" parent="HolderHolder"]
-position = Vector2( 0, -128 )
+position = Vector2( -640, -128 )
 
 [node name="Enemy 0" type="Node2D" parent="HolderHolder/EnemyHolder"]
-position = Vector2( -450, 0 )
+position = Vector2( 176, 0 )
 script = ExtResource( 9 )
 
 [node name="Sprite" type="Sprite" parent="HolderHolder/EnemyHolder/Enemy 0"]
@@ -44,9 +44,9 @@ position = Vector2( 651, 439 )
 texture = ExtResource( 7 )
 
 [node name="Choice" type="OptionButton" parent="HolderHolder/EnemyHolder/Enemy 0"]
-margin_left = 552.0
+margin_left = 560.0
 margin_top = 326.0
-margin_right = 752.0
+margin_right = 760.0
 margin_bottom = 364.0
 text = "none"
 items = [ "none", null, false, 0, null ]
@@ -78,7 +78,7 @@ __meta__ = {
 }
 
 [node name="Enemy 1" type="Node2D" parent="HolderHolder/EnemyHolder"]
-position = Vector2( -150, 0 )
+position = Vector2( 472, 0 )
 script = ExtResource( 9 )
 
 [node name="Sprite" type="Sprite" parent="HolderHolder/EnemyHolder/Enemy 1"]
@@ -121,7 +121,7 @@ __meta__ = {
 }
 
 [node name="Enemy 2" type="Node2D" parent="HolderHolder/EnemyHolder"]
-position = Vector2( 150, 0 )
+position = Vector2( 768, 0 )
 script = ExtResource( 9 )
 
 [node name="Sprite" type="Sprite" parent="HolderHolder/EnemyHolder/Enemy 2"]
@@ -164,7 +164,7 @@ __meta__ = {
 }
 
 [node name="Enemy 3" type="Node2D" parent="HolderHolder/EnemyHolder"]
-position = Vector2( 450, 0 )
+position = Vector2( 1064, 0 )
 script = ExtResource( 9 )
 
 [node name="Sprite" type="Sprite" parent="HolderHolder/EnemyHolder/Enemy 3"]
@@ -412,9 +412,9 @@ __meta__ = {
 visible = false
 modulate = Color( 0.984314, 0.945098, 0, 1 )
 margin_left = 586.0
-margin_top = 446.0
+margin_top = 382.0
 margin_right = 694.0
-margin_bottom = 514.0
+margin_bottom = 450.0
 text = "START BATTLE"
 __meta__ = {
 "_edit_use_anchors_": false

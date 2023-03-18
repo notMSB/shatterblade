@@ -10,7 +10,7 @@ var SHIELDVAL = 8
 func start_battle(_startingHealth, battle):
 	battle.canSee = false
 	for unit in global.storedParty:
-		unit.strength += STRENGTHBUFF
+		unit.tempStrength += STRENGTHBUFF
 		unit.update_strength()
 
 func check_hit(_usedMoveBox, targetHealth, moveUser, _real, battle):
@@ -21,7 +21,8 @@ func check_hit(_usedMoveBox, targetHealth, moveUser, _real, battle):
 func end_battle(_endingHealth, battle):
 	if !battle.canSee: Boons.grant_favor(REWARD)
 
-func peek():
-	for unit in global.storedParty:
-		unit.strength -= STRENGTHBUFF
-		unit.update_strength()
+func peek(turnCount):
+	if turnCount <= 1:
+		for unit in global.storedParty:
+			unit.tempStrength -= STRENGTHBUFF
+			unit.update_strength()

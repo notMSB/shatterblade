@@ -4,7 +4,7 @@ onready var Battle
 
 #Statuses are stored using a 2D array which is set by activation condition
 #When a condition occurs, functions are run if that condition's array has 1 or more items in it
-enum statusActivations {beforeTurn, gettingHit, usingAttack, gettingKill, passive}
+enum statusActivations {beforeTurn, gettingHit, usingAttack, gettingKill, afterHit, passive}
 
 const COUNTDOWNVAL = 50
 
@@ -28,7 +28,8 @@ var statusList = {
 	
 	"Venomous": {"activation": statusActivations.usingAttack, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 2]},
 	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "multiply_damage"), "args": ["damage", -1]},
-	"Thorns": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5]},
+	"Thorns": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5]},
+	"Firewall": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", "shield"]},
 	"Constricting": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "constrict_attack"), "args": ["unit", "intent"], "targetlock": true, "hittable": true},
 }
 
@@ -118,6 +119,7 @@ func evaluate_statuses(unit, type, args = []):
 						elif String(argument) == "value": newArgs.append(cond["value"])
 						elif String(argument) == "intent": newArgs.append(unit.storedTarget)
 						elif String(argument) == "self": newArgs.append(cond["name"])
+						elif String(argument) == "shield": newArgs.append(unit.shield)
 						else: newArgs.append(argument)
 				var newInfo = statusInfo["effect"].call_funcv(newArgs)
 				if newInfo != null: info = newInfo
@@ -164,7 +166,7 @@ func value_damage(unit, value, multiplier = 1):
 	return unit.currentHealth
 
 func counter_attack(target, value):
-	target.take_damage(value)
+	if value > 0: target.take_damage(value)
 
 func regenerate(unit, healing):
 	unit.heal(healing)

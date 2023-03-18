@@ -129,7 +129,7 @@ func quest_labor(time): #task that takes X time
 
 func quest_hunt(target): #battle with rare enemy
 	give_reward(false) #reward can be given in advance since battles are currently inescapable
-	Map.activate_battle([target]) #the reward is the component from the target
+	Map.activate_battle([target], true) #the reward is the component from the target
 
 func quest_weapon_request(_weaponType): #random weapon of a certain class
 	#Map.inventoryWindow.offerMode = Map.inventoryWindow.oModes.reward

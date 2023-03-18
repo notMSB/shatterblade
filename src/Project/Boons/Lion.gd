@@ -9,6 +9,7 @@ func start_battle(_startingHealth, _battle): #make thorns passive
 	for unit in global.storedParty:
 		if level < 1:
 			unit.passives["Thorns"] = 2
+			print("h")
 		else:
 			unit.passives["Thorns"] = 0
 

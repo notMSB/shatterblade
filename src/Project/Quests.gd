@@ -18,6 +18,7 @@ const SERVICES = 2
 var servicesMade = 0
 
 var currentBiome
+var currentMascot
 
 var relics = []
 var cheapComponents = []
@@ -28,8 +29,9 @@ func _ready():
 	relics = Moves.get_relics()
 	#generate_quest()
 
-func setup(biome):
+func setup(biome, mascot):
 	currentBiome = biome
+	currentMascot = mascot
 	sort_components()
 
 func generate_quest():
@@ -71,7 +73,8 @@ func generate_hunt():
 	var targets = []
 	for enemy in Enemies.enemyList:
 		var enemyData = Enemies.enemyList[enemy]
-		if (enemyData["locations"].has(Enemies.l.night) and enemyData["difficulty"] < 3) or enemyData["locations"].has(Enemies.l.dungeon): 
+		if ((enemyData["locations"].has(Enemies.l.night) and enemyData["difficulty"] < 3 and enemyData["biome"] == currentBiome) 
+		or (enemyData["locations"].has(Enemies.l.dungeon)) and enemy == currentMascot): 
 			targets.append(enemy)
 	return rando_item(targets)
 

@@ -77,10 +77,8 @@ func update_hp(newMax = false):
 	if ui != null:
 		ui.get_node("BattleElements/HPBar").value = currentHealth
 		ui.get_node("BattleElements/HPBar/Text").text = str(currentHealth, "/", maxHealth)
-		if isPlayer:
-			ui.get_node("BattleElements/Shield").text = "[" + String(shield) + "]"
-		else:
-			ui.get_node("BattleElements/HP").text += "[" + String(shield) + "]"
+		ui.get_node("BattleElements/Shield").text = "[" + String(shield) + "]"
+		if !isPlayer: ui.get_node("BattleElements/Shield").visible = true if shield > 0 else false
 
 func update_strength(resetTemp = false):
 	if resetTemp: tempStrength = 0

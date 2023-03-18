@@ -10,38 +10,44 @@ const XINCREMENT = 79
 const YINCREMENT = 59
 
 #components
-enum c {wing, fang, claw, sap, venom, fur, bone, garbage, darkness, blade, tentacle}
+enum c {wing, fang, claw, sap, venom, fur, bone, garbage, darkness, blade, tentacle, flame}
 
 var products = {
 	c.wing: {c.wing: "Speed Potion", c.fang: "Vampire", c.claw: "Dive Bomb", c.sap: "Dodge",
 			 c.venom: "Venoshock", c.fur: "Hide", c.bone: "Flex", c.garbage: "Goblin Dodge", 
-			 c.darkness: "Invisibility", c.blade: "Triple Hit", c.tentacle: "Sideswipe"},
+			 c.darkness: "Invisibility", c.blade: "Triple Hit", c.tentacle: "Sideswipe", c.flame: "Icarus"},
 	
 	c.fang: {c.fang: "Throwing Knife", c.claw: "Take Down", c.sap: "Taste Test", c.venom: "Poison Strike",
 			 c.fur: "Cleave", c.bone: "Frostfang", c.garbage: "Tasty Bite", c.darkness: "Feeding Frenzy", 
-			 c.blade: "Power Attack", c.tentacle: "Below Blow"},
+			 c.blade: "Power Attack", c.tentacle: "Below Blow", c.flame: "Flametongue"},
 	
-	c.claw: {c.claw: "Brass Knuckles", c.sap: "Eye Poke", c.venom: "Taunt", c.fur: "Quick Attack", c.bone: "Turtle Up", 
-			 c.garbage: "Back Rake", c.darkness: "Breaker Slash", c.blade: "Crusher Claw", c.tentacle: "Grapple"},
+	c.claw: {c.claw: "Brass Knuckles", c.sap: "Eye Poke", c.venom: "Taunt", c.fur: "Quick Attack", 
+			 c.bone: "Turtle Up", c.garbage: "Back Rake", c.darkness: "Breaker Slash", c.blade: "Crusher Claw", 
+			 c.tentacle: "Grapple", c.flame: "Brand"},
 	
 	c.sap: {c.sap: "Health Potion", c.venom: "Growth", c.fur: "Protect", c.bone: "Bonemerang", 
-			c.garbage: "Spit Shine", c.darkness: "Midnight Flare", c.blade: "Pierce", c.tentacle: "Cold Spring"},
+			c.garbage: "Spit Shine", c.darkness: "Soul Sample", c.blade: "Pierce", c.tentacle: "Cold Spring",
+			c.flame: "Fireball"},
 	
 	c.venom: {c.venom: "Poison Potion", c.fur: "Restore", c.bone: "Plague", c.garbage: "Belch", 
-			  c.darkness: "Mass Infection", c.blade: "Piercing Sting", c.tentacle: "Constrict"},
+			  c.darkness: "Mass Infection", c.blade: "Piercing Sting", c.tentacle: "Constrict", c.flame: "Squalorbomb"},
 	
 	c.fur: {c.fur: "Leather Buckler", c.bone: "Careful Strike", c.garbage: "Play Dead", c.darkness: "Defensive Pact", 
-			c.blade: "Sucker Punch", c.tentacle: "Bulwark"},
+			c.blade: "Sucker Punch", c.tentacle: "Bulwark", c.flame: "Firewall"},
 	
-	c.bone: {c.bone: "Bone Zone", c.garbage: "Bone Club", c.darkness: "Seeker Volley", c.blade: "Coldsteel", c.tentacle: "Submersion"},
+	c.bone: {c.bone: "Bone Zone", c.garbage: "Bone Club", c.darkness: "Seeker Volley", c.blade: "Coldsteel", 
+			 c.tentacle: "Submersion", c.flame: "Combust"},
 	
-	c.garbage: {c.garbage: "Concoction", c.darkness: "Dark Dive", c.blade: "Shiv",  c.tentacle: "Meat Harvest"},
+	c.garbage: {c.garbage: "Concoction", c.darkness: "Dark Dive", c.blade: "Shiv",  c.tentacle: "Meat Harvest",
+				c.flame: "Wildfire"},
 	
-	c.darkness: {c.darkness: "Dark Matter", c.blade: "Dark Spikes",  c.tentacle: "Eldritch Forces"},
+	c.darkness: {c.darkness: "Dark Matter", c.blade: "Dark Spikes", c.tentacle: "Eldritch Forces", c.flame: "Midnight Flare"},
 	
-	c.blade: {c.blade: "Storm of Steel", c.tentacle: "Deep Cut"},
+	c.blade: {c.blade: "Storm of Steel", c.tentacle: "Deep Cut", c.flame: "Firedance"},
 	
-	c.tentacle: {c.tentacle: "Tentacle Jar"}
+	c.tentacle: {c.tentacle: "Tentacle Jar", c.flame: "Monument"},
+	
+	c.flame: {c.flame: "Ring of Fire"}
 }
 
 func generate_grids():

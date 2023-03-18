@@ -162,9 +162,6 @@ func setup_enemy(unit, enemyCount, totalEnemies):
 	var display = UnitUI.instance()
 	add_child(display)
 	#display.get_node("Name").text = unit.name
-	display.get_node("BattleElements/HP").text = String(unit.currentHealth)
-	if unit.shield > 0:
-		display.get_node("BattleElements/HP").text += "[" + String(unit.shield) + "]"
 	#display.get_node("Stats").text = String(unit.strength) + "/" + String(unit.speed)
 	var sprite = display.get_node("Sprite")
 	var button = display.get_node("Button")

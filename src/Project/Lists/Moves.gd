@@ -18,7 +18,6 @@ func _ready():
 	"Defend": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 6], "description": "Shields 6", "slot": equipType.relic, "type": moveType.basic},
 	
 	"Earthshaker": {"target": targetType.enemies, "damage": 10, "resVal": 60, "status": "Stun", "value": 1, "type": 1},
-	"Firey Assault": {"target": targetType.enemyTargets, "damage": 5, "resVal": 40, "status": "Burn", "value": 1, "type": 1},
 	"Special Boy": {"target": targetType.enemy, "damage": 5, "resVal": 50, "hits": "moveUser:specials", "description": "One hit for every known special", "type": 1},
 	
 	
@@ -33,12 +32,13 @@ func _ready():
 	"Vampire": {"target": targetType.enemy, "damage": 8, "resVal": 15, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", -.25], "description": "25% lifesteal", "slot": equipType.gear, "type": moveType.special},
 	"Tasty Bite": {"target": targetType.enemy, "damage": 5, "resVal": 10, "status": "Poison", "value": 5, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "give_status"), "args": ["moveUser", "Poison", 5]},
 	"Bone Club": {"target": targetType.enemy, "damage": 30, "resVal": 20, "slot": equipType.gear, "type": moveType.special, "charge": true, "channel": true ,"cycle": ["Charge"]},
-	"Feeding Frenzy": {"target": targetType.enemy, "damage": 8, "resVal": 15, "timing": timings.before, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveTarget", .99, 1], "description": "Extra hit if enemy is damaged.", "slot": equipType.gear, "type": moveType.special},
+	"Feeding Frenzy": {"target": targetType.enemy, "damage": 8, "resVal": 15, "timing": timings.before, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveTarget", .01, 1, 1], "description": "Extra hit if enemy is damaged.", "slot": equipType.gear, "type": moveType.special},
 	"Breaker Slash": {"target": targetType.enemy, "damage": 9, "resVal": 20, "timing": timings.before, "effect": funcref(self, "hits_for_durability"), "args": ["usedMoveBox", .5, 1], "description": "Extra hit if this weapon is at half or less uses", "slot": equipType.gear, "type": moveType.special},
-	"Dark Dive": {"target": targetType.enemy, "damage": 12, "resVal": 15, "timing": timings.before, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser", .25, 1], "secondEffect": funcref(self, "take_recoil"), "secondArgs": ["moveUser", "damageCalc", .30], "description": "Extra hit if user is below 25% HP. 30% recoil.", "slot": equipType.gear, "type": moveType.special},
+	"Dark Dive": {"target": targetType.enemy, "damage": 12, "resVal": 15, "timing": timings.before, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser", .75, 1], "secondEffect": funcref(self, "take_recoil"), "secondArgs": ["moveUser", "damageCalc", .30], "description": "Extra hit if user is below 25% HP. 30% recoil.", "slot": equipType.gear, "type": moveType.special},
 	"Grapple": {"target": targetType.enemy, "damage": 4, "resVal": 15, "status": "Stun", "value": 2, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "give_status"), "args": ["moveUser", "Stun", 2], "description": "Stuns both the user and the target."},
 	"Deep Cut": {"target": targetType.enemyTargets, "damage": 19, "resVal": 25, "slot": equipType.gear, "type": moveType.special, "charge": true, "cycle": ["Charge"]},
 	"Meat Harvest": {"target": targetType.enemy, "damage": 6, "resVal": 2, "timing": timings.before, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "damage_amp"), "args": ["moveUser:currentHealth", .5], "secondEffect": funcref(self, "take_recoil"), "secondArgs": ["moveUser", "damageCalc", .50], "description": "Damage increased by 50% current health. 50% Recoil."},
+	"Monument": {"target": targetType.enemy, "damage": 8, "resVal": 30, "status": "Burn", "value": 8, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "taunt_burns"), "args": ["moveUser"], "charge": true, "cycle": ["Charge"], "description": "All burned enemies target the user."},
 	
 	"Flex": {"target": targetType.user, "resVal": 25, "status": "Double Damage", "value": 1, "quick": true, "slot": equipType.gear, "type": moveType.special},
 	"Protect": {"target": targetType.ally, "resVal": 5, "effect": funcref(self, "switch_intents"), "args": ["moveTarget", "moveUser"], "quick": true, "slot": equipType.gear, "type": moveType.special, "description": "Enemy attacks intended for target change to user"},
@@ -50,24 +50,30 @@ func _ready():
 	"Charge": {"target": targetType.none, "resVal": 20, "cycle": true, "slot": equipType.none, "type": moveType.special},
 	
 	
-	"Constrict": {"target": targetType.enemy, "damage": 5, "resVal": 20, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Stun", funcref(self, "is_unit_poisoned")], "description": "Stuns target if they are poisoned", "slot": equipType.gear, "type": moveType.magic},
+	"Constrict": {"target": targetType.enemy, "damage": 5, "resVal": 15, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Stun", funcref(self, "is_unit_poisoned")], "description": "Stuns target if they are poisoned", "slot": equipType.gear, "type": moveType.magic},
 	"Frostfang": {"target": targetType.enemy, "damage": 5, "resVal": 20, "status": "Chill", "value": 5, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", .5, true], "description": "Multiplies target chill by 1.5 after the hit", "slot": equipType.gear, "type": moveType.magic},
 	"Plague": {"target": targetType.enemies, "damaging": true, "resVal": 30, "status": "Poison", "value": 5, "slot": equipType.gear, "type": moveType.magic, "uses": 6},
-	"Venoshock": {"target": targetType.enemy, "damaging": true, "resVal": 10, "status": "Poison", "value": 6, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", funcref(self, "get_unit_poison")],"description": "Shield 1 for every poison that enemy has.", "slot": equipType.gear, "type": moveType.magic},
+	"Venoshock": {"target": targetType.enemy, "damaging": true, "resVal": 15, "status": "Poison", "value": 6, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", funcref(self, "get_unit_poison")],"description": "Shield 1 for every poison that enemy has.", "slot": equipType.gear, "type": moveType.magic},
 	"Belch": {"target": targetType.enemy, "resVal": 20, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Poison", funcref(self, "get_unit_poison")], "description": "Poisons enemy as much as the user is poisoned", "slot": equipType.gear, "type": moveType.magic},
-	"Mass Infection": {"target": targetType.everyone, "damaging": true, "resVal": 30, "status": "Poison", "value": 10, "slot": equipType.gear, "type": moveType.magic, "uses": 6, "condition": funcref(self, "is_damaged"), "Description": "Only affects damaged targets."},
+	"Mass Infection": {"target": targetType.everyone, "damaging": true, "resVal": 30, "status": "Poison", "value": 10, "slot": equipType.gear, "type": moveType.magic, "uses": 6, "condition": funcref(self, "is_damaged"), "description": "Only affects damaged enemies."},
 	"Dark Spikes": {"target": targetType.enemy, "damage": 6, "resVal": 20, "barrage": true, "hits": 3, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", 1], "killeffect": funcref(self, "change_attribute"), "killargs": ["moveUser", "shield", 12], "description": "12 shield on kill, 100% recoil", "slot": equipType.gear, "type": moveType.magic},
-	"Seeker Volley": {"target": targetType.enemy, "damage": 3, "resVal": 20, "barrage": true, "hits": 4, "slot": equipType.gear, "type": moveType.magic, "condition": funcref(self, "is_damaged"), "description": "Only targets damaged enemies if possible."},
+	"Seeker Volley": {"target": targetType.enemy, "damage": 3, "resVal": 20, "barrage": true, "hits": 4, "slot": equipType.gear, "type": moveType.magic, "condition": funcref(self, "is_damaged"), "description": "Followup hits only bounce to damaged enemies."},
+	"Soul Sample": {"target": targetType.enemy, "damage": 2, "resVal": 15, "slot": equipType.gear, "type": moveType.magic, "hits": 4, "barrage": true, "killeffect": funcref(self, "heal_team"), "killargs": ["moveUser", 5]},
+	"Fireball": {"target": targetType.enemies, "damage": 8, "resVal": 30, "slot": equipType.gear, "type": moveType.magic, "status": "Burn", "value": 8},
+	"Combust": {"target": targetType.enemy, "damage": 6, "resVal": 20, "slot": equipType.gear, "type": moveType.magic, "effect": funcref(self, "status_to_damage"), "args": ["moveTarget", "Burn"]},
 	
 	"Dodge": {"target": targetType.ally, "resVal": 20, "status": "Dodgy", "value": 1, "slot": equipType.gear, "type": moveType.magic},
 	"Growth": {"target": targetType.ally, "resVal": 10, "effect": funcref(self, "change_attribute"), "args": ["moveTarget", "strength", 3], "description": "Ally strength +3", "slot": equipType.gear, "type": moveType.magic, "uselimit": 1},
 	"Hide": {"target": targetType.ally, "resVal": 5, "effect": funcref(self, "switch_intents"), "args": ["moveUser", "moveTarget"], "slot": equipType.gear, "type": moveType.magic, "quick": true, "description": "Enemy attacks intended for user change to target"},
 	"Restore": {"target": targetType.ally, "resVal": 5, "healing": 5, "slot": equipType.gear, "type": moveType.magic, "quick": true, "mapUsable": true},
 	"Invisibility": {"target": targetType.ally, "resVal": 15, "status": "Stealth", "value": 2, "slot": equipType.gear, "type": moveType.magic, "quick": true},
-	"Midnight Flare": {"target": targetType.none, "resVal": 20, "quick": true, "slot": equipType.gear, "type": moveType.magic, "effect": funcref(self, "midnight_flare"), "args": [], "description": "All enemies target the lowest health ally."},
+	"Midnight Flare": {"target": targetType.none, "resVal": 15, "quick": true, "slot": equipType.gear, "type": moveType.magic, "effect": funcref(self, "midnight_flare"), "args": ["moveUser"], "description": "All enemies target the lowest health ally."},
 	"Defensive Pact": {"target": targetType.ally, "resVal": 10, "damage": 5 ,"effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 15], "description": "Adds 15 shield", "slot": equipType.gear, "type": moveType.magic},
-	"Cold Spring": {"target": targetType.allies, "healing": 6, "resVal": 35, "slot": equipType.gear, "type": moveType.magic, "status": "Chill", "value": 10},
+	"Cold Spring": {"target": targetType.allies, "healing": 6, "resVal": 25, "slot": equipType.gear, "type": moveType.magic, "status": "Chill", "value": 10},
 	"Submersion": {"target": targetType.everyone, "status": "Chill", "value": 10, "slot": equipType.gear, "type": moveType.magic},
+	"Firewall": {"target": targetType.ally, "resVal": 20, "status": "Firewall", "value": 1, "slot": equipType.gear, "type": moveType.magic, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 7], "description": "Shields 7. When shield is damaged, remaining shield is dealt to attacker."},
+	"Wildfire": {"target": targetType.enemy, "status": "Burn", "value": 4, "hits": 9, "barrage": true, "bounceEveryone": true, "slot": equipType.gear, "type": moveType.trick, "description": "Hits bounce to EVERYONE."},
+	"Icarus": {"target": targetType.enemies, "damage": 9, "resVal": 30, "slot": equipType.gear, "type": moveType.special},
 	
 	"Coldsteel": {"target": targetType.enemy, "damage": 3, "resVal": 3, "hits": 2, "slot": equipType.gear, "type": moveType.trick, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", "damageCalc"], "description": "Each hit inflicts chill equal to total damage dealt."},
 	"Crusher Claw": {"target": targetType.enemy, "damage": 8, "resVal": 2, "timing": timings.before, "effect": funcref(self, "crusher_claw"), "args": ["moveTarget", 1], "description": "Extra hit if the target has shields or dodge", "slot": equipType.gear, "type": moveType.trick},
@@ -75,16 +81,20 @@ func _ready():
 	"Quick Attack": {"target": targetType.enemy, "damage": 6, "resVal": 2, "quick": true, "slot": equipType.gear, "type": moveType.trick},
 	"Sucker Punch": {"target": targetType.enemy, "damage": 7, "resVal": 3, "timing": timings.before, "effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 1], "description": "Extra hit if enemy targets user", "slot": equipType.gear, "type": moveType.trick},
 	"Bonemerang": {"target": targetType.enemy, "damage": 4, "resVal": 1, "quick": true, "cycle": ["Catch"], "slot": equipType.gear, "type": moveType.trick, "uses": 12, "description": "Must be caught or else it is lost"},
-	"Shiv": {"target": targetType.enemy, "damage": 5, "resVal": 1, "timing": timings.before, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser", .25, 1], "description": "Extra hit if user is below 25% HP", "slot": equipType.gear, "type": moveType.trick},
+	"Shiv": {"target": targetType.enemy, "damage": 2, "resVal": 1, "timing": timings.before, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser", .15, 1], "description": "Extra hit for each 15% user is below max HP", "slot": equipType.gear, "type": moveType.trick},
 	"Taste Test": {"target": targetType.enemy, "damage": 5, "resVal": 3, "killeffect": funcref(self, "take_recoil"), "killargs": ["moveUser", "damageCalc", -1], "description": "100% lifesteal on kill", "slot": equipType.gear, "type": moveType.trick},
 	"Sideswipe": {"target": targetType.enemy, "damage": 7, "resVal": 3, "timing": timings.before, "hits": 0 ,"effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 1], "secondEffect": funcref(self, "give_status"), "secondArgs": ["moveUser", "Dodgy", 1], "description": "Add hit if target is targeting user. On hit, add 1 Dodge.", "slot": equipType.gear, "type": moveType.trick},
 	"Below Blow": {"target": targetType.enemy, "damage": 6, "resVal": 2, "slot": equipType.gear, "type": moveType.trick, "timing": timings.before, "effect": funcref(self, "below_blow"), "args": ["moveUser"], "description": "Gains an extra hit for each enemy NOT targeting the user."},
 	"Eldritch Forces": {"target": targetType.enemy, "damage": 6, "resVal": 4, "hits": 4, "barrage": true, "bounceEveryone": true, "slot": equipType.gear, "type": moveType.trick, "description": "Hits bounce to EVERYONE."},
+	"Flametongue": {"target": targetType.enemyTargets, "damage": 7, "resVal": 4, "status": "Burn", "value": 5, "type": moveType.trick, "slot": equipType.gear},
+	"Brand": {"target": targetType.enemy, "damage": 5, "status": "Burn", "value": 5, "resVal": 3, "slot": equipType.gear, "type": moveType.trick, "effect": funcref(self, "taunt"), "args": [], "description": "Taunts enemy."},
+	"Squalorbomb": {"target": targetType.enemy, "damaging": true, "resVal": 4, "slot": equipType.gear, "type": moveType.trick, "status": "Poison", "value": 7, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Burn", 7], "Description": "Poisons and burns."},
 	
 	"Taunt": {"target": targetType.enemy, "resVal": 2, "quick": true, "slot": equipType.gear, "type": moveType.trick, "effect": funcref(self, "taunt"), "args": []},
 	"Eye Poke": {"target": targetType.enemy,"resVal": 3, "timing": timings.before, "status": "Stun", "value": 1, "effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 1], "description": "Inflict stun if enemy is targeting the user.", "slot": equipType.gear, "type": moveType.trick, "quick": true, "hits": 0},
 	"Play Dead": {"target": targetType.user, "resVal": 4, "timing": timings.before, "status": "Dodgy", "value": 2, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser", .25, 1], "description": "2 dodge if at or below 25% HP.", "slot": equipType.gear, "type": moveType.trick, "hits": 0},
-	"Back Rake": {"target": targetType.enemy,"resVal": 3, "quick": true, "timing": timings.before, "status": "Stun", "value": 1, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser:storedTarget", .25, 1], "description": "Inflict stun if user is at 25% HP or less.", "slot": equipType.gear, "type": moveType.trick, "hits": 0},
+	"Back Rake": {"target": targetType.enemy,"resVal": 3, "quick": true, "timing": timings.before, "status": "Stun", "value": 1, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser:storedTarget", .75, 1], "description": "Inflict stun if user is at 25% HP or less.", "slot": equipType.gear, "type": moveType.trick, "hits": 0},
+	"Firedance": {"target": targetType.enemy, "resVal": 2, "slot": equipType.gear, "type": moveType.trick, "quick": true, "status": "Burn", "value": 5, "effect": funcref(self, "give_status"), "args": ["moveUser", "Burn", 5], "description": "Burns both the user and the target."},
 	
 	"Reload": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "slot": equipType.none, "type": moveType.trick},
 	"Catch": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "slot": equipType.none, "type": moveType.trick, "turnlimit": 1, "description": "Use it or lose it."},
@@ -94,13 +104,14 @@ func _ready():
 	"Brass Knuckles": {"target": targetType.enemy, "status": "Stun", "value": 1, "resVal": 0, "slot": equipType.gear, "type": moveType.item},
 	"Health Potion": {"target": targetType.ally, "resVal": 0, "healing": 15, "slot": equipType.gear, "type": moveType.item, "mapUsable": true},
 	"Poison Potion": {"target": targetType.enemy, "resVal": 0, "status": "Poison", "value": 10, "slot": equipType.gear, "type": moveType.item},
-	"Leather Buckler": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 10], "description": "Adds 10 shield", "slot": equipType.gear, "type": moveType.item, "quick": true},
+	"Leather Buckler": {"target": targetType.ally, "resVal": 0, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 12], "description": "Adds 12 shield.", "slot": equipType.gear, "type": moveType.item},
 	"Storm of Steel": {"target": targetType.enemy, "damage": 2, "resVal": 0, "slot": equipType.gear, "type": moveType.item, "hits": 10, "barrage": true},
 	"Bone Zone": {"target": targetType.user, "resVal": 0, "quick": true ,"effect": funcref(self, "fill_boxes"), "args": ["moveUser", "Bone Attack"], "description": "bones", "slot": equipType.gear, "type": moveType.item, "uses": 2},
 	"Bone Attack": {"slot": equipType.none, "resVal": 0 ,"type": moveType.none, "uselimit": 1, "fleeting": true, "target": targetType.enemy, "damage": 7, "quick": true, "uses": 1},
 	"Concoction": {"target": targetType.enemies, "damage": 8, "resVal": 0, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .5], "description": "50% recoil", "slot": equipType.gear, "type": moveType.item},
 	"Dark Matter": {"target": targetType.everyone, "damage": 15, "resVal": 0, "slot": equipType.gear, "type": moveType.item},
 	"Tentacle Jar": {"target": targetType.enemyTargets, "damage": 8, "status": "Chill", "value": 6, "slot": equipType.gear, "type": moveType.item},
+	"Ring of Fire": {"target": targetType.enemies, "damage": 9, "resVal": 30, "slot": equipType.gear, "type": moveType.special},
 	
 	"Rock": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 2, "quick": true, "cursed": true},
 	"Rock+": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick+"], "target": targetType.enemy, "damage": 4, "quick": true, "cursed": true},
@@ -229,15 +240,35 @@ func switch_intents(oldTarget, newTarget):
 func taunt():
 	Battle.set_intent(Battle.moveTarget, Battle.moveUser)
 
-func midnight_flare():
+func midnight_flare(user):
 	var damagedAlly = null
-	for unit in global.storedParty:
+	for unit in Battle.get_team(true, true, user.real):
 		if !damagedAlly: damagedAlly = unit
 		elif unit.currentHealth < damagedAlly.currentHealth: damagedAlly = unit
-	var allEnemies = Battle.get_team(false, true)
+	var allEnemies = Battle.get_team(false, true, user.real)
 	for enemy in allEnemies:
 		Battle.set_intent(enemy, damagedAlly)
-	
+
+func status_to_damage(target, statusName, multiplier = 1, removeAfter = true):
+	var StatusManager = get_node("../StatusManager")
+	var targetInfo = StatusManager.find_status(target, statusName, true)
+	if targetInfo:
+		var targetList = targetInfo[0]
+		var targetStatus = targetInfo[1]
+		target.take_damage(targetStatus["value"] * multiplier)
+		if removeAfter: StatusManager.remove_status(target, targetList, targetStatus)
+
+func taunt_burns(user):
+	var StatusManager = get_node("../StatusManager")
+	var allEnemies = Battle.get_team(false, true, user.real)
+	for enemy in allEnemies:
+		if StatusManager.find_status(enemy, "Burn"):
+			Battle.set_intent(enemy, user)
+
+func heal_team(user, value):
+	var team = Battle.get_team(true, true, user.real)
+	for unit in team:
+		unit.heal(value)
 
 func restore_ap(unit, gain):
 	if unit.isPlayer: unit.update_resource(gain, Battle.moveType.special, true)
@@ -306,9 +337,13 @@ func crusher_claw(moveTarget, hitCount):
 	if moveTarget.shield > 0 or StatusManager.find_status(moveTarget, "Dodgy"):
 		Battle.hits += hitCount
 
-func hits_for_hp_percentage(unit, percentage, hitCount):
-	if unit.currentHealth <= unit.maxHealth * percentage:
+func hits_for_hp_percentage(unit, percentage, hitCount, maxGain = 30):
+	var checkVal = unit.maxHealth * percentage
+	var i = 1
+	while unit.currentHealth <= unit.maxHealth - (checkVal * i):
 		Battle.hits += hitCount
+		i+=1
+		if i >= maxGain: break
 
 func hits_for_durability(box, percentage, hitCount):
 	if float(box.currentUses)/box.maxUses <= percentage:
