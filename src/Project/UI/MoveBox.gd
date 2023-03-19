@@ -131,15 +131,15 @@ func _on_Button_pressed():
 				boxModeScene.cut_from_order(self)
 		"Puzzle":
 			boxModeScene.show_grid(self)
-		"Data": #party or crafting grid
+		"EquipmentHolder": #party or crafting grid
 			$Tooltip.visible = false
-			var Puzzle = boxModeScene.get_node("../Puzzle")
+			var Puzzle = boxModeScene.get_node("../../../Puzzle")
 			if Puzzle.selection:
 				Puzzle.set_box(moves[0])
 			else:
-				boxModeScene.get_node("Crafting/EquipmentHolder").visible = false
-				boxModeScene.get_node("../Party").visible = true
-				boxModeScene.get_node("../Toggle").visible = true
-				boxModeScene.get_node("../Table").visible = true
+				boxModeScene.visible = false
+				boxModeScene.get_node("../../../Party").visible = true
+				boxModeScene.get_node("../../../Toggle").visible = true
+				boxModeScene.get_node("../../../Table").visible = true
 		_: #map scene
 			pass

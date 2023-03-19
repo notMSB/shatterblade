@@ -21,7 +21,7 @@ func _ready():
 	"Special Boy": {"target": targetType.enemy, "damage": 5, "resVal": 50, "hits": "moveUser:specials", "description": "One hit for every known special", "type": 1},
 	
 	
-	"Careful Strike": {"target": targetType.enemy, "damage": 8, "resVal": 20, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5], "description": "Deals damage and then shields 5.", "slot": equipType.gear, "type": moveType.special},
+	"Careful Strike": {"target": targetType.enemy, "damage": 8, "resVal": 20, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 5], "timing": timings.before, "description": "Shields 5 before attacking.", "slot": equipType.gear, "type": moveType.special},
 	"Cleave": {"target": targetType.enemies, "damage": 9, "resVal": 30, "slot": equipType.gear, "type": moveType.special},
 	"Dive Bomb": {"target": targetType.enemy, "damage": 16, "resVal": 15, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .2], "description": "20% recoil", "slot": equipType.gear, "type": moveType.special},
 	"Pierce": {"target": targetType.enemyTargets, "damage": 10, "resVal": 15, "slot": equipType.gear, "type": moveType.special},
@@ -78,9 +78,9 @@ func _ready():
 	"Coldsteel": {"target": targetType.enemy, "damage": 3, "resVal": 3, "hits": 2, "slot": equipType.gear, "type": moveType.trick, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", "damageCalc"], "description": "Each hit inflicts chill equal to total damage dealt."},
 	"Crusher Claw": {"target": targetType.enemy, "damage": 8, "resVal": 2, "timing": timings.before, "effect": funcref(self, "crusher_claw"), "args": ["moveTarget", 1], "description": "Extra hit if the target has shields or dodge", "slot": equipType.gear, "type": moveType.trick},
 	"Piercing Sting": {"target": targetType.enemy, "damage": 11, "resVal": 4, "status": "Poison", "value": 6, "slot": equipType.gear, "type": moveType.trick},
-	"Quick Attack": {"target": targetType.enemy, "damage": 6, "resVal": 2, "quick": true, "slot": equipType.gear, "type": moveType.trick},
+	"Quick Attack": {"target": targetType.enemy, "damage": 6, "resVal": 3, "quick": true, "slot": equipType.gear, "type": moveType.trick},
 	"Sucker Punch": {"target": targetType.enemy, "damage": 7, "resVal": 3, "timing": timings.before, "effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 1], "description": "Extra hit if enemy targets user", "slot": equipType.gear, "type": moveType.trick},
-	"Bonemerang": {"target": targetType.enemy, "damage": 4, "resVal": 1, "quick": true, "cycle": ["Catch"], "slot": equipType.gear, "type": moveType.trick, "uses": 12, "description": "Must be caught or else it is lost"},
+	"Bonemerang": {"target": targetType.enemy, "damage": 4, "resVal": 2, "quick": true, "cycle": ["Catch"], "slot": equipType.gear, "type": moveType.trick, "description": "Must be caught or else it is lost"},
 	"Shiv": {"target": targetType.enemy, "damage": 2, "resVal": 1, "timing": timings.before, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser", .15, 1], "description": "Extra hit for each 15% user is below max HP", "slot": equipType.gear, "type": moveType.trick},
 	"Taste Test": {"target": targetType.enemy, "damage": 5, "resVal": 3, "killeffect": funcref(self, "take_recoil"), "killargs": ["moveUser", "damageCalc", -1], "description": "100% lifesteal on kill", "slot": equipType.gear, "type": moveType.trick},
 	"Sideswipe": {"target": targetType.enemy, "damage": 7, "resVal": 3, "timing": timings.before, "hits": 0 ,"effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 1], "secondEffect": funcref(self, "give_status"), "secondArgs": ["moveUser", "Dodgy", 1], "description": "Add hit if target is targeting user. On hit, add 1 Dodge.", "slot": equipType.gear, "type": moveType.trick},
@@ -93,7 +93,7 @@ func _ready():
 	"Taunt": {"target": targetType.enemy, "resVal": 2, "quick": true, "slot": equipType.gear, "type": moveType.trick, "effect": funcref(self, "taunt"), "args": []},
 	"Eye Poke": {"target": targetType.enemy,"resVal": 3, "timing": timings.before, "status": "Stun", "value": 1, "effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 1], "description": "Inflict stun if enemy is targeting the user.", "slot": equipType.gear, "type": moveType.trick, "quick": true, "hits": 0},
 	"Play Dead": {"target": targetType.user, "resVal": 4, "timing": timings.before, "status": "Dodgy", "value": 2, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser", .25, 1], "description": "2 dodge if at or below 25% HP.", "slot": equipType.gear, "type": moveType.trick, "hits": 0},
-	"Back Rake": {"target": targetType.enemy,"resVal": 3, "quick": true, "timing": timings.before, "status": "Stun", "value": 1, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser:storedTarget", .75, 1], "description": "Inflict stun if user is at 25% HP or less.", "slot": equipType.gear, "type": moveType.trick, "hits": 0},
+	"Back Rake": {"target": targetType.enemy,"resVal": 3, "quick": true, "timing": timings.before, "status": "Stun", "value": 1, "effect": funcref(self, "hits_for_hp_percentage"), "args": ["moveUser", .75, 1], "description": "Inflict stun if user is at 25% HP or less.", "slot": equipType.gear, "type": moveType.trick, "hits": 0},
 	"Firedance": {"target": targetType.enemy, "resVal": 2, "slot": equipType.gear, "type": moveType.trick, "quick": true, "status": "Burn", "value": 5, "effect": funcref(self, "give_status"), "args": ["moveUser", "Burn", 5], "description": "Burns both the user and the target."},
 	
 	"Reload": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "slot": equipType.none, "type": moveType.trick},

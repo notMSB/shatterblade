@@ -147,7 +147,7 @@ func damage_player(unitIndex, value):
 func place_quest():
 	var validPoints = []
 	var currentDistance = Map.activePoint.clicksFromStart
-	for point in Map.get_node("HolderHolder/PointHolder").get_children(): #Quests go on event points that are in the same section
+	for point in Map.get_node("HolderHolder/$HolderHolder/ScrollContainer/ColorRect/PointHolder").get_children(): #Quests go on event points that are in the same section
 		if point.visible and point.clicksFromStart > currentDistance and point.pointType == Map.pointTypes.event:
 			validPoints.append(point)
 	if validPoints.empty():

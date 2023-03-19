@@ -31,7 +31,7 @@ func update_resource(resValue, type, isGain: bool):
 		if isGain: energy = min(energy + resValue, maxEnergy)
 		else: energy -= resValue
 	#else: #unused
-	update_box_bars()
+	if real: update_box_bars()
 
 func boost_stat(stat):
 	match stat:

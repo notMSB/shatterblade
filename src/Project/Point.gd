@@ -78,7 +78,7 @@ func _on_Button_pressed():
 					else:
 						Map.subtract_time(ceil(movementLine.points[0].distance_to(movementLine.points[1]) * Map.DISTANCE_TIME_MULT))
 					Map.eval_darkness(Map.activePoint, self)
-					Map.move_map(position.x)
+					#Map.move_map(position.x)
 					Map.activePoint.toggle_activation(false) #toggle off map's active node
 					toggle_activation(true) #this is now the map's active node
 					return #done

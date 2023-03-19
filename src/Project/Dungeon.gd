@@ -69,7 +69,6 @@ func enter():
 	determine_side()
 	visible = true
 	Map.currentDungeon = self
-	Map.get_node("HolderHolder/SectionHolder").visible = false
 
 func switch_save(newSave): #If a player fully traversed the dungeon, switch the overworld's save point to the other side
 	Map.savedPoint.toggle_activation(false)
@@ -85,4 +84,3 @@ func _on_Exit_pressed():
 	Map.savedPoint.toggle_activation(true, false) #Activate the overworld point, change false to true to skip activating the event
 	Map.currentDungeon = null
 	visible = false
-	Map.get_node("HolderHolder/SectionHolder").visible = true

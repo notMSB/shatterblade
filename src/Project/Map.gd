@@ -131,6 +131,11 @@ func _ready():
 	
 	set_time_text()
 	set_quick_panels()
+	fix_scroll_position()
+
+func fix_scroll_position(): #hacky way to get the scrollbar where I need it to be, needs to be delayed
+	yield(get_tree().create_timer(.1), "timeout")
+	$CraftScroll/_v_scroll.rect_position.x = 270
 
 func set_quick_panels():
 	set_quick_crafts()
@@ -140,12 +145,12 @@ func set_biome():
 	currentBiome = availableBiomes[randi() % availableBiomes.size()]
 	availableBiomes.erase(currentBiome)
 	match currentBiome:
-		biomesList.plains: $Background.color = Color("00005f") #Blue
-		biomesList.forest: $Background.color = Color("005c00") #Green
-		biomesList.mountain: $Background.color = Color("923b3b") #Red
-		biomesList.city: $Background.color = Color("6f7300") #Yellow
-		biomesList.battlefield: $Background.color = Color("923e00") #Orange
-		biomesList.graveyard: $Background.color = Color("4e004e") #Purple
+		biomesList.plains: $HolderHolder/ScrollContainer/ColorRect.color = Color("00005f") #Blue
+		biomesList.forest: $HolderHolder/ScrollContainer/ColorRect.color = Color("005c00") #Green
+		biomesList.mountain: $HolderHolder/ScrollContainer/ColorRect.color = Color("923b3b") #Red
+		biomesList.city: $HolderHolder/ScrollContainer/ColorRect.color = Color("6f7300") #Yellow
+		biomesList.battlefield: $HolderHolder/ScrollContainer/ColorRect.color = Color("923e00") #Orange
+		biomesList.graveyard: $HolderHolder/ScrollContainer/ColorRect.color = Color("4e004e") #Purple
 	currentMascot = mascotList[randi() % (mascotList.size())]
 	Trading.assign_component_values(currentBiome, currentMascot)
 
@@ -216,7 +221,7 @@ func check_delay():
 		activate_battle(temp)
 
 func activate_battle(newOpponents = null, isHunt = false):
-	
+	print($CraftScroll/_v_scroll.rect_position.x)
 	#if inventoryWindow.visible:
 		#delayBattle = newOpponents
 	if currentDungeon:
@@ -320,7 +325,9 @@ func use_map_move(unit):
 			unit.boost_stat(Moves.moveList[selectedMapMove]["statBoost"])
 		selectedMapBox.reduce_uses(1)
 		if selectedMapBox.currentUses == 0: #it's broken
+			Boons.call_boon("uses_reduced", [moveUser, selectedMapBox, selectedMapBox.currentUses, true, battleWindow])
 			$HolderHolder/DisplayHolder.box_move(selectedMapBox, "X", true)
+			set_quick_panels()
 		if moveUser != null: moveUser.update_resource(Moves.moveList[selectedMapMove]["resVal"], Moves.moveType.magic, false)
 	end_map_move()
 
@@ -333,7 +340,7 @@ func end_map_move():
 
 func make_points(nextPos):
 	var currentPoint = Point.instance()
-	$HolderHolder/PointHolder.add_child(currentPoint)
+	$HolderHolder/ScrollContainer/ColorRect/PointHolder.add_child(currentPoint)
 	currentPoint.position = nextPos
 	fuzz_point(currentPoint)
 
@@ -350,7 +357,6 @@ func make_points(nextPos):
 			startIndex.toggle_activation(true)
 			startIndex.set_name("Start")
 			determine_distances(startIndex)
-			move_map(LEFTBOUND)
 			return clean_up()
 		nextPos.x = INCREMENT
 	make_points(nextPos)
@@ -363,7 +369,7 @@ func find_border_points():
 	for i in TOTALSECTIONS - 1:
 		possibleDungeons.append([])
 		exitPoints.append([])
-	for point in $HolderHolder/PointHolder.get_children():
+	for point in $HolderHolder/ScrollContainer/ColorRect/PointHolder.get_children():
 		if point.visible and point.clicksFromStart and point.sectionNum != TOTALSECTIONS - 1: #no reason to check points in the last section
 			checkSection = point.sectionNum
 			for line in point.lines:
@@ -434,7 +440,7 @@ func place_town(exitPoint, borderPoints): #towns are adjacent to dungeon exits a
 func clean_up():
 	var divider = bottomRight.x / TOTALSECTIONS
 	add_sections(divider)
-	for point in $HolderHolder/PointHolder.get_children():
+	for point in $HolderHolder/ScrollContainer/ColorRect/PointHolder.get_children():
 		point.sectionNum = floor(point.position.x / divider)
 		point.set_name(str(point.sectionNum, " | ", point.clicksFromStart))
 		if point.clicksFromStart == null and point.visible: 
@@ -465,7 +471,12 @@ func regen_map(newMember = false):
 	endIndex = null
 	canEnd = false
 	for holder in $HolderHolder.get_children():
-		if holder != $HolderHolder/DisplayHolder: #this one can stay
+		if holder == $HolderHolder/ScrollContainer:
+			for scrollHolder in $HolderHolder/ScrollContainer/ColorRect.get_children():
+				for child in scrollHolder.get_children(): #normal family activity
+					scrollHolder.remove_child(child)
+					child.queue_free()
+		elif holder != $HolderHolder/DisplayHolder: #this one can stay
 			for child in holder.get_children():
 				holder.remove_child(child)
 				child.queue_free()
@@ -481,6 +492,7 @@ func regen_map(newMember = false):
 			unit.currentHealth = unit.maxHealth
 			unit.mana = unit.maxMana
 			unit.update_hp()
+		$HolderHolder/ScrollContainer.scroll_horizontal = 0
 	else: print("Bad map gen settings")
 
 func add_new_member():
@@ -508,7 +520,7 @@ func add_sections(divider):
 	var addedSections = []
 	for i in TOTALSECTIONS:
 		newSection = Section.instance()
-		$HolderHolder/SectionHolder.add_child(newSection)
+		$HolderHolder/ScrollContainer/ColorRect/SectionHolder.add_child(newSection)
 		addedSections.append(newSection)
 		sectionBG = newSection.get_node("BG")
 		sectionBG.margin_left = i * divider
@@ -516,7 +528,7 @@ func add_sections(divider):
 	set_sections(addedSections)
 
 func set_sections(addedSections = null):
-	var sHolder = $HolderHolder/SectionHolder
+	var sHolder = $HolderHolder/ScrollContainer/ColorRect/SectionHolder
 	if addedSections:
 		for i in addedSections.size():
 			addedSections[i].visible = false if currentDay == i else true
@@ -529,7 +541,7 @@ func set_label(point, label, distance = false):
 	else: point.set_name(label)
 
 func organize_lines():
-	for point in $HolderHolder/PointHolder.get_children():
+	for point in $HolderHolder/ScrollContainer/ColorRect/PointHolder.get_children():
 		if point.lines.empty() and point.visible: point.visible = false #remove orphaned points
 		if !point.visible: #kill lines involving invisible points
 			for line in point.lines:
@@ -543,7 +555,7 @@ func organize_lines():
 func classify_remaining_points():
 	Quests.setup(currentBiome, currentMascot)
 	var remainingPoints = []
-	for point in $HolderHolder/PointHolder.get_children():
+	for point in $HolderHolder/ScrollContainer/ColorRect/PointHolder.get_children():
 		if point.visible and point.pointType == pointTypes.none:
 			remainingPoints.append(point)
 		
@@ -574,7 +586,7 @@ func classify_remaining_points():
 	set_point_displays()
 
 func set_point_displays():
-	for point in $HolderHolder/PointHolder.get_children():
+	for point in $HolderHolder/ScrollContainer/ColorRect/PointHolder.get_children():
 		if point.pointType == pointTypes.dungeon: point.set_type_text("D")
 		elif point.pointType == pointTypes.end: point.set_type_text("E")
 		elif point.pointType == pointTypes.start: point.set_type_text("S")
@@ -661,7 +673,7 @@ func analyze_points(one, two):
 			one.visible = false #visibility toggle instead of deletion to keep the indexing functional
 		elif distance <= MAXDISTANCE: #any points further away than MAXDISTANCE are usually too close to an incoming point and deleted anyway, but still
 			var pointLine = Line.instance()
-			$HolderHolder/LineHolder.add_child(pointLine)
+			$HolderHolder/ScrollContainer/ColorRect/LineHolder.add_child(pointLine)
 			pointLine.add_point(one.position) #add points to line
 			pointLine.add_point(two.position)
 			pointLine.linePoints.append(one)
@@ -784,7 +796,7 @@ func update_mana(gain = null):
 		else: unit.update_resource(unit.maxMana, Moves.moveType.magic, true)
 
 func get_point(i, diff):
-	return $HolderHolder/PointHolder.get_child(i - diff)
+	return $HolderHolder/ScrollContainer/ColorRect/PointHolder.get_child(i - diff)
 
 func fuzz_point(currentPoint):
 	var pointChange = rando_fuzz()
@@ -795,11 +807,3 @@ func fuzz_point(currentPoint):
 
 func rando_fuzz():
 	return randi() % (FUZZ * 2)
-
-func move_map(pointPos):
-	var checkPos = 640 - pointPos
-	checkPos = min(checkPos, LEFTBOUND)
-	checkPos = max(checkPos, LEFTBOUND * -1)
-	$HolderHolder/LineHolder.position.x = checkPos
-	$HolderHolder/PointHolder.position.x = checkPos
-	$HolderHolder/SectionHolder.position.x = checkPos

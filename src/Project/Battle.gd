@@ -141,13 +141,13 @@ func welcome_back(newOpponents = null, currentArea = 0): #reusing an existing ba
 	$BattleUI.enemyCount = 0
 	battleDone = false
 	previewBattleDone = false
-	Boons.call_boon("start_battle", [get_partyHealth(), self])
 	for unit in $Units.get_children():
 		if !unit.isPlayer:
 			unit.cease_to_exist()
 		else:
 			set_ui(unit, true)
 	turnIndex = -1
+	Boons.call_boon("start_battle", [get_partyHealth(), self])
 	yield(create_enemies(currentArea, newOpponents), "completed")
 	if !canSee: toggle_blind(false)
 	if autoPreview: toggle_previews(true)
