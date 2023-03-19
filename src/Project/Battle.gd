@@ -688,6 +688,7 @@ func done(rewards = []):
 		deadEnemies = 0
 		previewDeadEnemies = 0
 		$BattleUI.toggle_movebox_buttons(true)
+		Map.set_quick_panels()
 
 func _on_Preview_pressed():
 	$BattleUI.toggle_buttons(false)

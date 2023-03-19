@@ -299,7 +299,7 @@ __meta__ = {
 
 [node name="Tooltip" type="Node2D" parent="Weapon"]
 visible = false
-position = Vector2( 0, 185 )
+position = Vector2( 0, 97 )
 z_index = 5
 
 [node name="Background" type="ColorRect" parent="Weapon/Tooltip"]

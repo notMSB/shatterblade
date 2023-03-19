@@ -56,19 +56,19 @@ func generate_grids():
 	generate_scales()
 
 func generate_equipment():
-	setup_box("X", "EquipmentHolder", 0, 0)
-	setup_box("X", "EquipmentHolder", 14, 0)
-	setup_box("X", "EquipmentHolder", 15, 0)
-	setup_box("X", "EquipmentHolder", 12, 0)
-	setup_box("X", "EquipmentHolder", 13, 0)
+	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 0, 0)
+	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 14, 0)
+	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 15, 0)
+	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 12, 0)
+	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 13, 0)
 	for i in c.size():
-		setup_box(c.keys()[i], "EquipmentHolder", i+1, 0)
-		setup_box(c.keys()[i], "EquipmentHolder", 0, i+1)
+		setup_box(c.keys()[i], "EquipmentHolder/CraftScroll/ColorRect", i+1, 0)
+		setup_box(c.keys()[i], "EquipmentHolder/CraftScroll/ColorRect", 0, i+1)
 		for j in c.size():
 			if i<=j:
-				setup_box(products[i][j], "EquipmentHolder", i+1, j+1)
+				setup_box(products[i][j], "EquipmentHolder/CraftScroll/ColorRect", i+1, j+1)
 			else:
-				setup_box(products[j][i], "EquipmentHolder", i+1, j+1)
+				setup_box(products[j][i], "EquipmentHolder/CraftScroll/ColorRect", i+1, j+1)
 
 func generate_relics():
 	setup_box("X", "RelicHolder", 0, 0)

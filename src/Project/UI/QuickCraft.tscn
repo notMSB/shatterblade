@@ -375,7 +375,7 @@ __meta__ = {
 
 [node name="Tooltip" type="Node2D" parent="Productbox"]
 visible = false
-position = Vector2( -100, 185 )
+position = Vector2( -100, 113 )
 z_index = 20
 
 [node name="Background" type="ColorRect" parent="Productbox/Tooltip"]

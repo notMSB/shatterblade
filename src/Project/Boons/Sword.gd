@@ -2,7 +2,7 @@ extends Node
 
 var Boons
 
-const REWARD = 5
+const REWARD = 8
 
 var level = 0
 

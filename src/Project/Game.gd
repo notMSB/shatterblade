@@ -16,4 +16,3 @@ func _on_Table_pressed():
 	$Table.visible = false
 	$Party.visible = false
 	$Puzzle.visible = false
-	
