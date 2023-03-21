@@ -41,7 +41,7 @@ func _ready():
 	"Monument": {"target": targetType.enemy, "damage": 8, "resVal": 30, "status": "Burn", "value": 8, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "taunt_burns"), "args": ["moveUser"], "charge": true, "cycle": ["Charge"], "description": "All burned enemies target the user."},
 	
 	"Flex": {"target": targetType.user, "resVal": 25, "status": "Double Damage", "value": 1, "quick": true, "slot": equipType.gear, "type": moveType.special},
-	"Protect": {"target": targetType.ally, "resVal": 5, "effect": funcref(self, "switch_intents"), "args": ["moveTarget", "moveUser"], "quick": true, "slot": equipType.gear, "type": moveType.special, "description": "Enemy attacks intended for target change to user"},
+	"Protect": {"target": targetType.ally, "resVal": 10, "effect": funcref(self, "switch_intents"), "args": ["moveTarget", "moveUser"], "quick": true, "slot": equipType.gear, "type": moveType.special, "description": "Enemy attacks intended for target change to user"},
 	"Turtle Up": {"target": targetType.user, "resVal": 15, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 6, funcref(self, "get_enemy_targeters")], "description": "Shields 6 for each enemy targeting the user", "slot": equipType.gear, "type": moveType.special},
 	"Goblin Dodge": {"target": targetType.enemies, "resVal": 15, "quick": true, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "taunt"), "args": [], "description": "All enemies target the user"},
 	"Spit Shine": {"target": targetType.ally, "resVal": 5, "healing": 6, "slot": equipType.gear, "type": moveType.special, "quick": true, "status": "Poison", "value": 5},
@@ -73,7 +73,7 @@ func _ready():
 	"Submersion": {"target": targetType.everyone, "status": "Chill", "value": 10, "slot": equipType.gear, "type": moveType.magic},
 	"Firewall": {"target": targetType.ally, "resVal": 20, "status": "Firewall", "value": 1, "slot": equipType.gear, "type": moveType.magic, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 7], "description": "Shields 7. When shield is damaged, remaining shield is dealt to attacker."},
 	"Wildfire": {"target": targetType.enemy, "status": "Burn", "value": 4, "hits": 9, "barrage": true, "bounceEveryone": true, "slot": equipType.gear, "type": moveType.trick, "description": "Hits bounce to EVERYONE."},
-	"Icarus": {"target": targetType.enemies, "damage": 9, "resVal": 30, "slot": equipType.gear, "type": moveType.special},
+	"Icarus": {"target": targetType.ally, "resVal": 30, "slot": equipType.gear, "type": moveType.magic, "status": "Icarus", "value": 2, "description": "Target absorbs all damage while Icarus status is active. If it is not active, take all the absorbed damage at turn start."},
 	
 	"Coldsteel": {"target": targetType.enemy, "damage": 3, "resVal": 3, "hits": 2, "slot": equipType.gear, "type": moveType.trick, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", "damageCalc"], "description": "Each hit inflicts chill equal to total damage dealt."},
 	"Crusher Claw": {"target": targetType.enemy, "damage": 8, "resVal": 2, "timing": timings.before, "effect": funcref(self, "crusher_claw"), "args": ["moveTarget", 1], "description": "Extra hit if the target has shields or dodge", "slot": equipType.gear, "type": moveType.trick},
@@ -85,7 +85,7 @@ func _ready():
 	"Taste Test": {"target": targetType.enemy, "damage": 5, "resVal": 3, "killeffect": funcref(self, "take_recoil"), "killargs": ["moveUser", "damageCalc", -1], "description": "100% lifesteal on kill", "slot": equipType.gear, "type": moveType.trick},
 	"Sideswipe": {"target": targetType.enemy, "damage": 7, "resVal": 3, "timing": timings.before, "hits": 0 ,"effect": funcref(self, "add_hits"), "args": ["moveTarget:storedTarget", "moveUser", 1], "secondEffect": funcref(self, "give_status"), "secondArgs": ["moveUser", "Dodgy", 1], "description": "Add hit if target is targeting user. On hit, add 1 Dodge.", "slot": equipType.gear, "type": moveType.trick},
 	"Below Blow": {"target": targetType.enemy, "damage": 6, "resVal": 2, "slot": equipType.gear, "type": moveType.trick, "timing": timings.before, "effect": funcref(self, "below_blow"), "args": ["moveUser"], "description": "Gains an extra hit for each enemy NOT targeting the user."},
-	"Eldritch Forces": {"target": targetType.enemy, "damage": 6, "resVal": 4, "hits": 4, "barrage": true, "bounceEveryone": true, "slot": equipType.gear, "type": moveType.trick, "description": "Hits bounce to EVERYONE."},
+	"Eldritch Forces": {"target": targetType.enemy, "damage": 11, "resVal": 4, "hits": 4, "barrage": true, "bounceEveryone": true, "slot": equipType.gear, "type": moveType.trick, "description": "Hits bounce to EVERYONE."},
 	"Flametongue": {"target": targetType.enemyTargets, "damage": 7, "resVal": 4, "status": "Burn", "value": 5, "type": moveType.trick, "slot": equipType.gear},
 	"Brand": {"target": targetType.enemy, "damage": 5, "status": "Burn", "value": 5, "resVal": 3, "slot": equipType.gear, "type": moveType.trick, "effect": funcref(self, "taunt"), "args": [], "description": "Taunts enemy."},
 	"Squalorbomb": {"target": targetType.enemy, "damaging": true, "resVal": 4, "slot": equipType.gear, "type": moveType.trick, "status": "Poison", "value": 7, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Burn", 7], "Description": "Poisons and burns."},
@@ -111,7 +111,7 @@ func _ready():
 	"Concoction": {"target": targetType.enemies, "damage": 8, "resVal": 0, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", .5], "description": "50% recoil", "slot": equipType.gear, "type": moveType.item},
 	"Dark Matter": {"target": targetType.everyone, "damage": 15, "resVal": 0, "slot": equipType.gear, "type": moveType.item},
 	"Tentacle Jar": {"target": targetType.enemyTargets, "damage": 8, "status": "Chill", "value": 6, "slot": equipType.gear, "type": moveType.item},
-	"Ring of Fire": {"target": targetType.enemies, "damage": 9, "resVal": 30, "slot": equipType.gear, "type": moveType.special},
+	"Ring of Fire": {"target": targetType.enemy, "damage": 8, "resVal": 30, "hits": 10, "barrage": true, "bounceEveryone": true ,"slot": equipType.gear, "type": moveType.item, "Description": "Hits bounce to EVERYONE."},
 	
 	"Rock": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 2, "quick": true, "cursed": true},
 	"Rock+": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick+"], "target": targetType.enemy, "damage": 4, "quick": true, "cursed": true},

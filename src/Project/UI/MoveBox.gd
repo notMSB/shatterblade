@@ -87,6 +87,8 @@ func set_tooltip_text(tip):
 	for line in splits:
 		var length = $Tooltip/Label.get_font("font").get_string_size(line).x
 		if length > 225: lineCount += 1 #extra long descriptions
+		if length > 300: lineCount +=1
+		if length > 375: lineCount +=1
 		if length > longestLineSize: longestLineSize = length
 	if longestLineSize < 200:
 		var offset = (200 - longestLineSize) / 2
@@ -99,6 +101,11 @@ func set_tooltip_text(tip):
 		$Tooltip/Inside.margin_top += offset
 		$Tooltip/Background.margin_top += offset
 		$Tooltip/Label.margin_top += offset
+	if lineCount > 5:
+		var offset = (lineCount - 5) * 16
+		$Tooltip/Inside.margin_bottom += offset
+		$Tooltip/Background.margin_bottom += offset
+		$Tooltip/Label.margin_bottom += offset
 	$Tooltip/Label.text = tip
 
 func _on_mouse_entered():

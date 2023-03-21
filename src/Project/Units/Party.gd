@@ -24,23 +24,32 @@ var chosenBoon = null
 var tempParty = []
 
 var partyMembers = {
-	"Gerald": {"type": types.fighter, "stats": [40, 0], "moves": ["Pierce", "Protect"]},
-	"Jerald": {"type": types.fighter, "stats": [35, 5], "moves": ["Power Attack", "Turtle Up"]},
-	"Werald": {"type": types.fighter, "stats": [30, 10], "moves": ["Cleave", "Careful Strike"]},
-	"Merald": {"type": types.fighter, "stats": [25, 15], "moves": ["Poison Strike", "Feeding Frenzy"]},
-	"Ferald": {"type": types.fighter, "stats": [20, 20], "moves": ["Dark Dive", "Spit Shine"]},
+	"Gerald": {"type": types.fighter, "stats": [40, 0], "moves": ["Grapple", "Power Attack"], "boon": "Scales"},
+	"Ferald": {"type": types.fighter, "stats": [40, 0], "moves": ["Breaker Slash", "Deep Cut"], "boon": "Infinite"},
+	"Yerald": {"type": types.fighter, "stats": [35, 5], "moves": ["Bone Club", "Dark Dive"], "boon": "Mask"},
+	"Jerald": {"type": types.fighter, "stats": [30, 10], "moves": ["Take Down", "Dive Bomb"], "boon": "Crown"},
+	"Werald": {"type": types.fighter, "stats": [30, 10], "moves": ["Cleave", "Spit Shine"], "boon": "Blind"},
+	"Zerald": {"type": types.fighter, "stats": [25, 15], "moves": ["Pierce", "Protect"], "boon": "Tides"},
+	"Berald": {"type": types.fighter, "stats": [25, 15], "moves": ["Goblin Dodge", "Careful Strike"], "boon": "Weak"},
+	"Merald": {"type": types.fighter, "stats": [20, 20], "moves": ["Poison Strike", "Turtle Up"], "boon": "Lion"},
 	
-	"Steve": {"type": types.mage, "stats": [40, 100], "moves": ["Dark Spikes", "Growth"]},
-	"Sbeve": {"type": types.mage, "stats": [35, 120], "moves": ["Seeker Volley", "Restore"]},
-	"Stephe": {"type": types.mage, "stats": [30, 140], "moves": ["Constrict", "Venoshock"]},
-	"Sbephe": {"type": types.mage, "stats": [25, 160], "moves": ["Plague", "Dodge"]},
-	"Sbbbbb": {"type": types.mage, "stats": [20, 180], "moves": ["Frostfang", "Hide"]},
+	"Steve": {"type": types.mage, "stats": [40, 100], "moves": ["Defensive Pact", "Submersion"], "boon": "Crown"},
+	"Sbeve": {"type": types.mage, "stats": [35, 120], "moves": ["Soul Sample", "Dark Spikes"], "boon": "Sword"},
+	"Strive": {"type": types.mage, "stats": [35, 120], "moves": ["Frostfang", "Firewall"], "boon": "Mask"},
+	"Steed": {"type": types.mage, "stats": [30, 140], "moves": ["Venoshock", "Invisibility"], "boon": "Cup"},
+	"Stove": {"type": types.mage, "stats": [25, 160], "moves": ["Seeker Volley", "Constrict"], "boon": "Wings"},
+	"Sbephe": {"type": types.mage, "stats": [25, 160], "moves": ["Fireball", "Restore"], "boon": "Column"},
+	"Sbbbbb": {"type": types.mage, "stats": [20, 180], "moves": ["Plague", "Hide"], "boon": "Lion"},
+	"Stephe": {"type": types.mage, "stats": [20, 180], "moves": ["Growth", "Mass Infection"], "boon": "Blind"},
 	
-	"Jimmy": {"type": types.rogue, "stats": [40, 4], "moves": ["Coldsteel", "Eye Poke"]},
-	"Bimmy": {"type": types.rogue, "stats": [35, 5], "moves": ["Piercing Sting", "Crusher Claw"]},
-	"Timmy": {"type": types.rogue, "stats": [30, 6], "moves": ["Taunt", "Sucker Punch"]},
-	"Pimmy": {"type": types.rogue, "stats": [25, 7], "moves": ["Quick Attack", "Taste Test"]},
-	"Mimmy": {"type": types.rogue, "stats": [20, 8], "moves": ["Shiv", "Back Rake"]},
+	"Jimmy": {"type": types.rogue, "stats": [40, 4], "moves": ["Below Blow", "Eye Poke"], "boon": "Scales"},
+	"Bimmy": {"type": types.rogue, "stats": [35, 5], "moves": ["Brand", "Crusher Claw"], "boon": "Sword"},
+	"Rimmy": {"type": types.rogue, "stats": [35, 5], "moves": ["Coldsteel", "Sideswipe"], "boon": "Cup"},
+	"Timmy": {"type": types.rogue, "stats": [30, 6], "moves": ["Taunt", "Sucker Punch"], "boon": "Infinite"},
+	"Grimmy": {"type": types.rogue, "stats": [30, 6], "moves": ["Bonemerang", "Squalorbomb"], "boon": "Wings"},
+	"Pimmy": {"type": types.rogue, "stats": [25, 7], "moves": ["Quick Attack", "Taste Test"], "boon": "Column"},
+	"Slimmy": {"type": types.rogue, "stats": [25, 7], "moves": ["Firedance", "Flametongue"], "boon": "Tides"},
+	"Mimmy": {"type": types.rogue, "stats": [20, 8], "moves": ["Shiv", "Back Rake"], "boon": "Weak"},
 }
 
 func _ready():
@@ -48,7 +57,7 @@ func _ready():
 	if global.storedParty.size() > 0:
 		global.storedParty.clear()
 	create_options()
-	$ColorRect/UI/MemberText.text = str("0/", PARTYSIZE, " Members Selected")
+	#$ColorRect/UI/MemberText.text = str("0/", PARTYSIZE, " Members Selected")
 
 func create_options():
 	for i in 3:
@@ -74,16 +83,25 @@ func create_options():
 			newSelect.position.y = 30 if j <= 1 else 85
 	var currentType = 0
 	var currentMember = 0
+	var pathStart = "Scrolls/"
+	var pathEnd = "/ColorRect"
+	get_node(pathStart + types.keys()[currentType] + pathEnd).rect_min_size.y = 28.3 * partyMembers.size() #it is what it is
 	for member in partyMembers:
 		if currentType != partyMembers[member]["type"]: 
 			currentType = partyMembers[member]["type"]
+			get_node(pathStart + types.keys()[currentType] + pathEnd).rect_min_size.y = 28.3 * partyMembers.size() #yeah we need to do this more
 			currentMember = 0
 		var choice = PartyChoice.instance()
-		$Choices.add_child(choice)
+		get_node(pathStart + types.keys()[currentType] + pathEnd).add_child(choice)
 		setup_member(choice, member, currentType)
-		choice.position.y = 190 + 85 * currentMember
-		choice.position.x = 98 + 400 * currentType
+		choice.position.y = 85 * currentMember
 		currentMember += 1
+	for i in PARTYSIZE:
+		var choice = PartyChoice.instance()
+		$CurrentParty.add_child(choice)
+		choice.position.y = 535
+		choice.position.x = 300 + 415 * i
+		choice.get_node("Button").disabled = true
 
 func area_break():
 	var currentType = 0
@@ -132,10 +150,23 @@ func choose_member(selection):
 			set_button_color(selection.get_node("Button"), partyMembers[selection.unitName]["type"])
 			tempParty.erase(selection)
 		if tempParty.size() > PARTYSIZE:
+			tempParty[0].chosen = false
 			set_button_color(tempParty[0].get_node("Button"), partyMembers[tempParty[0].unitName]["type"])
 			tempParty.pop_front()
-		$ColorRect/UI/MemberText.text = str(tempParty.size(), "/", PARTYSIZE, " Members Selected")
+		set_current_party()
+		#$ColorRect/UI/MemberText.text = str(tempParty.size(), "/", PARTYSIZE, " Members Selected")
 		check_start()
+
+func set_current_party():
+	for i in PARTYSIZE:
+		var choice = $CurrentParty.get_child(i)
+		choice.get_node("Text").visible = false
+		set_button_color($CurrentParty.get_child(i).get_node("Button"), 3)
+		$DisplayHolder.box_move(choice.get_node("Left"), "X")
+		$DisplayHolder.box_move(choice.get_node("Right"), "X")
+	for i in tempParty.size():
+		$CurrentParty.get_child(i).get_node("Text").visible = true
+		setup_member($CurrentParty.get_child(i), tempParty[i].unitName, partyMembers[tempParty[i].unitName]["type"])
 
 func create_unit(choice):
 	var unit = Player.instance()
@@ -159,17 +190,22 @@ func create_unit(choice):
 	partyMembers.erase(choice.unitName)
 	return unit
 
-func select_pressed(boonSelect, reroll = false):
+func select_pressed(boonSelect, reroll = false, autoTeam = true):
 	if boonSelect.name == chosenBoon:
 		if !reroll:
 			set_button_color(boonSelect.get_node("Button"), types.none)
 			chosenBoon = null
-			$ColorRect/UI/BoonText.text = "0/1 Boon Selected"
+			#$ColorRect/UI/BoonText.text = "0/1 Boon Selected"
 	else:
 		if chosenBoon != null: set_button_color($Choices.get_node(chosenBoon).get_node("Button"), types.none)
 		chosenBoon = boonSelect.name
 		set_button_color(boonSelect.get_node("Button"), types.other)
-		$ColorRect/UI/BoonText.text = "1/1 Boon Selected"
+		#$ColorRect/UI/BoonText.text = "1/1 Boon Selected"
+	if chosenBoon and autoTeam:
+		for scroll in $Scrolls.get_children():
+			for choice in scroll.get_child(0).get_children():
+				if partyMembers[choice.unitName]["boon"] == chosenBoon:
+					choice._on_Button_pressed()
 	check_start()
 
 func check_start():
@@ -260,14 +296,29 @@ func _on_Random_pressed():
 			i-=1
 	if !chosenBoon or reroll:
 		var randomBoon = randi() % totalBoons
-		select_pressed($Choices.get_child(randomBoon), reroll)
+		select_pressed($Choices.get_child(randomBoon), reroll, false)
 	if tempParty.size() < PARTYSIZE:
 		var availableMembers = []
-		var i = totalBoons
-		while i < $Choices.get_child_count():
-			if !tempParty.has($Choices.get_child(i)): availableMembers.append($Choices.get_child(i))
+		var i = 0
+		while i < $Scrolls/fighter/ColorRect.get_child_count():
+			if !tempParty.has($Scrolls/fighter/ColorRect.get_child(i)): availableMembers.append($Scrolls/fighter/ColorRect.get_child(i))
+			i+=1
+		i = 0
+		while i < $Scrolls/mage/ColorRect.get_child_count():
+			if !tempParty.has($Scrolls/mage/ColorRect.get_child(i)): availableMembers.append($Scrolls/mage/ColorRect.get_child(i))
+			i+=1
+		i = 0
+		while i < $Scrolls/rogue/ColorRect.get_child_count():
+			if !tempParty.has($Scrolls/rogue/ColorRect.get_child(i)): availableMembers.append($Scrolls/rogue/ColorRect.get_child(i))
 			i+=1
 		while tempParty.size() < PARTYSIZE:
 			var rando = randi() % availableMembers.size()
 			availableMembers[rando]._on_Button_pressed()
 			availableMembers.remove(rando)
+
+func _on_BoonRandom_pressed():
+	var reroll = true if chosenBoon else false
+	var randomBoon = randi() % totalBoons
+	while $Choices.get_child(randomBoon).name == chosenBoon: #reroll if already chosen
+		randomBoon = randi() % totalBoons
+	select_pressed($Choices.get_child(randomBoon), reroll)

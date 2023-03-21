@@ -20,6 +20,9 @@ var statusList = {
 	"Provoke": {"activation": statusActivations.passive, "system": false},
 	"Stealth": {"activation": statusActivations.passive, "system": false},
 	
+	"Icarus": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "apply_icarus"), "args": ["unit", "damage"]},
+	"IDamage": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "pop_icarus"), "args": ["unit", "value"], "neverCountdown": true},
+	
 	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "multiply_damage"), "args": ["damage", 1]},
 	"Blocking": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "multiply_damage"), "args": ["damage", 0.5]},
 	"Durability Redirect": {"activation": statusActivations.passive, "system": false},
@@ -123,7 +126,7 @@ func evaluate_statuses(unit, type, args = []):
 						else: newArgs.append(argument)
 				var newInfo = statusInfo["effect"].call_funcv(newArgs)
 				if newInfo != null: info = newInfo
-				if !statusInfo.has("system") and cond.has("value"): #If there is no system for subtracting turns automatically, subtract one manually after proc
+				if !statusInfo.has("system") and cond.has("value") and !statusInfo.has("neverCountdown"): #If there is no system for subtracting turns automatically, subtract one manually after proc
 					cond["value"] -= 1
 					if cond["value"] <= 0:
 						remove_status(unit, list, cond)
@@ -174,6 +177,15 @@ func regenerate(unit, healing):
 
 func constrict_attack(attacker, target):
 	target.take_damage(attacker.strength)
+
+func apply_icarus(unit, damage):
+	add_status(unit, "IDamage", damage)
+	return 0
+
+func pop_icarus(unit, value):
+	if !find_status(unit, "Icarus"):
+		unit.take_damage(value)
+		reduce_status(unit, "IDamage", value)
 
 func stunned(unit):
 	unit.isStunned = true

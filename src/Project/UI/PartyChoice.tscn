@@ -38,7 +38,6 @@ margin_right = 279.0
 margin_bottom = 112.0
 rect_pivot_offset = Vector2( 685.172, -123.365 )
 custom_fonts/font = SubResource( 2 )
-text = "Sbephe | 40HP | 8 Energy"
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false

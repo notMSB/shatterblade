@@ -74,7 +74,7 @@ var battleWindow
 var inventoryWindow
 enum pointTypes {none, start, battle, quest, visited, event, town, dungeon, repair, trader, temple, end} #Points to the left of "visited" turn off after being activated
 
-var mascotList = ["Scorpion", "Kraken"]
+var mascotList = ["Scorpion", "Kraken", "Phoenix"]
 var currentMascot
 
 var canEnd = false
@@ -221,7 +221,6 @@ func check_delay():
 		activate_battle(temp)
 
 func activate_battle(newOpponents = null, isHunt = false):
-	print($CraftScroll/_v_scroll.rect_position.x)
 	#if inventoryWindow.visible:
 		#delayBattle = newOpponents
 	if currentDungeon:

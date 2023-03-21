@@ -59,8 +59,10 @@ func generate_equipment():
 	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 0, 0)
 	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 14, 0)
 	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 15, 0)
-	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 12, 0)
 	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 13, 0)
+	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 0, 13)
+	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 0, 14)
+	setup_box("X", "EquipmentHolder/CraftScroll/ColorRect", 0, 15)
 	for i in c.size():
 		setup_box(c.keys()[i], "EquipmentHolder/CraftScroll/ColorRect", i+1, 0)
 		setup_box(c.keys()[i], "EquipmentHolder/CraftScroll/ColorRect", 0, i+1)

@@ -48,6 +48,7 @@ __meta__ = {
 position = Vector2( 0, 24 )
 
 [node name="BoonText" type="Label" parent="ColorRect/UI"]
+visible = false
 margin_top = 130.0
 margin_right = 1280.0
 margin_bottom = 166.0
@@ -59,6 +60,7 @@ __meta__ = {
 }
 
 [node name="MemberText" type="Label" parent="ColorRect/UI"]
+visible = false
 margin_top = 590.0
 margin_right = 1280.0
 margin_bottom = 706.0
@@ -75,11 +77,11 @@ margin_left = 244.0
 margin_top = 626.0
 margin_right = 396.0
 margin_bottom = 694.0
-custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 2 )
 text = "Difficulty"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -103,35 +105,99 @@ margin_left = 564.0
 margin_top = 626.0
 margin_right = 716.0
 margin_bottom = 694.0
-custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 2 )
 disabled = true
 text = "Start"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Random" type="Button" parent="ColorRect/UI"]
+[node name="BoonRandom" type="Button" parent="ColorRect/UI"]
+modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
+margin_left = 520.0
+margin_top = 136.0
+margin_right = 752.0
+margin_bottom = 204.0
+custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 2 )
+text = "Random Boon"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FullRandom" type="Button" parent="ColorRect/UI"]
 modulate = Color( 0.976471, 0.847059, 0.847059, 1 )
 margin_left = 884.0
 margin_top = 626.0
 margin_right = 1046.0
 margin_bottom = 694.0
-custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-text = "Random"
+custom_fonts/font = SubResource( 2 )
+text = "Full Random"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Choices" type="Node2D" parent="."]
 
+[node name="Scrolls" type="Node2D" parent="."]
+position = Vector2( 0, 40 )
+
+[node name="fighter" type="ScrollContainer" parent="Scrolls"]
+margin_left = 98.0
+margin_top = 190.0
+margin_right = 378.0
+margin_bottom = 490.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="Scrolls/fighter"]
+margin_right = 280.0
+margin_bottom = 1000.0
+rect_min_size = Vector2( 280, 1000 )
+
+[node name="mage" type="ScrollContainer" parent="Scrolls"]
+margin_left = 498.0
+margin_top = 190.0
+margin_right = 778.0
+margin_bottom = 490.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="Scrolls/mage"]
+margin_right = 280.0
+margin_bottom = 1000.0
+rect_min_size = Vector2( 280, 1000 )
+
+[node name="rogue" type="ScrollContainer" parent="Scrolls"]
+margin_left = 898.0
+margin_top = 190.0
+margin_right = 1178.0
+margin_bottom = 490.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="Scrolls/rogue"]
+margin_right = 280.0
+margin_bottom = 1000.0
+rect_min_size = Vector2( 280, 1000 )
+
+[node name="CurrentParty" type="Node2D" parent="."]
+
 [connection signal="pressed" from="ColorRect/UI/Difficulty" to="." method="_on_Difficulty_pressed"]
 [connection signal="pressed" from="ColorRect/UI/Start" to="." method="_on_Start_pressed"]
-[connection signal="pressed" from="ColorRect/UI/Random" to="." method="_on_Random_pressed"]
+[connection signal="pressed" from="ColorRect/UI/BoonRandom" to="." method="_on_BoonRandom_pressed"]
+[connection signal="pressed" from="ColorRect/UI/FullRandom" to="." method="_on_Random_pressed"]

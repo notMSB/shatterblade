@@ -86,8 +86,8 @@ onready var enemyList = {
 	
 	"Kraken": {"stats": [19, 27, 35, 43, 51], "specials": ["Eldritch Forces"], "hardSpecials": ["Meat Harvest"],
 		"biome": b.none, "rewards": ["tentacle"], "locations": [l.dungeon], "difficulty": 3, "sprite": "Kraken"},
-	"Phoenix": {"stats": [1, 1], "specials": [], "hardSpecials": [],
-		"biome": b.none, "rewards": ["blade"], "locations": [l.special], "difficulty": 3, "sprite": "Phoenix"},
+	"Phoenix": {"stats": [15, 21, 27, 33, 39], "specials": ["Fireball"], "hardSpecials": ["Firewall"],
+		"biome": b.none, "rewards": ["flame"], "locations": [l.dungeon], "difficulty": 3, "sprite": "Phoenix"},
 	"Scorpion": {"stats": [17, 22, 27, 32, 37], "specials": ["Crusher Claw"], "hardSpecials": ["Piercing Sting"],
 		"biome": b.none, "rewards": ["blade"], "locations": [l.dungeon], "difficulty": 3, "sprite": "Scorpion"},
 }
