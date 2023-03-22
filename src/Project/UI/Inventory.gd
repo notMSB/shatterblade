@@ -375,6 +375,8 @@ func restore_basics(boxes): #puts attack/defend back on non-relic boxes and remo
 					dHolder.box_move(box, "Defend")
 			elif moveInfo.has("morph"):
 				dHolder.box_move(box, moveInfo["morph"][box.get_index()])
+			if Moves.get_uses(box.moves[0]) <= 0:
+				box.set_uses(-1)
 		else: #inventory box
 			if Moves.moveList[box.get_node("Name").text]["type"] == Moves.moveType.basic:
 				dHolder.box_move(box, "X")
@@ -413,6 +415,13 @@ func identify_product(box): #updates box color and trade value
 		else:
 			box.get_node("ColorRect").color = DEFAULTCOLOR
 	set_box_value(box, boxName)
+
+func revalue_all_gear():
+	for box in iHolder.get_children():
+		set_box_value(box, box.moves[0])
+	for display in dHolder.get_children():
+		for box in display.get_node("MoveBoxes").get_children():
+			set_box_value(box, box.moves[0])
 
 func set_box_value(box, boxName):
 	var boxInfo = box.get_node("Info")

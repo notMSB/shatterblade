@@ -16,9 +16,15 @@ func prep_inventory():
 func added_boon(invNode):
 	for i in global.storedParty.size():
 		add_rocks(i, invNode)
+		var bar = global.storedParty[i].ui.get_node("Trackers/ResourceTracker/ResourceBar")
+		bar.margin_right += 80
+		bar.get_node("Text").rect_position.x += 40
 
 func new_member(invNode):
 	add_rocks(global.storedParty.size() - 1, invNode)
+	var bar = global.storedParty[global.storedParty.size() - 1].ui.get_node("Trackers/ResourceTracker/ResourceBar")
+	bar.margin_right += 80
+	bar.get_node("Text").rect_position.x += 40
 
 func add_rocks(i, invNode):
 	var boxHolder = invNode.dHolder.get_child(i).get_node("MoveBoxes")
@@ -27,7 +33,8 @@ func add_rocks(i, invNode):
 	boxHolder.get_child(boxCount).trackerBar = boxHolder.get_child(2).trackerBar
 	for j in boxCount - 2:
 		invNode.swap_boxes(boxHolder.get_child(boxCount - j), boxHolder.get_child(boxCount - j - 1))
-	invNode.dHolder.box_move(boxHolder.get_child(2), "Rock", true)
+	var rockName = "Rock" if level < 1 else "Rock+"
+	invNode.dHolder.box_move(boxHolder.get_child(2), rockName, true)
 
 func level_up(invNode): #upgrade every rock and stick 
 	for i in global.storedParty.size():

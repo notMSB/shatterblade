@@ -71,12 +71,12 @@ func generate_tooltip(boonName):
 	match boonName:
 		"Scales": tip = "Difficulty: ** \n Condition: Win battles without reusing a box. \n Effect: Generates a new box with rotating items for use in battle. \n Upgrade: Rotating items become stronger."
 		"Crown": tip = "Difficulty: * \n Condition: Kill enemies with the crown. \n Effect: You get the crown. It's very normal. Enjoy! \n Upgrade: The Crown hits all enemies."
-		"Sword": tip = "Difficulty: * \n Condition: Use damaging gear when it has maximum durability. \n Effect: The activated gear deals more damage, as if you have 2 extra strength. \n Upgrade: Repairs always restore gear to maximum durability."
+		"Sword": tip = "Difficulty: *** \n Condition: Use damaging gear when it has maximum durability. \n Effect: The activated gear deals more damage, as if you have 2 extra strength. \n Upgrade: Repairs always restore gear to maximum durability."
 		"Blind": tip = "Difficulty: ***** \n Downside: Enemy intents and damage preview are disabled while active. \n Condition: Win battles without deactivating. \n Effect: +2 strength for the party on Turn 1 while active. \n Upgrade: Killing blows while active grant the user +8 shield."
 		
-		"Column": tip = "Difficulty: *** \n Condition: Win battles in which less than half the party has less health from where they started. \n Effect: One turn of 5 shield to every party member. \n Upgrade: 5 shield to the party every turn."
+		"Column": tip = "Difficulty: ** \n Condition: Win battles in which less than half the party has less health from where they started. \n Effect: One turn of 5 shield to every party member. \n Upgrade: 5 shield to the party every turn."
 		"Lion": tip = "Difficulty: *** \n Condition: Kill enemies without using attacks. \n Effect: 1 turn of thorns to every party member. \n Upgrade: The thorns become permanent."
-		"Infinite": tip = "Difficulty: * \n Condition: Break your gear. \n Effect: Regain a component used in the crafting recipe for the broken gear. \n Upgrade: Breaking gear grants the user 10 shield."
+		"Infinite": tip = "Difficulty: *** \n Condition: Break your gear. \n Effect: Regain a component used in the crafting recipe for the broken gear. \n Upgrade: Breaking gear grants the user 10 shield."
 		"Weak": tip = "Difficulty: ***** \n Downside: On battle start, the lowest health member is named VIP. Their health is set to 1 and they have a turn of Provoke. \n Condition: Win battles where the VIP survives. \n Effect: If the VIP survives, they are fully healed. \n Upgrade: Stealth instead of Provoke. Others gain 1 Dodge."
 		
 		"Cup": tip = "Difficulty: ** \n Condition: Split kills as evenly as possible among party members. \n Effect: The first damaging move used in battle has an extra hit. \n Upgrade: Every party member's first damaging move has an extra hit."

@@ -15,7 +15,7 @@ onready var Map = get_node("/root/Game/Map")
 func toggle_activation(active, skip = false):
 	if active: 
 		Map.activePoint = self
-		if (!skip and pointType != Map.pointTypes.visited): Map.activate_point(self) #skip used to exit dungeon without reactivating it
+		if !skip: Map.activate_point(self) #skip used to exit dungeon without reactivating it
 		$Sprite.visible = true
 		$Sprite.modulate = Color(1,1,1,1)
 	else: 
@@ -77,7 +77,7 @@ func _on_Button_pressed():
 						Map.subtract_time(1)
 					else:
 						Map.subtract_time(ceil(movementLine.points[0].distance_to(movementLine.points[1]) * Map.DISTANCE_TIME_MULT))
-					Map.eval_darkness(Map.activePoint, self)
+					#Map.eval_darkness(Map.activePoint, self) 
 					#Map.move_map(position.x)
 					Map.activePoint.toggle_activation(false) #toggle off map's active node
 					toggle_activation(true) #this is now the map's active node

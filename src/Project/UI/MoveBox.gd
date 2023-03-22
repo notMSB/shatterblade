@@ -87,8 +87,8 @@ func set_tooltip_text(tip):
 	for line in splits:
 		var length = $Tooltip/Label.get_font("font").get_string_size(line).x
 		if length > 225: lineCount += 1 #extra long descriptions
-		if length > 300: lineCount +=1
 		if length > 375: lineCount +=1
+		if length > 450: lineCount +=1
 		if length > longestLineSize: longestLineSize = length
 	if longestLineSize < 200:
 		var offset = (200 - longestLineSize) / 2
@@ -117,6 +117,7 @@ func _on_mouse_exited():
 
 func _on_Button_pressed():
 	boxModeScene = set_mode_scene()
+	#print(boxModeScene)
 	match boxModeScene.name:
 		"Inventory": #inventory
 			var map = boxModeScene.get_node("../Map")
@@ -148,5 +149,14 @@ func _on_Button_pressed():
 				boxModeScene.get_node("../../../Party").visible = true
 				boxModeScene.get_node("../../../Toggle").visible = true
 				boxModeScene.get_node("../../../Table").visible = true
+		"Data":
+			var Puzzle = boxModeScene.get_node("../Puzzle")
+			if Puzzle.selection:
+				Puzzle.set_box(moves[0])
+			else:
+				boxModeScene.visible = false
+				boxModeScene.get_node("../Party").visible = true
+				boxModeScene.get_node("../Toggle").visible = true
+				boxModeScene.get_node("../Table").visible = true
 		_: #map scene
 			pass

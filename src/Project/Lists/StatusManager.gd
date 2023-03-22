@@ -4,7 +4,7 @@ onready var Battle
 
 #Statuses are stored using a 2D array which is set by activation condition
 #When a condition occurs, functions are run if that condition's array has 1 or more items in it
-enum statusActivations {beforeTurn, gettingHit, usingAttack, gettingKill, afterHit, passive}
+enum statusActivations {beforeTurn, gettingHit, usingAttack, gettingKill, afterHit, successfulHit, passive}
 
 const COUNTDOWNVAL = 50
 
@@ -29,7 +29,7 @@ var statusList = {
 	"Movecost Refund": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["usedMoveBox", "unit"]},
 	"Gain Mana": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["damage", "unit"]},
 	
-	"Venomous": {"activation": statusActivations.usingAttack, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 2]},
+	"Venomous": {"activation": statusActivations.successfulHit, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 2]},
 	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "multiply_damage"), "args": ["damage", -1]},
 	"Thorns": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5]},
 	"Firewall": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", "shield"]},

@@ -107,7 +107,8 @@ func create_enemies(enemyDifficulty, opponents):
 		else: createdUnit.make_stats(enemy["stats"][enemyDifficulty])
 		createdUnit.identity = opponent
 		createdUnit.spriteBase = enemy["sprite"]
-		createdUnit.battleName = str(createdUnit.identity, String(i))
+		createdUnit.battleName = str(createdUnit.identity, " ", String(i))
+		createdUnit.displayName = createdUnit.battleName
 		if enemy.has("passives"): createdUnit.passives = enemy["passives"]
 		if enemy.has("specials"): 
 			createdUnit.moves = enemy["specials"]
@@ -286,7 +287,7 @@ func set_intent(unit, target = false):
 			unit.storedTarget = target
 	var targetText = unit.storedTarget
 	if typeof(targetText) != TYPE_STRING:
-		targetText = targetText.battleName
+		targetText = targetText.displayName
 	if actionDamage: targetText = str(targetText, " (", actionDamage, ")")
 	if unit.real:
 		var dHolder = global.storedParty[0].ui.get_parent()
@@ -571,6 +572,8 @@ func execute_move(real = true):
 				if tempDamage != null: damageCalc = tempDamage
 				damageCalc = target.take_damage(damageCalc) #Returns the amount of damage dealt (for recoil reasons). Multihit moves recalculate damage.
 				StatusManager.evaluate_statuses(target, StatusManager.statusActivations.afterHit, [damageCalc]) 
+				if damageCalc == null: damageCalc = 0 #nulls out sometimes when battle won
+				if damageCalc > 0: StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.successfulHit, [damageCalc])
 			
 			if chosenMove.has("healing"): #Get base damage, evaluate target status to final damage, deal said damage, update UI	
 				target.heal(chosenMove["healing"])
@@ -660,6 +663,7 @@ func evaluate_game_over():
 		if unit.currentHealth <= 0:
 			deadUnits +=1
 	if deadUnits == global.storedParty.size():
+		
 		battleDone = true
 		gameOver = true
 

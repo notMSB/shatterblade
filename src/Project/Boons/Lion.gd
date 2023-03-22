@@ -2,7 +2,7 @@ extends Node
 
 var Boons
 
-const REWARD = 5
+const REWARD = 4
 var level = 0
 
 func start_battle(_startingHealth, battle): #make thorns passive

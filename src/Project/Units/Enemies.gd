@@ -8,7 +8,7 @@ const MAXENCOUNTERSIZE = 4
 onready var enemyList = {
 	"PGoblin": {"stats": [6, 11, 13, 15, 17], "specials": ["Shiv"],
 		"biome": b.plains, "rewards": ["garbage"], "locations": [l.day], "difficulty": 1, "sprite": "Goblin"},
-	"PRat": {"stats": [6, 8, 10, 12, 14], "passives": {"Dodgy": 1}, "specials": ["Plague"], 
+	"PRat": {"stats": [4, 8, 12, 16, 20], "passives": {"Dodgy": 1}, "specials": ["Plague"], 
 		"biome": b.plains, "rewards": ["fur"], "locations": [l.day], "difficulty": 2, "sprite": "Rat"},
 	"PSnake": {"stats": [13, 17, 20, 22, 24], "passives": {"Venomous": 0}, "specials": ["Constrict"], "hardSpecials": ["Venoshock"],
 		"biome": b.plains, "rewards": ["venom"], "locations": [l.day], "difficulty": 3, "sprite": "Snake"},
@@ -25,7 +25,7 @@ onready var enemyList = {
 		"biome": b.forest, "rewards": ["claw"], "locations": [l.day], "difficulty": 2, "sprite": "Wolf"},
 	"FSkeleton": {"stats": [15, 19, 23, 27, 31], "specials": ["Power Attack", "Coldsteel"], 
 		"biome": b.forest, "rewards": ["bone"], "locations": [l.day], "difficulty": 3, "sprite": "Skeleton"},
-	"FRat": {"stats": [6, 10, 14, 18, 22], "passives": {"Dodgy": 1}, "specials": ["Plague"], 
+	"FRat": {"stats": [4, 8, 12, 16, 20], "passives": {"Dodgy": 1}, "specials": ["Plague"], 
 		"biome": b.forest, "rewards": ["fur"], "locations": [l.night], "difficulty": 1, "sprite": "Rat"},
 	"FZombie": {"stats": [28, 33, 38, 43, 48], "specials": ["Feeding Frenzy"], "hardSpecials": ["Dark Spikes"],
 		"biome": b.forest, "rewards": ["darkness"], "locations": [l.night], "difficulty": 2, "sprite": "Zombie"},
@@ -45,7 +45,7 @@ onready var enemyList = {
 	"BIG BIRD": {"stats": [32, 39, 46, 53, 60], "specials": ["Dive Bomb", "Dive Bomb"], "hardSpecials": ["Dive Bomb"],
 		"biome": b.mountain, "rewards": ["wing"], "locations": [l.night], "difficulty": 3, "sprite": "Bird", "elite": true},
 	
-	"CBat": {"stats": [4, 8, 12, 16, 20], "passives": {"Dodgy": 1}, "specials": ["Vampire"], 
+	"CBat": {"stats": [6, 10, 14, 18, 22], "passives": {"Dodgy": 1}, "specials": ["Vampire"], 
 		"biome": b.city, "rewards": ["fang"], "locations": [l.day], "difficulty": 1, "sprite": "Bat"},
 	"CGoblin": {"stats": [12, 17, 22, 27, 32], "specials": ["Dark Dive", "Shiv", "Tasty Bite"],
 		"biome": b.city, "rewards": ["garbage"], "locations": [l.day], "difficulty": 2, "sprite": "Goblin"},
@@ -58,7 +58,7 @@ onready var enemyList = {
 	"Dacula": {"stats": [44, 51, 58, 65, 72], "specials": ["Vampire", "Power Attack", "Take Down"], "hardSpecials": ["Cleave"],
 		"biome": b.city, "rewards": ["fang"], "locations": [l.night], "difficulty": 3, "sprite": "Vampire", "elite": true},
 	
-	"BBat": {"stats": [4, 8, 12, 16, 20], "passives": {"Dodgy": 1}, "specials": ["Vampire"], 
+	"BBat": {"stats": [6, 10, 14, 18, 22], "passives": {"Dodgy": 1}, "specials": ["Vampire"], 
 		"biome": b.battlefield, "rewards": ["fang"], "locations": [l.day], "difficulty": 1, "sprite": "Bat"},
 	"BRat": {"stats": [10, 14, 18, 22, 26], "passives": {"Venomous": 0}, "specials": ["Careful Strike"], "hardSpecials": ["Triple Hit"],
 		"biome": b.battlefield, "rewards": ["fur"], "locations": [l.day], "difficulty": 2, "sprite": "Rat"},
@@ -109,7 +109,7 @@ func generate_encounter(rating, isDay, biome, dungeonEnemy = null, seenElite = f
 				validEnemies.erase(enemy)
 				strongestEnemy -= 1
 				break
-	elif rating > MAXENCOUNTERSIZE * strongestEnemy: rating = MAXENCOUNTERSIZE * strongestEnemy
+	if rating > MAXENCOUNTERSIZE * strongestEnemy: rating = MAXENCOUNTERSIZE * strongestEnemy
 	while rating > 0:
 		if validEnemies.size() > 1: validEnemies = evaluate_list(validEnemies, rating, MAXENCOUNTERSIZE - encounter.size(), strongestEnemy)
 		#print(validEnemies)
@@ -121,6 +121,7 @@ func generate_encounter(rating, isDay, biome, dungeonEnemy = null, seenElite = f
 			var remainingSpaces = MAXENCOUNTERSIZE - encounter.size()
 			if rating > remainingSpaces * strongestEnemy: rating = remainingSpaces * strongestEnemy #needed to prevent 5stacks
 		rating -= enemyList[nextEnemy]["difficulty"]
+	if encounter.empty(): encounter.append(validEnemies[0]) #just in case something weird happens, avoids a softlock
 	return encounter
 
 func evaluate_list(enemies, remainingRating, remainingSpaces, strongestEnemy): #makes sure an enemy cannot be chosen in a way that allows the encounter to no longer matches the rating

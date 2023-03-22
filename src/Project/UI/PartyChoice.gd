@@ -1,6 +1,6 @@
 extends Node2D
 
-onready var Party = get_node("../../../../")
+onready var Party = get_node("/root/Game/Party")
 
 var unitName
 var chosen = false

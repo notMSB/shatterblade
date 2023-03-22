@@ -12,7 +12,6 @@ var boxHolder
 var allowedType
 enum types {none, basic, item, special, magic, trick}
 var title
-var displayName = ""
 var discounts = {} #probably only works with reload for now
 
 enum statBoosts {health, resource}

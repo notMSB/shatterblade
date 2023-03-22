@@ -25,8 +25,8 @@ var tempParty = []
 
 var partyMembers = {
 	"Gerald": {"type": types.fighter, "stats": [40, 0], "moves": ["Grapple", "Power Attack"], "boon": "Scales"},
-	"Ferald": {"type": types.fighter, "stats": [40, 0], "moves": ["Breaker Slash", "Deep Cut"], "boon": "Infinite"},
-	"Yerald": {"type": types.fighter, "stats": [35, 5], "moves": ["Bone Club", "Dark Dive"], "boon": "Mask"},
+	"Ferald": {"type": types.fighter, "stats": [40, 0], "moves": ["Breaker Slash", "Dark Dive"], "boon": "Infinite"},
+	"Yerald": {"type": types.fighter, "stats": [35, 5], "moves": ["Vampire", "Deep Cut"], "boon": "Column"},
 	"Jerald": {"type": types.fighter, "stats": [30, 10], "moves": ["Take Down", "Dive Bomb"], "boon": "Crown"},
 	"Werald": {"type": types.fighter, "stats": [30, 10], "moves": ["Cleave", "Spit Shine"], "boon": "Blind"},
 	"Zerald": {"type": types.fighter, "stats": [25, 15], "moves": ["Pierce", "Protect"], "boon": "Tides"},
@@ -45,9 +45,9 @@ var partyMembers = {
 	"Jimmy": {"type": types.rogue, "stats": [40, 4], "moves": ["Below Blow", "Eye Poke"], "boon": "Scales"},
 	"Bimmy": {"type": types.rogue, "stats": [35, 5], "moves": ["Brand", "Crusher Claw"], "boon": "Sword"},
 	"Rimmy": {"type": types.rogue, "stats": [35, 5], "moves": ["Coldsteel", "Sideswipe"], "boon": "Cup"},
-	"Timmy": {"type": types.rogue, "stats": [30, 6], "moves": ["Taunt", "Sucker Punch"], "boon": "Infinite"},
+	"Timmy": {"type": types.rogue, "stats": [30, 6], "moves": ["Taunt", "Sucker Punch"], "boon": "Mask"},
 	"Grimmy": {"type": types.rogue, "stats": [30, 6], "moves": ["Bonemerang", "Squalorbomb"], "boon": "Wings"},
-	"Pimmy": {"type": types.rogue, "stats": [25, 7], "moves": ["Quick Attack", "Taste Test"], "boon": "Column"},
+	"Pimmy": {"type": types.rogue, "stats": [25, 7], "moves": ["Quick Attack", "Taste Test"], "boon": "Infinite"},
 	"Slimmy": {"type": types.rogue, "stats": [25, 7], "moves": ["Firedance", "Flametongue"], "boon": "Tides"},
 	"Mimmy": {"type": types.rogue, "stats": [20, 8], "moves": ["Shiv", "Back Rake"], "boon": "Weak"},
 }
@@ -282,6 +282,8 @@ func _on_Start_pressed(): #make units, put in global party, set boon
 		n.queue_free()
 	Game.mapMode = true
 	Game.add_child(MapScene.instance())
+	$Scrolls.visible = false
+	$CurrentParty.visible = false
 	$ColorRect/UI.visible = false
 	$ColorRect.margin_bottom = 460 #For between areas
 	visible = false

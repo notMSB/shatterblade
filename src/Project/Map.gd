@@ -153,6 +153,7 @@ func set_biome():
 		biomesList.graveyard: $HolderHolder/ScrollContainer/ColorRect.color = Color("4e004e") #Purple
 	currentMascot = mascotList[randi() % (mascotList.size())]
 	Trading.assign_component_values(currentBiome, currentMascot)
+	if inventoryWindow: inventoryWindow.revalue_all_gear()
 
 func set_boon_text():
 	favorNode.get_node("Virtue").text = Boons.set_text()
@@ -176,11 +177,9 @@ func set_display_color(display):
 	elif unitType == Moves.moveType.trick: display.get_node("Sprite").modulate = Color(.3,.7,.3,1) #G
 
 func activate_point(point):
+	if $Events.visible: $Events.visible = false
 	var type = point.pointType
-	if type == pointTypes.none:
-		pass
-	elif type == pointTypes.start:
-		print("Start")
+	if type == pointTypes.none: pass
 	elif type == pointTypes.end: #todo: event asking if you want to end (and eventually a boss here)
 		#print("End")
 		regen_map(true)
@@ -193,12 +192,16 @@ func activate_point(point):
 		else: pass #todo: event saying town is closed
 	elif type == pointTypes.battle or !isDay or point.sectionNum != currentDay: #no events at night
 		activate_battle()
+	elif type == pointTypes.visited:
+		pass
 	elif type == pointTypes.trader:
 		grab_event("Store")
 	elif type == pointTypes.repair:
 		grab_event("Crafting")
 	elif type == pointTypes.temple:
 		grab_event("Temple")
+	elif type == pointTypes.start:
+		print("Start")
 	elif type == pointTypes.event:
 		if point.pointQuest:
 			$Events/EventDescription.text = str(point.pointQuest["description"], "\nfor\n", point.pointQuest["prize"])
@@ -228,7 +231,7 @@ func activate_battle(newOpponents = null, isHunt = false):
 		newOpponents = Enemies.generate_encounter(dungeonRando + get_difficulty_mod(), false, currentBiome, currentDungeon.mascot)
 	elif !newOpponents and distanceTraveled > 1:
 		var dayEncounter = isDay
-		if isDay and activePoint.sectionNum > currentDay: dayEncounter = false #if it's day but you're out of bounds it counts as night
+		if isDay and activePoint.sectionNum != currentDay: dayEncounter = false #if it's day but you're out of bounds it counts as night
 		newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + get_difficulty_mod(), dayEncounter, currentBiome, null, seenElite)
 	if isHunt: 
 		for i in currentArea: newOpponents.append(newOpponents[0]) #scale up hunts by area
@@ -396,6 +399,16 @@ func place_dungeons(possibleDungeons, borderPoints): #dungeons start in one sect
 			if entrySection == point.sectionNum: 
 				newDungeon.originLocation = point
 				point.set_name(str(currentMascot, " Entry"))
+				var entryOK = false
+				for line in point.lines:
+					var checkPoint = line.get_connection(point)
+					if checkPoint.sectionNum == point.sectionNum:
+						entryOK = true
+						break
+				if !entryOK:
+					regen_map()
+					return print("invalid dungeon entry")
+				
 			else: 
 				newDungeon.exitLocation = point
 				point.set_name(str(currentMascot, " Exit"))
@@ -481,8 +494,8 @@ func regen_map(newMember = false):
 				child.queue_free()
 	regens += 1
 	if regens < REGENLIMIT: 
-		make_points(Vector2(INCREMENT,INCREMENT*.5))
 		advance_day(true)
+		make_points(Vector2(INCREMENT,INCREMENT*.5))
 		time = DAYTIME
 		seenElite = false
 		set_biome()
@@ -533,7 +546,7 @@ func set_sections(addedSections = null):
 			addedSections[i].visible = false if currentDay == i else true
 	else:
 		for i in TOTALSECTIONS:
-			sHolder.get_child(i).visible = false if currentDay == i else true
+			sHolder.get_child(i).visible = true if currentDay != i or !isDay else false
 
 func set_label(point, label, distance = false):
 	if distance: point.set_name(str(label, " ", point.clicksFromStart))
@@ -566,13 +579,26 @@ func classify_remaining_points():
 				sectionPoints.append(point)
 		if sectionPoints.empty(): 
 			regen_map() #needs to be a really messed up mapgen for this, but if it happens it crashes
-			print("no points for quests")
-			return
+			return print("no points for quests")
 		if i > 0:
-			var randoPoint = sectionPoints[randi() % sectionPoints.size()]
-			place_temple(randoPoint)
-			sectionPoints.erase(randoPoint)
+			if i == TOTALSECTIONS - 1: #last section, put temple on point next to exit with most lines
+				var checkTemple
+				for line in endIndex.lines:
+					var checkPoint = line.get_connection(endIndex)
+					if !checkTemple: checkTemple = checkPoint
+					elif checkPoint.lines.size() > checkTemple.lines.size(): checkTemple = checkPoint
+				place_temple(checkTemple)
+				sectionPoints.erase(checkTemple)
+			else:
+				var randoPoint = sectionPoints[randi() % sectionPoints.size()]
+				place_temple(randoPoint)
+				sectionPoints.erase(randoPoint)
 		var battleCount = ceil(sectionPoints.size() * .5)
+		for line in startIndex.lines:
+			var checkPoint = line.get_connection(startIndex)
+			checkPoint.pointType = pointTypes.battle
+			sectionPoints.erase(checkPoint)
+			battleCount -= 1
 		while battleCount > 0:
 			var randoPoint = sectionPoints[randi() % sectionPoints.size()]
 			randoPoint.pointType = pointTypes.battle
@@ -590,7 +616,7 @@ func set_point_displays():
 		elif point.pointType == pointTypes.end: point.set_type_text("E")
 		elif point.pointType == pointTypes.start: point.set_type_text("S")
 		elif point.pointType == pointTypes.town: point.set_type_text("T")
-		elif point.sectionNum == currentDay:
+		elif point.sectionNum == currentDay and isDay:
 			if point.pointType > pointTypes.event:
 				point.set_type_text(pointTypes.keys()[point.pointType][0].to_upper())
 			elif point.pointQuest:
@@ -707,8 +733,11 @@ func subtract_time(diff, refillAllMana = false):
 	if time <= 0:
 		time = DAYTIME + time
 		advance_day()
+		set_point_displays()
 	elif time <= 50: 
 		isDay = false
+		set_sections()
+		set_point_displays()
 	set_time_text()
 
 func set_time_text():
@@ -731,7 +760,7 @@ func advance_day(reset = false):
 	isDay = true
 	if reset: currentDay = 0
 	else: currentDay += 1
-	set_sections()
+	if !reset: set_sections()
 	set_point_displays()
 
 func set_quick_crafts():
