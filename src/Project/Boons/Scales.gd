@@ -5,12 +5,12 @@ var Boons
 const REWARD = 5
 var usedBoxes = []
 var boxesOK = true
-var level = 0
+var level = [false, false]
 
 func prep_inventory():
 	#print("scales prep inventory")
 	for unit in global.storedParty:
-		unit.moves.insert(0, "Rock")
+		unit.moves.insert(0, "Snapshot")
 	return 1
 
 func added_boon(invNode):
@@ -33,13 +33,19 @@ func add_rocks(i, invNode):
 	boxHolder.get_child(boxCount).trackerBar = boxHolder.get_child(2).trackerBar
 	for j in boxCount - 2:
 		invNode.swap_boxes(boxHolder.get_child(boxCount - j), boxHolder.get_child(boxCount - j - 1))
-	var rockName = "Rock" if level < 1 else "Rock+"
+	var rockName = "Snapshot" if !level[0] else "Snapshot+"
 	invNode.dHolder.box_move(boxHolder.get_child(2), rockName, true)
 
-func level_up(invNode): #upgrade every rock and stick 
+func level_up(invNode, upgradeIndex):
 	for i in global.storedParty.size():
-		var boxHolder = invNode.dHolder.get_child(i).get_node("MoveBoxes")
-		invNode.dHolder.box_move(boxHolder.get_child(2), "Rock+")
+			var boxHolder = invNode.dHolder.get_child(i).get_node("MoveBoxes")
+			if upgradeIndex == 0: 
+				if level[1]: invNode.dHolder.box_move(boxHolder.get_child(2), "Sidewinder+")
+				else: invNode.dHolder.box_move(boxHolder.get_child(2), "Snapshot+")
+			else: 
+				if level[0]: invNode.dHolder.box_move(boxHolder.get_child(2), "Sidewinder+")
+				else: invNode.dHolder.box_move(boxHolder.get_child(2), "Sidewinder")
+		
 
 func start_battle(_startingHealth, _battle):
 	boxesOK = true

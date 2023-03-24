@@ -19,6 +19,7 @@ var statusList = {
 	
 	"Provoke": {"activation": statusActivations.passive, "system": false},
 	"Stealth": {"activation": statusActivations.passive, "system": false},
+	"Resist": {"activation": statusActivations.passive},
 	
 	"Icarus": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "apply_icarus"), "args": ["unit", "damage"]},
 	"IDamage": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "pop_icarus"), "args": ["unit", "value"], "neverCountdown": true},
@@ -66,6 +67,10 @@ func countdown_turns(unit, turnStart):
 					unit.update_status_ui()
 
 func add_status(unit, status, value = 0): #If value is not sent, status does not time out
+	if statusList[status].has("subtractLate") or (statusList[status].has("system") and statusList[status]["system"] == true):
+		if find_status(unit, "Resist"):
+			reduce_status(unit, "Resist", 1) #If the unit can resist certain statuses, do that instead of applying the status
+			return 
 	var addedStatus = find_status(unit, status) #need to see if it's on already
 	if addedStatus: #if so, just increment the values of the existing one
 		if value > 0:

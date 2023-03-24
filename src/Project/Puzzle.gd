@@ -11,14 +11,14 @@ const LASTMOVEBOX = 6
 const SCALESINDEX = 1
 const OFFSET = 2
 const DEFAULTOPTION = "none"
-const SCALESMOVES = ["Rock", "Stick"]
+const SCALESMOVES = ["Snapshot", "Line Drive", "Sidewinder"]
 
 var selection
 var enemyDifficulty = 0
 
 var units = []
 var playerBoons = [0, 0, 0]
-var boonLevels = [0, 0, 0]
+var boonLevels = [[false, false], [false, false], [false, false]]
 var opponents = [DEFAULTOPTION, DEFAULTOPTION, DEFAULTOPTION, DEFAULTOPTION]
 
 func _ready():
@@ -114,7 +114,10 @@ func set_boon(selectorIndex, boonIndex):
 	#print(playerBoons)
 
 func set_boon_level(selectorIndex, value):
-	boonLevels[selectorIndex] = value
+	if value == 0: boonLevels[selectorIndex] = [false, false] #Bronze
+	elif value == 1: boonLevels[selectorIndex] = [true, false] #Silver
+	elif value == 2: boonLevels[selectorIndex] = [false, true] #Gold
+	else: boonLevels[selectorIndex] = [true, true] #Platinum
 	var path = str("HolderHolder/BoonHolder/Boon ", selectorIndex, "/Choice")
 	if get_node(path).get_item_text(playerBoons[selectorIndex]) == "Scales":
 		for display in $HolderHolder/DisplayHolder.get_children():
@@ -125,11 +128,11 @@ func set_boon_level(selectorIndex, value):
 				if box.moves[0] == "Crown" or box.moves[0] == "Crown+": check_crown(box)
 
 func check_crown(box):
-	var level = 0
+	var level
 	for boonIndex in playerBoons.size():
 		var boonName = $"HolderHolder/BoonHolder/Boon 0/Choice".get_item_text(playerBoons[boonIndex])
-		if boonName == "Crown": level = boonLevels[boonIndex]
-	if level == 0: $HolderHolder/DisplayHolder.box_move(box, "Crown")
+		if boonName == "Crown": level = boonLevels[boonIndex][0]
+	if level == false: $HolderHolder/DisplayHolder.box_move(box, "Crown")
 	else: $HolderHolder/DisplayHolder.box_move(box, "Crown+")
 
 func check_special_boons(boonIndex, enabled:bool):
@@ -231,8 +234,8 @@ func _on_GoButton_pressed():
 			var chosenBoon = $HolderHolder/BoonHolder.get_child(i).get_node("Choice").get_text()
 			Boons.playerBoons.append(chosenBoon)
 			Boons.create_boon(chosenBoon)
-			if boonLevels[i] > 0: Boons.get_node(chosenBoon).level += boonLevels[i]
-			
+			if boonLevels[i][0]: Boons.get_node(chosenBoon).level[0] = true
+			if boonLevels[i][1]: Boons.get_node(chosenBoon).level[1] = true
 	
 	var newOpponents = []
 	for enemyName in opponents:

@@ -4,7 +4,7 @@ var Boons
 
 const REWARD = 10
 var president = null
-var level = 0
+var level = [false, false]
 
 func start_battle(_startingHealth, battle):
 	for unit in global.storedParty:
@@ -12,11 +12,11 @@ func start_battle(_startingHealth, battle):
 		elif unit.currentHealth < president.currentHealth: president = unit
 	president.currentHealth = 1
 	president.update_hp()
-	if level < 1: battle.StatusManager.add_status(president, "Provoke", 2)
-	else:
+	if level[0]: battle.StatusManager.add_status(president, "Stealth", 2)
+	else: battle.StatusManager.add_status(president, "Provoke", 2)
+	if level[1]:
 		for unit in global.storedParty:
 			if unit != president: battle.StatusManager.add_status(unit, "Dodgy", 1)
-			else: battle.StatusManager.add_status(president, "Stealth", 2)
 
 func end_battle(_endingHealth, _battle):
 	if president.currentHealth > 0: 

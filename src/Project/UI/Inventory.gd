@@ -499,9 +499,10 @@ func get_component_count():
 				total += global.itemDict[item]
 	return total
 
-func check_and_award_component(box):
+func check_and_award_component(box, flip = false):
 	#if get_component_count() <= 1: #potential balance fix that prevents component hoarding
-	add_item(Crafting.break_down(box.moves[0])[0])
+	if flip: add_item(Crafting.break_down(box.moves[0])[1])
+	else: add_item(Crafting.break_down(box.moves[0])[0])
 
 func exit(): #Save inventory and leave, todo: make the passives and discounts apply somewhere other than here
 	deselect_box(otherSelection)

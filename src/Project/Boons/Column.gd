@@ -4,9 +4,9 @@ var Boons
 
 const REWARD = 5
 var healthCheck = []
-var level = 0
+var level = [false, false]
 
-func start_battle(_startingHealth, _battle):
+func start_battle(_startingHealth, battle):
 	healthCheck.clear()
 	for unit in global.storedParty:
 		unit.shield += 5
@@ -14,9 +14,10 @@ func start_battle(_startingHealth, _battle):
 		
 		healthCheck.append(unit.currentHealth)
 		unit.ui.get_node("BattleElements/VirtueStatus").text = String(unit.currentHealth)
+		if level[1]: battle.StatusManager.add_status(unit, "Resist", 1)
 
 func start_turn():
-	if level >= 1:
+	if level[0]:
 		for unit in global.storedParty:
 			unit.shield += 5
 			unit.update_hp()

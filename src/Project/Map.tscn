@@ -19,7 +19,7 @@
 [ext_resource path="res://src/Project/Temple.tscn" type="PackedScene" id=17]
 [ext_resource path="res://src/Project/UI/QuickCraft.tscn" type="PackedScene" id=18]
 [ext_resource path="res://src/Project/UI/QuickRepair.tscn" type="PackedScene" id=19]
-[ext_resource path="res://src/Assets/Images/Circle.png" type="Texture" id=20]
+[ext_resource path="res://src/Project/UI/UICircle.tscn" type="PackedScene" id=20]
 
 [sub_resource type="StyleBoxFlat" id=2]
 bg_color = Color( 0.192157, 0.32549, 0.737255, 1 )
@@ -70,14 +70,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CraftPanel" type="ColorRect" parent="."]
-margin_right = 280.0
-margin_bottom = 460.0
-color = Color( 0, 0.478431, 0.478431, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="XPBorder" type="ColorRect" parent="."]
 modulate = Color( 0, 0, 0, 1 )
 show_behind_parent = true
@@ -110,7 +102,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="CraftPanel" type="ColorRect" parent="."]
+margin_top = 80.0
+margin_right = 280.0
+margin_bottom = 460.0
+color = Color( 0, 0.478431, 0.478431, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="CraftScroll" type="ScrollContainer" parent="."]
+margin_top = 80.0
 margin_right = 640.0
 margin_bottom = 460.0
 __meta__ = {
@@ -125,6 +127,7 @@ color = Color( 0, 0.478431, 0.478431, 1 )
 
 [node name="RepairPanel" type="ColorRect" parent="."]
 margin_left = 1000.0
+margin_top = 80.0
 margin_right = 1280.0
 margin_bottom = 460.0
 color = Color( 0, 0.478431, 0.478431, 1 )
@@ -134,6 +137,7 @@ __meta__ = {
 
 [node name="RepairScroll" type="ScrollContainer" parent="."]
 margin_left = 641.0
+margin_top = 80.0
 margin_right = 1280.0
 margin_bottom = 460.0
 __meta__ = {
@@ -181,6 +185,42 @@ mouse_filter = 1
 
 [node name="TempleHolder" type="Node2D" parent="HolderHolder"]
 
+[node name="CornerHolder" type="Node2D" parent="HolderHolder"]
+
+[node name="Time" type="Node2D" parent="HolderHolder/CornerHolder"]
+
+[node name="ColorRect" type="ColorRect" parent="HolderHolder/CornerHolder/Time"]
+margin_right = 280.0
+margin_bottom = 80.0
+color = Color( 0.286275, 0.176471, 0.176471, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Favor" type="Node2D" parent="HolderHolder/CornerHolder"]
+
+[node name="ColorRect" type="ColorRect" parent="HolderHolder/CornerHolder/Favor"]
+margin_left = 1000.0
+margin_right = 1280.0
+margin_bottom = 80.0
+mouse_filter = 2
+color = Color( 0.286275, 0.176471, 0.176471, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Boon 1" parent="HolderHolder/CornerHolder/Favor/ColorRect" instance=ExtResource( 20 )]
+visible = false
+position = Vector2( 142, 41 )
+
+[node name="Boon 2" parent="HolderHolder/CornerHolder/Favor/ColorRect" instance=ExtResource( 20 )]
+visible = false
+position = Vector2( 46, 35 )
+
+[node name="Boon 3" parent="HolderHolder/CornerHolder/Favor/ColorRect" instance=ExtResource( 20 )]
+visible = false
+position = Vector2( 238, 36 )
+
 [node name="Events" type="Node2D" parent="."]
 visible = false
 script = ExtResource( 11 )
@@ -204,9 +244,3 @@ __meta__ = {
 }
 
 [node name="Choices" type="Node2D" parent="Events"]
-
-[node name="Circle" type="Sprite" parent="."]
-visible = false
-position = Vector2( 637, 598 )
-scale = Vector2( 0.45, 0.45 )
-texture = ExtResource( 20 )

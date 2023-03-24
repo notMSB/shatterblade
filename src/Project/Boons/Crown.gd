@@ -3,7 +3,7 @@ extends Node
 var Boons
 
 const REWARD = 5
-var level = 0
+var level = [false, false]
 
 func prep_inventory():
 	global.itemDict["moves"].append("Crown")
@@ -11,7 +11,7 @@ func prep_inventory():
 func added_boon(invNode):
 	invNode.add_item("Crown", true)
 
-func level_up(invNode): #find the crown and upgrade it
+func level_up(invNode, upgradeIndex): #find the crown and upgrade it
 	for i in global.storedParty.size():
 		var boxHolder = invNode.dHolder.get_child(i).get_node("MoveBoxes")
 		for box in boxHolder.get_children():
@@ -19,6 +19,8 @@ func level_up(invNode): #find the crown and upgrade it
 	for iBox in invNode.iHolder.get_children():
 		var iName = iBox.get_node("Name").text
 		if iName == "Crown": invNode.dHolder.box_move(iBox, "Crown+")
+	if upgradeIndex == 1:
+		invNode.add_item("Crown", true)
 
 func check_hit(usedBox, targetHealth, _moveUser, real, _battle):
 	if usedBox != null and real:

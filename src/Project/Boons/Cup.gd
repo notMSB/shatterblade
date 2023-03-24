@@ -5,12 +5,14 @@ var Boons
 const REWARD = 5
 const MAXENEMIES = 4
 
+var restoreUsed = false
 var moveUsers = []
 var previewUsers = []
 var killers = []
-var level = 0
+var level = [false, false]
 
 func start_battle(_startingHealth, _battle):
+	restoreUsed = false
 	moveUsers.clear()
 	killers.clear()
 	for member in global.storedParty:
@@ -26,16 +28,27 @@ func before_move(moveUser, _usedMoveBox, real, _moveTarget, _battle): #returns a
 	var currentUsers = moveUsers if real else previewUsers
 	if !currentUsers.has(moveUser):
 		currentUsers.append(moveUser)
-		if level >= 1: return 1
+		if level[0]: return 1
 		elif currentUsers.size() < 2: return 1
 	return 0
 
 func check_move(_usedBox, targetHealth, moveUser, real):
-	if targetHealth <= 0 and real:
-		for entry in killers:
-			if entry[0] == moveUser:
-				entry[1] += 1
-				entry[0].ui.get_node("BattleElements/VirtueStatus").text = String(entry[1])
+	if targetHealth <= 0: 
+		if real:
+			for entry in killers:
+				if entry[0] == moveUser:
+					entry[1] += 1
+					entry[0].ui.get_node("BattleElements/VirtueStatus").text = String(entry[1])
+		if level[1] and !restoreUsed:
+			restoreUsed = true
+			if real:
+				for unit in moveUsers:
+					if unit == moveUser:
+						moveUsers.erase(unit)
+			else:
+				for unit in previewUsers:
+					if unit == moveUser:
+						previewUsers.erase(unit)
 		#if level >= 1:
 			#moveUsers.erase(moveUser) #refresh bonus hit
 

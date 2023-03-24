@@ -71,7 +71,7 @@ func _ready():
 	"Defensive Pact": {"target": targetType.ally, "resVal": 10, "damage": 5 ,"effect": funcref(self, "change_attribute"), "args": ["moveTarget", "shield", 15], "description": "Adds 15 shield", "slot": equipType.gear, "type": moveType.magic},
 	"Cold Spring": {"target": targetType.allies, "healing": 6, "resVal": 25, "slot": equipType.gear, "type": moveType.magic, "status": "Chill", "value": 10},
 	"Submersion": {"target": targetType.everyone, "resVal": 25, "status": "Chill", "value": 10, "slot": equipType.gear, "type": moveType.magic},
-	"Firewall": {"target": targetType.ally, "resVal": 20, "status": "Firewall", "value": 1, "slot": equipType.gear, "type": moveType.magic, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 7], "description": "Shields 7. When shield is damaged, remaining shield is dealt to attacker."},
+	"Firewall": {"target": targetType.ally, "resVal": 20, "status": "Firewall", "value": 1, "slot": equipType.gear, "type": moveType.magic, "effect": funcref(self, "change_attribute"), "args": ["moveTarget", "shield", 7], "description": "Shields 7. When shield is damaged, remaining shield is dealt to attacker."},
 	"Icarus": {"target": targetType.ally, "resVal": 30, "slot": equipType.gear, "type": moveType.magic, "status": "Icarus", "value": 2, "description": "Target absorbs all damage while Icarus status is active. If it is not active, take all the absorbed damage at turn start."},
 	
 	"Coldsteel": {"target": targetType.enemy, "damage": 3, "resVal": 3, "hits": 2, "slot": equipType.gear, "type": moveType.trick, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", "damageCalc"], "description": "Each hit inflicts chill equal to total damage dealt."},
@@ -113,10 +113,12 @@ func _ready():
 	"Tentacle Jar": {"target": targetType.enemyTargets, "damage": 8, "status": "Chill", "value": 6, "slot": equipType.gear, "type": moveType.item},
 	"Ring of Fire": {"target": targetType.enemy, "damage": 8, "resVal": 0, "hits": 10, "barrage": true, "bounceEveryone": true ,"slot": equipType.gear, "type": moveType.item, "description": "Hits bounce to EVERYONE."},
 	
-	"Rock": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick"], "target": targetType.enemy, "damage": 2, "quick": true, "cursed": true},
-	"Rock+": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Stick+"], "target": targetType.enemy, "damage": 4, "quick": true, "cursed": true},
-	"Stick": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Rock"], "target": targetType.enemy, "damage": 8, "cursed": true},
-	"Stick+": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Rock+"], "target": targetType.enemy, "damage": 12, "cursed": true},
+	"Snapshot": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Line Drive"], "target": targetType.enemy, "damage": 2, "quick": true, "cursed": true},
+	"Snapshot+": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Line Drive+"], "target": targetType.enemy, "damage": 4, "quick": true, "cursed": true},
+	"Line Drive": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Snapshot"], "target": targetType.enemyTargets, "damage": 6, "cursed": true},
+	"Line Drive+": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Snapshot+"], "target": targetType.enemyTargets, "damage": 9, "cursed": true},
+	"Sidewinder": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Snapshot, Line Drive"], "target": targetType.enemy, "damage": 5, "barrage": true, "hits": 2, "cursed": true},
+	"Sidewinder+": {"slot": equipType.none, "type": moveType.none, "resVal": 0, "uselimit": 1, "cycle": ["Snapshot+, Line Drive+"], "target": targetType.enemy, "damage": 7, "barrage": true, "hits": 3, "cursed": true},
 	
 	"Health Seed": {"slot": equipType.none, "type": moveType.none, "unusable": true, "unequippable": true, "price": 6, "mapUsable": true, "statBoost": statBoosts.health, "uses": 1, "obtainable": true, "rarity": rarities.uncommon, "description": "Raises max health of unit by 5."},
 	"Resource Seed": {"slot": equipType.none, "type": moveType.none, "unusable": true, "unequippable": true, "price": 6, "mapUsable": true, "statBoost": statBoosts.resource, "uses": 1, "obtainable": true, "rarity": rarities.uncommon, "description": "Raises resource capacity of unit."},
@@ -138,7 +140,7 @@ func _ready():
 	"Power Loader": {"slot": equipType.relic, "type": moveType.trick, "rarity": rarities.uncommon, "unusable": true, "discount": [["Reload", 1], ["Catch", 1]], "description": "Reloads cost 1 less."},
 	
 	"Crown": {"slot": equipType.relic, "type": moveType.none, "cursed": true, "resVal": 0, "channel": true, "damage": 12, "target": targetType.enemy, "uselimit": 1, "price": 0, "description": "definitely not cursed"},
-	"Crown+": {"slot": equipType.relic, "type": moveType.none, "cursed": true, "resVal": 0, "channel": true, "damage": 12, "target": targetType.enemies, "uselimit": 1, "price": 0},
+	"Crown+": {"slot": equipType.relic, "type": moveType.none, "cursed": true, "resVal": 0, "channel": true, "damage": 12, "target": targetType.enemyTargets, "uselimit": 1, "price": 0},
 	
 	"X": {"slot": equipType.any, "type": moveType.none, "resVal": 999, "uses": 0} #temp
 }

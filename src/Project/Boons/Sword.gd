@@ -3,16 +3,18 @@ extends Node
 var Boons
 
 const REWARD = 8
+var level = [false, false]
 
-var level = 0
-
-func level_up(invNode):
+func level_up(invNode, _upgradeIndex):
 	invNode.repairBonus = true
 
-func uses_reduced(_user, usedBox, useNumber, real, battle):
+func uses_reduced(user, usedBox, useNumber, real, battle):
 	if battle.Moves.moveList[usedBox.moves[0]].has("damage"):
 		var originalUses = useNumber
 		if real: originalUses = useNumber + 1
 		if originalUses == usedBox.maxUses:
 			if real: Boons.grant_favor(REWARD)
-			battle.damageBuff += 2
+			if level[1]:
+				user.strength += 2
+				user.update_strength()
+			else: battle.damageBuff += 2

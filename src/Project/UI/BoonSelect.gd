@@ -1,6 +1,7 @@
 extends Node2D
 
 var clickCost = null
+var offeredUpgrade
 
 func _on_Button_pressed():
 	get_node("../../").select_pressed(self)
@@ -20,7 +21,7 @@ func set_tooltip(tip):
 		$Tooltip/Background.margin_left += offset
 		$Tooltip/Background.margin_right -= offset
 	if lineCount != 5:
-		var offset = (5 - lineCount) * 16
+		var offset = (5 - lineCount) * 20
 		$Tooltip/Inside.margin_bottom -= offset
 		$Tooltip/Background.margin_bottom -= offset
 		$Tooltip/Label.margin_bottom -= offset

@@ -231,8 +231,8 @@ margin_top = 58.0
 margin_right = 546.0
 margin_bottom = 78.0
 rect_scale = Vector2( 1.5, 1.5 )
-text = "0"
-items = [ "0", null, false, 0, null, "1", null, false, 1, null ]
+text = "Bronze"
+items = [ "Bronze", null, false, 0, null, "Silver", null, false, 1, null, "Gold", null, false, 2, null, "Platinum", null, false, 3, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -285,8 +285,8 @@ margin_top = 58.0
 margin_right = 618.0
 margin_bottom = 78.0
 rect_scale = Vector2( 1.5, 1.5 )
-text = "0"
-items = [ "0", null, false, 0, null, "1", null, false, 1, null ]
+text = "Bronze"
+items = [ "Bronze", null, false, 0, null, "Silver", null, false, 1, null, "Gold", null, false, 2, null, "Platinum", null, false, 3, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -339,8 +339,8 @@ margin_top = 58.0
 margin_right = 530.0
 margin_bottom = 78.0
 rect_scale = Vector2( 1.5, 1.5 )
-text = "0"
-items = [ "0", null, false, 0, null, "1", null, false, 1, null ]
+text = "Bronze"
+items = [ "Bronze", null, false, 0, null, "Silver", null, false, 1, null, "Gold", null, false, 2, null, "Platinum", null, false, 3, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false

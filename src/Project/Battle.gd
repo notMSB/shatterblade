@@ -209,7 +209,6 @@ func play_turn(notFirstTurn = true):
 				var boxName = box.get_node("Name").text
 				if box.currentUses > 0 and (boxName == "Reload" or boxName == "Catch") and !unit.isStunned and unit.currentHealth > 0: box._on_Button_pressed()
 		Boons.call_boon("start_turn")
-		doubleXP = false
 		log_turn()
 		logIndex = 0
 		if autoPreview: yield(preview_turn(), "completed")
@@ -221,7 +220,7 @@ func play_turn(notFirstTurn = true):
 		StatusManager.countdown_turns(currentUnit, false)
 		play_turn()
 	else: #Enemy turn
-		if $BattleLog/Scroll/ColorRect.get_child_count() > logIndex and $BattleLog/Scroll/ColorRect.get_child(logIndex).logUser == currentUnit: focus_log()
+		if $BattleLog/Scroll/Control.get_child_count() > logIndex and $BattleLog/Scroll/Control.get_child(logIndex).logUser == currentUnit: focus_log()
 		if currentUnit.currentHealth > 0: #if you're dead stop doing moves
 			StatusManager.evaluate_statuses(currentUnit, StatusManager.statusActivations.beforeTurn)
 			Boons.call_boon("post_status_eval", [currentUnit, currentUnit.real])
@@ -360,8 +359,8 @@ func go_button_press():
 	emit_signal("turn_taken")
 
 func focus_log():
-	if logIndex > 0: $BattleLog/Scroll/ColorRect.get_child(logIndex - 1).recolor()
-	$BattleLog/Scroll/ColorRect.get_child(logIndex).focus()
+	if logIndex > 0: $BattleLog/Scroll/Control.get_child(logIndex - 1).recolor()
+	$BattleLog/Scroll/Control.get_child(logIndex).focus()
 	if logIndex > 4: $BattleLog/Scroll.scroll_horizontal = 240 * logIndex
 	logIndex += 1
 
@@ -420,13 +419,13 @@ func convert_unit(target):
 func log_turn():
 	var logIncrement = 240
 	var totalLogs = 0
-	for child in $BattleLog/Scroll/ColorRect.get_children():
-		$BattleLog/Scroll/ColorRect.remove_child(child)
+	for child in $BattleLog/Scroll/Control.get_children():
+		$BattleLog/Scroll/Control.remove_child(child)
 		child.queue_free()
 	
 	for i in executionOrder.size(): #box, move, user, target
 		var entry = LogEntry.instance()
-		$BattleLog/Scroll/ColorRect.add_child(entry)
+		$BattleLog/Scroll/Control.add_child(entry)
 		entry.assemble(executionOrder[i][2], executionOrder[i][3], executionOrder[i][0].moves[0])
 		entry.position.x = logIncrement * totalLogs
 		totalLogs += 1
@@ -434,14 +433,14 @@ func log_turn():
 	for enemy in get_team(false, true):
 			if enemy.currentHealth > 0 and !enemy.isStunned:
 				var entry = LogEntry.instance()
-				$BattleLog/Scroll/ColorRect.add_child(entry)
+				$BattleLog/Scroll/Control.add_child(entry)
 				if !canSee: entry.assemble(enemy, null, "X")
 				else: entry.assemble(enemy, enemy.storedTarget, enemy.storedAction)
 				entry.position.x = logIncrement * totalLogs
 				totalLogs += 1
-	if totalLogs > 5: $BattleLog/Scroll/_h_scroll.rect_position.y = 70
 	#$BattleLog/Scroll.update()
-	$BattleLog/Scroll/ColorRect.rect_min_size.x = max(1280, totalLogs * logIncrement)
+	$BattleLog/Scroll/Control.rect_min_size.x = max(720, totalLogs * logIncrement)
+	if totalLogs == 4 and $BattleLog/Scroll/_h_scroll.rect_position.y > 100: $BattleLog/Scroll/_h_scroll.rect_position.y -= 130
 
 func toggle_previews(toggle):
 	for unit in $Units.get_children():
@@ -646,7 +645,9 @@ func activate_effect(effectName = "effect", argsName = "args"):
 
 func evaluate_completion(deadUnit):
 	if deadUnit.real:
-		if Map: Map.increment_xp(deadUnit.maxHealth, deadUnit, doubleXP)
+		if Map: 
+			Map.increment_xp(deadUnit.maxHealth, deadUnit, doubleXP)
+			doubleXP = false
 		deadEnemies += 1
 		previewDeadEnemies += 1
 		if deadEnemies >= enemyNum:

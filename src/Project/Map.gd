@@ -86,9 +86,9 @@ const REGENLIMIT = 100
 func _ready():
 	randomize()
 	timeNode = Time.instance()
-	add_child(timeNode)
+	$HolderHolder/CornerHolder/Time/ColorRect.add_child(timeNode)
 	favorNode = Favor.instance()
-	add_child(favorNode)
+	$HolderHolder/CornerHolder/Favor/ColorRect.add_child(favorNode)
 	Boons.Map = self
 	
 	biomesList = Enemies.b
@@ -105,10 +105,9 @@ func _ready():
 		for display in $HolderHolder/DisplayHolder.get_children():
 			set_display_color(display)
 	bottomRight = Vector2($ReferenceRect.margin_right, $ReferenceRect.margin_bottom)
-	timeNode.position.x -= 30
-	timeNode.position.y += bottomRight.y
-	favorNode.position.y += bottomRight.y + 5
-	favorNode.position.x += bottomRight.x - 125
+	timeNode.position.x += 60
+	favorNode.position.x += 75
+	favorNode.get_node("Virtue").text = Boons.set_text()
 	set_boon_text()
 	columnNum = int(ceil(bottomRight.x/INCREMENT) - 1) #ceil-1 instead of floor prevents strangeness with exact divisions
 	#print(columnNum)
@@ -156,7 +155,20 @@ func set_biome():
 	if inventoryWindow: inventoryWindow.revalue_all_gear()
 
 func set_boon_text():
-	favorNode.get_node("Virtue").text = Boons.set_text()
+	var index = Boons.playerBoons.size() - 1
+	var checkBoon = $HolderHolder/CornerHolder/Favor/ColorRect.get_child(index)
+	checkBoon.visible = true
+	checkBoon.set_tooltip_text(Boons.generate_tooltip(Boons.playerBoons[index]))
+	checkBoon.set_letter(Boons.playerBoons[index][0])
+	if index == 1: checkBoon.reposition_tooltip(100)
+	elif index == 2: checkBoon.reposition_tooltip(-100)
+
+func recolor_boon_ui(index):
+	var level = Boons.get_level(Boons.playerBoons[index])
+	var sprite = $HolderHolder/CornerHolder/Favor/ColorRect.get_child(index).get_node("Sprite")
+	if level[0] and level[1]: sprite.modulate = Color.paleturquoise
+	elif level[0]: sprite.modulate = Color.silver
+	else: sprite.modulate = Color.gold
 
 func setup_inventory():
 	inventoryWindow = Inventory.instance()
@@ -479,6 +491,7 @@ func regen_map(newMember = false):
 		else:
 			return get_tree().change_scene("res://src/Project/Win.tscn")
 			#you win !
+	else: availableBiomes.append(currentBiome) #put this biome back in the pool since it was never used
 	startIndex = null
 	endIndex = null
 	canEnd = false
@@ -488,7 +501,7 @@ func regen_map(newMember = false):
 				for child in scrollHolder.get_children(): #normal family activity
 					scrollHolder.remove_child(child)
 					child.queue_free()
-		elif holder != $HolderHolder/DisplayHolder: #this one can stay
+		elif holder != $HolderHolder/DisplayHolder and holder != $HolderHolder/CornerHolder: #these can stay
 			for child in holder.get_children():
 				holder.remove_child(child)
 				child.queue_free()
