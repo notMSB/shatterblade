@@ -50,9 +50,9 @@ var mode = iModes.craft
 
 var repairBonus = false
 
-func _ready(): #Broken with relics as a standalone scene, but works when the Map is a parent scene
+func _ready():
 	if global.itemDict.empty():
-		global.itemDict = {"wing": 0, "fang": 0, "claw": 0, "sap": 0, "venom": 0, "fur": 0, "blade": 0, "bone": 0, "garbage": 0, "darkness": 0, "tentacle": 0, "flame": 0, "moves": ["Resource Seed", "Health Seed", "Health Potion"]}
+		global.itemDict = {"wing": 0, "fang": 0, "claw": 0, "sap": 0, "venom": 0, "fur": 0, "blade": 0, "bone": 0, "garbage": 0, "darkness": 0, "tentacle": 0, "flame": 0, "moves": ["Health Potion"]}
 	MOVESPACES += Boons.call_boon("prep_inventory")
 	dHolder = $HolderHolder/DisplayHolder
 	make_grid()
@@ -406,7 +406,8 @@ func identify_product(box): #updates box color and trade value
 		if productType == Moves.moveType.special: box.get_node("ColorRect").color = Color(.9,.3,.3,1) #R
 		elif productType == Moves.moveType.trick: box.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
 		elif productType == Moves.moveType.magic: box.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
-		elif productType == Moves.moveType.item:  box.get_node("ColorRect").color = Color(.9,.7, 0,1) #Y
+		elif productType == Moves.moveType.item or Moves.moveList[boxName]["slot"] == Moves.equipType.relic:  box.get_node("ColorRect").color = Color(.9,.7, 0,1) #Y
+		elif Moves.moveList[boxName].has("unequippable"): box.get_node("ColorRect").color = Color.orangered
 		else: #X/other
 			box.get_node("ColorRect").color = DEFAULTCOLOR
 	else: 
@@ -418,7 +419,7 @@ func identify_product(box): #updates box color and trade value
 
 func revalue_all_gear():
 	for box in iHolder.get_children():
-		set_box_value(box, box.moves[0])
+		set_box_value(box, box.get_node("Name").text)
 	for display in dHolder.get_children():
 		for box in display.get_node("MoveBoxes").get_children():
 			set_box_value(box, box.moves[0])

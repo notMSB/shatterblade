@@ -24,7 +24,7 @@ var chosenBoon = null
 var tempParty = []
 
 var partyMembers = {
-	"Gerald": {"type": types.fighter, "stats": [40, 0], "moves": ["Grapple", "Power Attack"], "boon": "Scales"},
+	"Gerald": {"type": types.fighter, "stats": [40, 0], "moves": ["Feeding Frenzy", "Power Attack"], "boon": "Scales"},
 	"Ferald": {"type": types.fighter, "stats": [40, 0], "moves": ["Breaker Slash", "Dark Dive"], "boon": "Infinite"},
 	"Yerald": {"type": types.fighter, "stats": [35, 5], "moves": ["Vampire", "Deep Cut"], "boon": "Column"},
 	"Jerald": {"type": types.fighter, "stats": [30, 10], "moves": ["Take Down", "Dive Bomb"], "boon": "Crown"},
@@ -46,9 +46,9 @@ var partyMembers = {
 	"Bimmy": {"type": types.rogue, "stats": [35, 5], "moves": ["Brand", "Crusher Claw"], "boon": "Sword"},
 	"Rimmy": {"type": types.rogue, "stats": [35, 5], "moves": ["Coldsteel", "Sideswipe"], "boon": "Cup"},
 	"Timmy": {"type": types.rogue, "stats": [30, 6], "moves": ["Taunt", "Sucker Punch"], "boon": "Mask"},
-	"Grimmy": {"type": types.rogue, "stats": [30, 6], "moves": ["Bonemerang", "Squalorbomb"], "boon": "Wings"},
+	"Grimmy": {"type": types.rogue, "stats": [30, 6], "moves": ["Bonemerang", "Flametongue"], "boon": "Wings"},
 	"Pimmy": {"type": types.rogue, "stats": [25, 7], "moves": ["Quick Attack", "Taste Test"], "boon": "Infinite"},
-	"Slimmy": {"type": types.rogue, "stats": [25, 7], "moves": ["Firedance", "Flametongue"], "boon": "Tides"},
+	"Slimmy": {"type": types.rogue, "stats": [25, 7], "moves": ["Firedance", "Squalorbomb"], "boon": "Tides"},
 	"Mimmy": {"type": types.rogue, "stats": [20, 8], "moves": ["Shiv", "Back Rake"], "boon": "Weak"},
 }
 

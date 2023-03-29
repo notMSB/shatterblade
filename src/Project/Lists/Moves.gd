@@ -201,7 +201,7 @@ func get_description(moveName):
 	if moveData.has("healing"): desc += "Healing: " + String(moveData["healing"])
 	var tags = []
 	if moveData.has("channel"): tags.append("Channel")
-	if moveData.has("charge"): tags.append("Charge")
+	if moveData.has("charge"): tags.append(moveData["cycle"][0])
 	if moveData.has("quick"): tags.append("Quick")
 	if moveData.has("hits") and moveData["hits"] != 1: tags.append(str(moveData["hits"], " Hits"))
 	if moveData.has("barrage"): tags.append("Barrage")

@@ -24,7 +24,7 @@ var opponents = [DEFAULTOPTION, DEFAULTOPTION, DEFAULTOPTION, DEFAULTOPTION]
 func _ready():
 	for i in 4:
 		var unit = Player.instance()
-		unit.displayName = "Player"
+		unit.displayName = str("Player ", i+1)
 		unit.moves = ["X", "X", "X", "X", "X"]
 		var display = $HolderHolder/DisplayHolder.setup_player(unit, i)
 		unit.ui = display

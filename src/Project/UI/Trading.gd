@@ -4,7 +4,6 @@ onready var Crafting = get_node("../Crafting")
 onready var Enemies = get_node("../Enemies")
 onready var Moves = get_node("../Moves")
 
-var assigned = false
 var selectedBox
 var values = {}
 var stock = []
@@ -30,11 +29,12 @@ func assign_component_values(biome, dungeonMascot):
 		elif eList[enemy]["locations"].has(Enemies.l.dungeon):
 			for reward in eList[enemy]["rewards"]:
 				values[reward] = DEFAULTVALUE - 1
-	assigned = true
+	
 
 func get_item_value(itemName, box = null):
 	var value = 0
 	if Crafting.c.has(itemName):
+		
 		return values[itemName]
 	if typeof(itemName) == TYPE_INT or itemName == "X" or Moves.moveList[itemName]["type"] == Moves.moveType.basic:
 		return 0

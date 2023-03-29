@@ -62,7 +62,7 @@ onready var enemyList = {
 		"biome": b.battlefield, "rewards": ["fang"], "locations": [l.day], "difficulty": 1, "sprite": "Bat"},
 	"BRat": {"stats": [10, 14, 18, 22, 26], "passives": {"Venomous": 0}, "specials": ["Careful Strike"], "hardSpecials": ["Triple Hit"],
 		"biome": b.battlefield, "rewards": ["fur"], "locations": [l.day], "difficulty": 2, "sprite": "Rat"},
-	"BFlower": {"stats": [13, 18, 23, 28, 33], "passives": {"Thorns": 1}, "specials": ["Plague"], "hardSpecials": ["Mass Infection"],
+	"BFlower": {"stats": [13, 18, 23, 28, 33], "passives": {"Venomous": 0}, "specials": ["Plague"], "hardSpecials": ["Mass Infection"],
 		"biome": b.battlefield, "rewards": ["sap"], "locations": [l.day], "difficulty": 3, "sprite": "Flower"},
 	"BGoblin": {"stats": [5, 10, 15, 20, 25], "passives": {"Dodgy": 1}, "specials": ["Dark Dive"], "hardSpecials": ["Dark Dive"],
 		"biome": b.battlefield, "rewards": ["garbage"], "locations": [l.night], "difficulty": 1, "sprite": "Goblin"},

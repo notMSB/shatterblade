@@ -7,7 +7,6 @@ var energy = 6
 var maxEnergy = 6
 var mana = 120
 var maxMana = 120
-var boxHolder
 
 var allowedType
 enum types {none, basic, item, special, magic, trick}

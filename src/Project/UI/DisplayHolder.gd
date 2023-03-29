@@ -23,14 +23,15 @@ func setup_player(unit, playerCount):
 	unit.isPlayer = true
 	display.position.x = PLAYERXSTART + (playerCount % 2 * STARTXINCREMENT)
 	display.position.y = PLAYERYSTART + STARTYINCREMENT if playerCount > 1 else PLAYERYSTART
-	if playerCount % 2 != 0: display.get_node("Sprite").flip_h = true
-	else: display.get_node("Name").align = 2 #Right
+	if playerCount % 2 != 0: 
+		display.get_node("Sprite").flip_h = true
+		display.get_node("Name").align = 1 #Left
 	if playerCount >= 2: 
 		display.get_node("Sprite").flip_v = true
 		display.get_node("BattleElements/HPBar").rect_position.y = -66
 		display.get_node("BattleElements/PreviewRect").rect_position.y = -66
-	else:
-		display.get_node("Name").rect_position.y += 65
+		display.get_node("BattleElements/Statuses").rect_position.y = -30
+		display.get_node("Name").rect_position.y += 66
 	
 	add_moves(unit, display, playerCount)
 	

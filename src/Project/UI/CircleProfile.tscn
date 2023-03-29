@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://src/Project/UI/BoxHolder.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/UI/PuzzleMenu.gd" type="Script" id=2]
@@ -17,10 +17,6 @@ bg_color = Color( 0, 0, 0, 1 )
 
 [sub_resource type="DynamicFont" id=4]
 size = 20
-font_data = ExtResource( 4 )
-
-[sub_resource type="DynamicFont" id=5]
-size = 12
 font_data = ExtResource( 4 )
 
 [sub_resource type="DynamicFont" id=6]
@@ -69,12 +65,13 @@ __meta__ = {
 }
 
 [node name="Name" type="Label" parent="."]
-margin_left = -60.0
-margin_top = -42.0
-margin_right = 60.0
-margin_bottom = -18.0
+margin_left = -133.0
+margin_top = -45.0
+margin_right = 63.0
+margin_bottom = -21.0
 custom_fonts/font = SubResource( 1 )
 text = "Test"
+align = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -140,11 +137,11 @@ __meta__ = {
 
 [node name="VirtueStatus" type="Label" parent="BattleElements"]
 margin_left = 35.0
-margin_top = -39.0
+margin_top = -23.0
 margin_right = 54.0
-margin_bottom = -15.0
-custom_fonts/font = SubResource( 1 )
+margin_bottom = 1.0
 custom_colors/font_color = Color( 0.847059, 0.870588, 0.133333, 1 )
+custom_fonts/font = SubResource( 1 )
 align = 2
 valign = 1
 __meta__ = {
@@ -163,13 +160,12 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Statuses" type="Label" parent="BattleElements"]
-margin_left = -61.5232
-margin_top = -21.0396
-margin_right = 63.4767
-margin_bottom = 179.96
-custom_fonts/font = SubResource( 5 )
-align = 1
+[node name="Statuses" type="Control" parent="BattleElements"]
+margin_left = -41.0
+margin_top = 26.0
+margin_right = 60.0
+margin_bottom = 48.0
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }

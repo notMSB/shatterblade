@@ -171,8 +171,8 @@ func toggle_buttons(toggle, units = []):
 		if units.size() == 1 and usedHolder == playerHolder:
 			usedHolder.get_child(units[0].get_index()).get_node("Button").visible = true
 		else:
-			for child in usedHolder.get_children(): #known to toggle on too many buttons if not in map mode
-				child.get_node("Button").visible = true
+			for i in usedHolder.get_child_count(): #known to toggle on too many buttons if not in map mode
+				if i < units.size() and units[i].currentHealth > 0: usedHolder.get_child(i).get_node("Button").visible = true
 	else:
 		for child in playerHolder.get_children():
 			child.get_node("Button").visible = false

@@ -1,11 +1,14 @@
 extends Node2D
 
+export (PackedScene) var UICircle
+
 onready var Battle = get_node("../../")
 
 var isPlayer
 var maxHealth
 var identity = ""
 var real = true
+var boxHolder
 
 var startingStrength = 0
 var tempStrength = 0
@@ -59,12 +62,15 @@ func take_damage(damageVal):
 			currentHealth -= floor(max(0, damageVal))
 		update_hp()
 		if currentHealth <= 0:
-			if ui: ui.visible = false
 			damageVal += currentHealth #Returns amount of damage actually dealt for recoil reasons
 			if !isPlayer: 
+				if real: ui.visible = false
 				Battle.evaluate_completion(self)
 			else:
 				Battle.evaluate_game_over()
+				if real: for box in boxHolder.get_children():
+					if box.currentUses > 0:
+						box.reduce_uses(1)
 		return damageVal
 
 func heal(healVal):
@@ -72,7 +78,6 @@ func heal(healVal):
 	update_hp()
 
 func update_hp(newMax = false):
-	
 	if newMax:
 		ui.get_node("BattleElements/HPBar").max_value = maxHealth
 	if ui != null:
@@ -98,16 +103,22 @@ func cease_to_exist():
 	queue_free()
 
 func update_status_ui():
-	var text = ""
-	for category in statuses:
+	var statusHolder = ui.get_node_or_null("BattleElements/Statuses")
+	if statusHolder != null:
+		for child in statusHolder.get_children(): #temporary
+			statusHolder.remove_child(child)
+			child.queue_free()
 		var i = 0
-		for status in category:
-			#print(status["name"][0])
-			if i > 0: text += ", "
-			text += status["name"][0] + status["name"][1]
-			if status.has("value"):
-				text += "[" + String(status["value"]) + "]"
-			i+=1
-	if text == "": text = "[]"
-	if ui.get_node_or_null("BattleElements/Statuses") != null:
-		ui.get_node("BattleElements/Statuses").text = text
+		for category in statuses:
+			for status in category:
+				var statusUI = UICircle.instance()
+				statusHolder.add_child(statusUI)
+				statusUI.get_node("Visuals").scale = Vector2(.5, .5)
+				statusUI.position.x += 35 * i
+				statusUI.set_letter(status["name"][0])
+				if status.has("value"):
+					statusUI.set_number(status["value"])
+				statusUI.set_tooltip_text(status["tooltip"], true)
+				statusUI.get_node("Visuals/Sprite").modulate = status["color"]
+				i+=1
+	

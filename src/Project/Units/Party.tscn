@@ -37,8 +37,9 @@ PlayerProfile = ExtResource( 4 )
 PlayerMove = ExtResource( 3 )
 
 [node name="ColorRect" type="ColorRect" parent="."]
-margin_right = 1280.0
+margin_right = 1290.0
 margin_bottom = 726.0
+mouse_filter = 2
 color = Color( 0.345098, 0.345098, 0.345098, 1 )
 __meta__ = {
 "_edit_use_anchors_": false

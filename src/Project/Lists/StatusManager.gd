@@ -10,31 +10,31 @@ const COUNTDOWNVAL = 50
 
 #If system is true, uses points system. If false, uses turns system. If system is absent, lasts forever. Points/Turns are applied by moves.
 var statusList = {
-	"Regen": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "regenerate"), "args": ["unit", 1]},
+	"Regen": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "regenerate"), "args": ["unit", 1], "tooltip": ""},
 	
-	"Poison": {"activation": statusActivations.beforeTurn, "subtractEarly": true, "system": true, "effect": funcref(self, "value_damage"), "args": ["unit", "value",]},
-	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -1, "value", "unit", "self"]},
-	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 1, "value", "unit", "self"]},
-	"Stun": {"activation": statusActivations.beforeTurn, "subtractLate": true, "system": false, "effect": funcref(self, "stunned"), "args": ["unit"]},
+	"Poison": {"activation": statusActivations.beforeTurn, "subtractEarly": true, "system": true, "effect": funcref(self, "value_damage"), "args": ["unit", "value",], "tooltip": "Poison \n Damage dealt at start of unit's turn."},
+	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -1, "value", "unit", "self"], "tooltip": "Burn \n Outgoing damage reduced by value with a limit of 0 damage. Value is then reduced by total reduction."},
+	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 1, "value", "unit", "self"], "tooltip": "Chill \n Incoming damage increased by value with a limit of double damage. Value is then reduced by total increase."},
+	"Stun": {"activation": statusActivations.beforeTurn, "subtractLate": true, "system": true, "effect": funcref(self, "stunned"), "args": ["unit"], "tooltip": "Stun \n Actions disabled at start of unit's turn."},
 	
-	"Provoke": {"activation": statusActivations.passive, "system": false},
-	"Stealth": {"activation": statusActivations.passive, "system": false},
-	"Resist": {"activation": statusActivations.passive},
+	"Provoke": {"activation": statusActivations.passive, "system": false, "tooltip": "Provoke \n Enemies more likely to target unit."},
+	"Stealth": {"activation": statusActivations.passive, "system": false, "tooltip": "Stealth \n Enemies will not target unit unless necessary."},
+	"Resist": {"activation": statusActivations.passive, "tooltip": "Resist \n Blocks incoming negative status."},
 	
-	"Icarus": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "apply_icarus"), "args": ["unit", "damage"]},
-	"IDamage": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "pop_icarus"), "args": ["unit", "value"], "neverCountdown": true},
+	"Icarus": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "apply_icarus"), "args": ["unit", "damage"], "tooltip": "Icarus \n Absorbs all incoming damage."},
+	"IDamage": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "pop_icarus"), "args": ["unit", "value"], "neverCountdown": true, "tooltip": "Icarus Damage \n Unit takes damage at turn start if Icarus is not active."},
 	
-	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "multiply_damage"), "args": ["damage", 1]},
-	"Blocking": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "multiply_damage"), "args": ["damage", 0.5]},
-	"Durability Redirect": {"activation": statusActivations.passive, "system": false},
-	"Movecost Refund": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["usedMoveBox", "unit"]},
-	"Gain Mana": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["damage", "unit"]},
+	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "multiply_damage"), "args": ["damage", 1], "tooltip": "Double Damage"},
+	"Blocking": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "multiply_damage"), "args": ["damage", 0.5], "tooltip": ""},
+	"Durability Redirect": {"activation": statusActivations.passive, "system": false, "tooltip": "Durability Redirect \n Unit's durability usage is instead absorbed by Stabilizer if able."},
+	"Movecost Refund": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["usedMoveBox", "unit"], "tooltip": ""},
+	"Gain Mana": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["damage", "unit"], "tooltip": "Gain Mana \n Kills restore mana."},
 	
-	"Venomous": {"activation": statusActivations.successfulHit, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 2]},
-	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "multiply_damage"), "args": ["damage", -1]},
-	"Thorns": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5]},
-	"Firewall": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", "shield"]},
-	"Constricting": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "constrict_attack"), "args": ["unit", "intent"], "targetlock": true, "hittable": true},
+	"Venomous": {"activation": statusActivations.successfulHit, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 2], "tooltip": "Venomous \n Unit's direct attacks inflict 2 poison on connect."},
+	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "multiply_damage"), "args": ["damage", -1], "tooltip": "Dodgy \n Unit is immune to direct damage."},
+	"Thorns": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5], "tooltip": "Thorns \n Unit deals back 5 damage when attacked."},
+	"Firewall": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", "shield"], "tooltip": "Firewall \n Unit deals back value of own shield after being attacked."},
+	"Constricting": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "constrict_attack"), "args": ["unit", "intent"], "targetlock": true, "hittable": true, "tooltip": ""},
 }
 
 func initialize_statuses(unit):
@@ -77,6 +77,11 @@ func add_status(unit, status, value = 0): #If value is not sent, status does not
 			addedStatus["value"] += floor(value)
 	else: #if not, generate a new instance
 		addedStatus = {"name": status}
+		addedStatus["tooltip"] = statusList[status]["tooltip"]
+		if statusList[status].has("system"):
+			if statusList[status]["system"]: addedStatus["color"] = Color.red
+			else: addedStatus["color"] = Color.blue
+		else: addedStatus["color"] = Color.darkgreen
 		if value > 0:
 			addedStatus["value"] = floor(value)
 		unit.statuses[statusList[status]["activation"]].append(addedStatus) #This adds the status and duration/value to the unit's personal status 2D array

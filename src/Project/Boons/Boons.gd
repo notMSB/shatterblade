@@ -10,7 +10,7 @@ var Map #when the map loads in it sets itself to this
 var boonList
 var playerBoons = []
 var chosen = v.none
-var favor = 100
+var favor = 0
 
 #At some point every boon will be its own node/script with functions activated from this one
 

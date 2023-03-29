@@ -72,7 +72,7 @@ var delayBattle = null
 
 var battleWindow
 var inventoryWindow
-enum pointTypes {none, start, battle, quest, visited, event, town, dungeon, repair, trader, temple, end} #Points to the left of "visited" turn off after being activated
+enum pointTypes {start, battle, quest, visited, none, event, town, dungeon, repair, trader, temple, end} #Points to the left of "visited" turn off after being activated
 
 var mascotList = ["Scorpion", "Kraken", "Phoenix"]
 var currentMascot
@@ -165,7 +165,7 @@ func set_boon_text():
 
 func recolor_boon_ui(index):
 	var level = Boons.get_level(Boons.playerBoons[index])
-	var sprite = $HolderHolder/CornerHolder/Favor/ColorRect.get_child(index).get_node("Sprite")
+	var sprite = $HolderHolder/CornerHolder/Favor/ColorRect.get_child(index).get_node("Visuals/Sprite")
 	if level[0] and level[1]: sprite.modulate = Color.paleturquoise
 	elif level[0]: sprite.modulate = Color.silver
 	else: sprite.modulate = Color.gold
@@ -251,6 +251,7 @@ func activate_battle(newOpponents = null, isHunt = false):
 	battleWindow.visible = true
 	check_for_elite(newOpponents)
 	battleWindow.welcome_back(newOpponents, currentArea)
+	toggle_map_windows(false)
 
 func check_for_elite(opponents):
 	for enemy in opponents:
@@ -261,6 +262,13 @@ func check_for_elite(opponents):
 func get_difficulty_mod():
 	var nightMod = 0 if isDay else 1
 	return DAYDIFFICULTYMOD * currentDay + AREADIFFICULTYMOD * currentArea + nightMod
+
+func toggle_map_windows(toggle):
+	$RepairPanel.visible = toggle
+	$RepairScroll.visible = toggle
+	$CraftPanel.visible = toggle
+	$CraftScroll.visible = toggle
+	$HolderHolder/ScrollContainer.visible = toggle
 
 func grab_event(eventName): #used for premade events, generated events have their own system
 	calledEvent = eventName
@@ -480,6 +488,7 @@ func clean_up():
 		#categorize_points()
 
 func regen_map(newMember = false):
+	
 	print("---------------- New Map ----------------")
 	if newMember:
 		currentArea += 1
@@ -591,8 +600,9 @@ func classify_remaining_points():
 			if point.sectionNum == i:
 				sectionPoints.append(point)
 		if sectionPoints.empty(): 
+			print("no points for quests")
 			regen_map() #needs to be a really messed up mapgen for this, but if it happens it crashes
-			return print("no points for quests")
+			return 
 		if i > 0:
 			if i == TOTALSECTIONS - 1: #last section, put temple on point next to exit with most lines
 				var checkTemple

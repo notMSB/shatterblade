@@ -45,11 +45,10 @@ func get_price(selectNode, boonName):
 	if level != null: 
 		if level[0] and level[1]: costVal = null
 		else:
-			if level[0]: costVal = 2
-			elif level[1]: costVal = 1
-			else: #random upgrade
-				selectNode.offeredUpgrade = randi() % 2
-				costVal = selectNode.offeredUpgrade + 1
+			if level[0]: selectNode.offeredUpgrade = 1
+			elif level[1]: selectNode.offeredUpgrade = 0
+			else: selectNode.offeredUpgrade = randi() % 2 #random upgrade
+			costVal = selectNode.offeredUpgrade + 1
 			if costVal == 1: selectNode.get_node("Button").modulate = Color.silver
 			else: selectNode.get_node("Button").modulate = Color.gold
 	if costVal == null: 

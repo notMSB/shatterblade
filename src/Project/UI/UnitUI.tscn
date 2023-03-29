@@ -76,14 +76,12 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Statuses" type="Label" parent="BattleElements"]
-margin_left = -15.2739
-margin_top = 98.3677
-margin_right = 109.726
-margin_bottom = 299.367
-custom_fonts/font = SubResource( 1 )
-text = "[]"
-align = 1
+[node name="Statuses" type="Control" parent="BattleElements"]
+margin_left = -22.0
+margin_top = 98.0
+margin_right = 147.0
+margin_bottom = 149.0
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -93,6 +91,7 @@ margin_left = -50.0
 margin_top = 123.878
 margin_right = 150.0
 margin_bottom = 161.878
+mouse_filter = 2
 percent_visible = false
 __meta__ = {
 "_edit_use_anchors_": false
@@ -114,6 +113,7 @@ margin_left = -50.0
 margin_top = 123.0
 margin_right = -50.0
 margin_bottom = 161.0
+mouse_filter = 2
 color = Color( 0.447059, 0, 0, 0.392157 )
 __meta__ = {
 "_edit_use_anchors_": false

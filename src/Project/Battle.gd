@@ -200,10 +200,10 @@ func play_turn(notFirstTurn = true):
 				StatusManager.countdown_turns(unit, true)
 				unit.update_resource(apIncrement, Moves.moveType.special, true)
 				unit.update_resource(unit.maxEnergy, Moves.moveType.trick, true)
-				if !unit.isStunned:
-					$BattleUI.toggle_moveboxes(unit.boxHolder, true, false, false, true)
-				else:
+				if unit.isStunned or unit.currentHealth <= 0:
 					$BattleUI.toggle_moveboxes(unit.boxHolder, false, false, false, true)
+				else:
+					$BattleUI.toggle_moveboxes(unit.boxHolder, true, false, false, true)
 		for unit in global.storedParty:
 			for box in unit.boxHolder.get_children():
 				var boxName = box.get_node("Name").text
@@ -694,6 +694,7 @@ func done(rewards = []):
 		previewDeadEnemies = 0
 		$BattleUI.toggle_movebox_buttons(true)
 		Map.set_quick_panels()
+		Map.toggle_map_windows(true)
 
 func _on_Preview_pressed():
 	$BattleUI.toggle_buttons(false)

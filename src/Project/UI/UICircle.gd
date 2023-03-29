@@ -1,12 +1,15 @@
 extends Node2D
 
 func set_letter(text):
-	$Letter.text = text
+	$Visuals/Letter.text = text
+
+func set_number(value):
+	$Visuals/Number.text = str(value)
 
 func reposition_tooltip(amount):
 	$Tooltip.position.x += amount
 
-func set_tooltip_text(tip):
+func set_tooltip_text(tip, reposition = false):
 	$Tooltip/Background.margin_left = -120 #Need to reset all of these to default for each time a new move needs a tooltip generated
 	$Tooltip/Background.margin_right = 120
 	$Tooltip/Inside.margin_left = -117
@@ -40,6 +43,7 @@ func set_tooltip_text(tip):
 		$Tooltip/Background.margin_bottom += offset
 		$Tooltip/Label.margin_bottom += offset
 	$Tooltip/Label.text = tip
+	if reposition: $Tooltip.position.y = 0
 
 func _on_Area2D_mouse_entered():
 	$Tooltip.visible = true
