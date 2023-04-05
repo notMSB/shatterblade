@@ -2,6 +2,7 @@ extends Node2D
 
 export (PackedScene) var Player
 
+onready var Moves = get_node("../Data/Moves")
 onready var Boons = get_node("../Data/Boons")
 onready var Enemies = get_node("../Data/Enemies")
 onready var battleWindow = get_node("../Battle")
@@ -56,7 +57,6 @@ func toggle_holder(boxIndex, toggle):
 	else: get_node("../Data/Crafting/EquipmentHolder").visible = toggle
 
 func set_box(boxName):
-	var Moves = get_node("../Data/Moves")
 	var allowedType = selection.get_node("../../PuzzleMenu").type
 	if Moves.moveList.has(boxName):
 		var type = Moves.moveList[boxName]["type"] - OFFSET #offset for relic types
@@ -136,7 +136,6 @@ func check_crown(box):
 	else: $HolderHolder/DisplayHolder.box_move(box, "Crown+")
 
 func check_special_boons(boonIndex, enabled:bool):
-	var Moves = get_node("../Data/Moves")
 	var boonName = $"HolderHolder/BoonHolder/Boon 0/Choice".get_item_text(boonIndex)
 	if boonName == "Scales":
 		for display in $HolderHolder/DisplayHolder.get_children():
@@ -206,6 +205,17 @@ func _on_enemyLevel_value_changed(value):
 	for enemySelector in $HolderHolder/EnemyHolder.get_children():
 		set_enemy_bar(enemySelector)
 
+func assess_passives():
+	for unit in global.storedParty:
+		for box in unit.boxHolder.get_children():
+			var moveData = Moves.moveList[box.moves[0]]
+			if moveData.has("passive"):
+				unit.passives[moveData["passive"][0]] = moveData["passive"][1]
+			if moveData.has("discount"):
+				unit.set_discount(moveData["discount"])
+			if moveData.has("strength"):
+				unit.startingStrength += moveData["strength"]
+
 func _on_GoButton_pressed():
 	global.storedParty.clear()
 	for unit in units:
@@ -236,6 +246,8 @@ func _on_GoButton_pressed():
 			Boons.create_boon(chosenBoon)
 			if boonLevels[i][0]: Boons.get_node(chosenBoon).level[0] = true
 			if boonLevels[i][1]: Boons.get_node(chosenBoon).level[1] = true
+	
+	assess_passives()
 	
 	var newOpponents = []
 	for enemyName in opponents:

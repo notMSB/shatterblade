@@ -26,6 +26,6 @@ func level_up(invNode, upgradeIndex): #find the crown and upgrade it
 
 func check_hit(usedBox, targetHealth, _moveUser, real, _battle):
 	if usedBox != null and real:
-		if targetHealth < 0 and (usedBox.moves[0] == "Crown" or usedBox.moves[0] == "Crown+"):
+		if targetHealth <= 0 and (usedBox.moves[0] == "Crown" or usedBox.moves[0] == "Crown+"):
 			#print("cool")
 			Boons.grant_favor(REWARD)

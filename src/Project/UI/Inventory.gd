@@ -43,10 +43,13 @@ enum oTypes {component, weapon, any}
 var offerMode = oModes.reward
 var offerType
 var offerNeed
+var quickActions = false
 
 enum iModes {default, craft, trade, offer}
 enum oModes {remove, repair, reward}
 var mode = iModes.craft
+
+var drag = false
 
 var repairBonus = false
 
@@ -68,6 +71,14 @@ func _ready():
 				identify_product(box)
 	else:
 		dHolder = get_node_or_null("../Map/HolderHolder/DisplayHolder")
+
+func check_drag(box):
+	if drag:
+		box._on_Button_pressed()
+
+func _process(_delta):
+	if drag and Input.is_action_just_released("left_click"):
+		drag = false
 
 func welcome_back():
 	toggle_trade_visibility(true)
@@ -217,6 +228,7 @@ func deselect_multi(boxes):
 	for box in boxes:
 		deselect_box(box)
 	otherSelection = null
+	player_blackouts()
 
 func quick_repair(moveBox, componentBox):
 	var craftingRestriction = Crafting.break_down(moveBox.get_node("Name").text)
@@ -229,9 +241,22 @@ func quick_repair(moveBox, componentBox):
 	else:
 		return false
 
+func inventory_blackouts(toggle):
+	for box in iHolder.get_children():
+		box.get_node("Blackout").visible = toggle
+
+func player_blackouts(checkBox = null):
+	for display in dHolder.get_children():
+		for box in display.get_node("MoveBoxes").get_children():
+			if checkBox and !player_inv_check(box, checkBox, false):
+				box.get_node("Blackout").visible = true
+			else:
+				box.get_node("Blackout").visible = false
+
 func check_swap(selectedBox):
 	if !otherSelection:
 		otherSelection = selectedBox
+		player_blackouts(selectedBox)
 	elif otherSelection == selectedBox: 
 		deselect_multi([selectedBox])
 		if get_node("../Map").selectedMapBox: get_node("../Map").end_map_move()
@@ -247,7 +272,7 @@ func check_swap(selectedBox):
 		if !canOffer and checkingOffering:
 			deselect_multi([selectedBox, otherSelection])
 			return
-		if otherSelection.get_parent() != tHolder and selectedBox.get_parent() != tHolder: #this is for quick crafts/repairs
+		if quickActions and otherSelection.get_parent() != tHolder and selectedBox.get_parent() != tHolder: #this is for quick crafts/repairs, disabled by default
 			var potentialProduct = Crafting.sort_then_combine(Crafting.c.get(otherSelection.get_node("Name").text), Crafting.c.get(selectedBox.get_node("Name").text))
 			if potentialProduct.length() > 1:
 				clear_box(selectedBox)
@@ -265,13 +290,13 @@ func check_swap(selectedBox):
 		elif otherSelection.get_parent().name == "MoveBoxes": player_inv_check(otherSelection, selectedBox)
 		else: swap_boxes(selectedBox, otherSelection)
 
-func player_inv_check(playerBox, otherBox): #returns true/false depending on if it swaps or not
+func player_inv_check(playerBox, otherBox, doSwap = true): #returns true/false depending on if it swaps or not
 	var checkName = otherBox.get_node("Name").text
 	var playerName = playerBox.get_node("Name").text
 	var playerClass = global.storedParty[playerBox.get_node("../../").get_index()].allowedType #Grandpa ia a PlayerProfile, its index matches the global index
 	if Crafting.c.get(checkName) == null: #can't move in crafting material
 		if Moves.moveList[checkName].has("unequippable"): 
-			deselect_multi([playerBox, otherBox])
+			if doSwap: deselect_multi([playerBox, otherBox])
 			return false
 		#var playerType = Moves.moveList[playerName]["type"]
 		var checkType = Moves.moveList[checkName]["type"]
@@ -281,13 +306,13 @@ func player_inv_check(playerBox, otherBox): #returns true/false depending on if 
 		if playerSlot == Moves.equipType.relic:
 			if checkSlot == Moves.equipType.relic or (checkSlot == Moves.equipType.any and otherBox.get_parent().name != "MoveBoxes"):
 				if checkType < Moves.moveType.item or checkType == playerClass:
-					swap_boxes(playerBox, otherBox, true) #restore attack/defend on boxes if necessary
+					if doSwap: swap_boxes(playerBox, otherBox, true) #restore attack/defend on boxes if necessary
 					return true
 		else: #swapping into player's class inventory boxes
 			if (checkType == playerClass or checkType == Moves.moveType.none or checkType == Moves.moveType.item) and checkSlot != Moves.equipType.relic: #The correct move type, an item, or an empty spot can be swapped
-				swap_boxes(playerBox, otherBox)
+				if doSwap: swap_boxes(playerBox, otherBox)
 				return true
-	deselect_multi([playerBox, otherBox])
+	if doSwap: deselect_multi([playerBox, otherBox])
 	return false
 
 func add_to_player(itemName):
@@ -442,6 +467,10 @@ func get_all_gear():
 			allGear.append(iBox)
 	return allGear
 
+func find_box(boxName):
+	for iBox in iHolder.get_children():
+		if iBox.get_node("Name").text == boxName: return iBox
+
 func xCheck(count = false): #returns an empty inventory space, todo: scenario for full inventory
 	var xCount = 0
 	for iBox in iHolder.get_children():
@@ -506,7 +535,7 @@ func check_and_award_component(box, flip = false):
 	else: add_item(Crafting.break_down(box.moves[0])[0])
 
 func exit(): #Save inventory and leave, todo: make the passives and discounts apply somewhere other than here
-	deselect_box(otherSelection)
+	deselect_multi([otherSelection])
 	var tStock = []
 	for box in tHolder.get_children():
 		tStock.append(box.get_node("Name").text)
@@ -517,6 +546,7 @@ func exit(): #Save inventory and leave, todo: make the passives and discounts ap
 func assess_unit_passives(i):
 	var unit = global.storedParty[i]
 	unit.startingStrength = 0
+	unit.baseHealing = 0
 	unit.moves.clear()
 	unit.passives.clear()
 	unit.discounts.clear()
@@ -533,6 +563,8 @@ func assess_unit_passives(i):
 			unit.set_discount(moveData["discount"])
 		if moveData.has("strength"):
 			unit.startingStrength += moveData["strength"]
+		if moveData.has("healing"):
+			unit.baseHealing += moveData["healing"]
 
 func reset_and_update_itemDict():
 	for item in global.itemDict:

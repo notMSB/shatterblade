@@ -10,9 +10,12 @@ var identity = ""
 var real = true
 var boxHolder
 
+var killedMove = ""
+
 var startingStrength = 0
 var tempStrength = 0
 var strength = 0
+var baseHealing = 0
 var speed = 0
 var defense = 0
 
@@ -49,7 +52,7 @@ func make_stats(hp):
 	maxHealth = hp
 	currentHealth = maxHealth
 
-func take_damage(damageVal):
+func take_damage(damageVal, moveName = ""):
 	if currentHealth > 0: #Can't be hitting someone that's dead
 		if shield > 0:
 			if shield - damageVal > 0:
@@ -62,6 +65,8 @@ func take_damage(damageVal):
 			currentHealth -= floor(max(0, damageVal))
 		update_hp()
 		if currentHealth <= 0:
+			
+			killedMove = moveName
 			damageVal += currentHealth #Returns amount of damage actually dealt for recoil reasons
 			if !isPlayer: 
 				if real: ui.visible = false

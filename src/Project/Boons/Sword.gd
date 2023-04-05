@@ -2,7 +2,7 @@ extends Node
 
 var Boons
 
-const REWARD = 8
+const REWARD = 7
 var level = [false, false]
 
 func level_up(invNode, _upgradeIndex):

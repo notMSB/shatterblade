@@ -32,7 +32,7 @@ var products = {
 	c.venom: {c.venom: "Poison Potion", c.fur: "Restore", c.bone: "Plague", c.garbage: "Belch", 
 			  c.darkness: "Mass Infection", c.blade: "Piercing Sting", c.tentacle: "Constrict", c.flame: "Squalorbomb"},
 	
-	c.fur: {c.fur: "Leather Buckler", c.bone: "Careful Strike", c.garbage: "Play Dead", c.darkness: "Defensive Pact", 
+	c.fur: {c.fur: "Tower Shield", c.bone: "Careful Strike", c.garbage: "Play Dead", c.darkness: "Defensive Pact", 
 			c.blade: "Sucker Punch", c.tentacle: "Bulwark", c.flame: "Firewall"},
 	
 	c.bone: {c.bone: "Bone Zone", c.garbage: "Bone Club", c.darkness: "Seeker Volley", c.blade: "Coldsteel", 
@@ -75,13 +75,17 @@ func generate_equipment():
 func generate_relics():
 	setup_box("X", "RelicHolder", 0, 0)
 	var i = 1
+	var j = 0
 	for move in Moves.moveList:
 		var moveData = Moves.moveList[move]
 		if moveData.has("slot") and moveData["slot"] == Moves.equipType.relic:
 			if !moveData.has("unequippable") and moveData.has("rarity"):
-				setup_box(move, "RelicHolder", i, 0)
+				setup_box(move, "RelicHolder", i, j)
 				i+=1
-	setup_box("Crown", "RelicHolder", 0, 4)
+				if i > 15:
+					i = 0
+					j+=1
+	setup_box("Crown", "RelicHolder", 0, j+2)
 
 func generate_scales():
 	setup_box("Rock", "ScalesHolder", 0, 0)
@@ -93,6 +97,7 @@ func setup_box(boxName, holderName, xMulti, yMulti):
 	$DisplayHolder.box_move(box, boxName)
 	box.position = Vector2(xMulti * XINCREMENT + XSTART, yMulti * YINCREMENT + YSTART)
 	color_box(box, boxName)
+	box.get_node("Tooltip").position.y += 200
 
 func color_box(box, boxName):
 	if Moves.moveList.has(boxName) and !box.get_node("Sprite").visible:

@@ -28,6 +28,7 @@ margin_left = 2.0
 margin_top = 2.0
 margin_right = 238.0
 margin_bottom = 78.0
+mouse_filter = 1
 color = Color( 0.494118, 0.054902, 0.529412, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -148,6 +149,7 @@ __meta__ = {
 [node name="ReferenceRect" type="ReferenceRect" parent="."]
 margin_right = 240.0
 margin_bottom = 79.0
+mouse_filter = 1
 border_color = Color( 1, 1, 1, 1 )
 __meta__ = {
 "_edit_use_anchors_": false

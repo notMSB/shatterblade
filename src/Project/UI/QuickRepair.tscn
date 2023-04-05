@@ -44,6 +44,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Blackout" type="ColorRect" parent="LeftComponent"]
+visible = false
+margin_left = -40.0
+margin_top = -20.0
+margin_right = 40.0
+margin_bottom = 40.0
+color = Color( 0, 0, 0, 0.784314 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Scales" type="Sprite" parent="LeftComponent"]
 visible = false
 modulate = Color( 0.85098, 1, 0, 1 )
@@ -131,6 +142,17 @@ margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Blackout" type="ColorRect" parent="RightComponent"]
+visible = false
+margin_left = -40.0
+margin_top = -20.0
+margin_right = 40.0
+margin_bottom = 40.0
+color = Color( 0, 0, 0, 0.784314 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -223,6 +245,17 @@ margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Blackout" type="ColorRect" parent="Weapon"]
+visible = false
+margin_left = -41.0
+margin_top = -20.0
+margin_right = 39.0
+margin_bottom = 40.0
+color = Color( 0, 0, 0, 0.784314 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

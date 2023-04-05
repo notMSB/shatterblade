@@ -11,8 +11,10 @@ var originalBox
 func disassemble(weaponName):
 	var components = Crafting.break_down(weaponName)
 	for i in components.size():
-		if i == 0: DisplayHolder.box_move($LeftComponent, components[i])
-		elif i == 1: DisplayHolder.box_move($RightComponent, components[i])
+		var usedBox = $LeftComponent if i == 0 else $RightComponent
+		DisplayHolder.box_move(usedBox, components[i])
+		if !Inventory.find_box(components[i]): usedBox.get_node("Blackout").visible = true
+	if $LeftComponent/Blackout.visible and $RightComponent/Blackout.visible: $Weapon/Blackout.visible = true
 
 func fix_and_reset():
 	originalBox.repair_uses(Inventory.repairBonus)

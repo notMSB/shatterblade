@@ -34,6 +34,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Blackout" type="ColorRect" parent="."]
+visible = false
+margin_left = -40.0
+margin_top = -20.0
+margin_right = 40.0
+margin_bottom = 40.0
+color = Color( 0, 0, 0, 0.784314 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Scales" type="Sprite" parent="."]
 visible = false
 modulate = Color( 0.85098, 1, 0, 1 )
@@ -67,6 +78,7 @@ margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
+mouse_filter = 1
 border_color = Color( 1, 1, 1, 1 )
 editor_only = false
 __meta__ = {
@@ -78,6 +90,8 @@ margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 39.0
+mouse_filter = 1
+action_mode = 0
 flat = true
 __meta__ = {
 "_edit_use_anchors_": false

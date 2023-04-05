@@ -27,6 +27,7 @@ __meta__ = {
 }
 
 [node name="Sprite" type="Sprite" parent="."]
+visible = false
 position = Vector2( 47.8972, 47.1434 )
 texture = ExtResource( 3 )
 
@@ -91,7 +92,6 @@ margin_left = -50.0
 margin_top = 123.878
 margin_right = 150.0
 margin_bottom = 161.878
-mouse_filter = 2
 percent_visible = false
 __meta__ = {
 "_edit_use_anchors_": false
@@ -108,7 +108,21 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="PreviewText" type="Label" parent="BattleElements/HPBar"]
+visible = false
+margin_right = 196.0
+margin_bottom = 36.0
+custom_fonts/font = SubResource( 2 )
+custom_colors/font_color = Color( 0, 0.976471, 1, 1 )
+text = "1/1"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="PreviewRect" type="ColorRect" parent="BattleElements"]
+visible = false
 margin_left = -50.0
 margin_top = 123.0
 margin_right = -50.0
@@ -123,4 +137,7 @@ __meta__ = {
 position = Vector2( 0, -74 )
 canMove = false
 
+[connection signal="mouse_entered" from="Button" to="." method="_on_Button_mouse_entered"]
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
+[connection signal="mouse_entered" from="BattleElements/HPBar" to="." method="_on_HPBar_mouse_entered"]
+[connection signal="mouse_exited" from="BattleElements/HPBar" to="." method="_on_HPBar_mouse_exited"]

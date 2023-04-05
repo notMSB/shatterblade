@@ -111,6 +111,8 @@ func set_tooltip_text(tip):
 func _on_mouse_entered():
 	if $Tooltip/Label.text.length() > 0:
 		$Tooltip.visible = true
+	boxModeScene = set_mode_scene()
+	if boxModeScene.name == "Inventory": boxModeScene.check_drag(self)
 
 func _on_mouse_exited():
 	$Tooltip.visible = false
@@ -120,6 +122,7 @@ func _on_Button_pressed():
 	#print(boxModeScene)
 	match boxModeScene.name:
 		"Inventory": #inventory
+			boxModeScene.drag = !boxModeScene.drag
 			var map = boxModeScene.get_node("../Map")
 			if map.battleWindow.visible == true:
 				pass #cannot click inventory items in battle
@@ -132,6 +135,7 @@ func _on_Button_pressed():
 				boxModeScene.select_box(self)
 			#else: boxModeScene.set_description($Name.text)
 		"Battle":
+			boxModeScene.drag = !boxModeScene.drag
 			#boxModeScene.set_description($Name.text)
 			if buttonMode:
 				boxModeScene.evaluate_targets(moves[moveIndex], user, self)

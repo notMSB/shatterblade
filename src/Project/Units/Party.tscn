@@ -78,11 +78,11 @@ margin_left = 244.0
 margin_top = 626.0
 margin_right = 396.0
 margin_bottom = 694.0
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 2 )
 text = "Difficulty"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -106,11 +106,11 @@ margin_left = 564.0
 margin_top = 626.0
 margin_right = 716.0
 margin_bottom = 694.0
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 2 )
 disabled = true
 text = "Start"
 __meta__ = {
@@ -123,11 +123,11 @@ margin_left = 520.0
 margin_top = 136.0
 margin_right = 752.0
 margin_bottom = 204.0
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 2 )
 text = "Random Boon"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -139,11 +139,11 @@ margin_left = 884.0
 margin_top = 626.0
 margin_right = 1046.0
 margin_bottom = 694.0
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
-custom_fonts/font = SubResource( 2 )
 text = "Full Random"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -159,6 +159,7 @@ margin_left = 98.0
 margin_top = 190.0
 margin_right = 378.0
 margin_bottom = 490.0
+mouse_filter = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -167,12 +168,14 @@ __meta__ = {
 margin_right = 280.0
 margin_bottom = 1000.0
 rect_min_size = Vector2( 280, 1000 )
+mouse_filter = 1
 
 [node name="mage" type="ScrollContainer" parent="Scrolls"]
 margin_left = 498.0
 margin_top = 190.0
 margin_right = 778.0
 margin_bottom = 490.0
+mouse_filter = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -181,12 +184,14 @@ __meta__ = {
 margin_right = 280.0
 margin_bottom = 1000.0
 rect_min_size = Vector2( 280, 1000 )
+mouse_filter = 1
 
 [node name="rogue" type="ScrollContainer" parent="Scrolls"]
 margin_left = 898.0
 margin_top = 190.0
 margin_right = 1178.0
 margin_bottom = 490.0
+mouse_filter = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -195,6 +200,7 @@ __meta__ = {
 margin_right = 280.0
 margin_bottom = 1000.0
 rect_min_size = Vector2( 280, 1000 )
+mouse_filter = 1
 
 [node name="CurrentParty" type="Node2D" parent="."]
 

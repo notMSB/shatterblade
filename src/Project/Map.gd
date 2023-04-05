@@ -252,6 +252,7 @@ func activate_battle(newOpponents = null, isHunt = false):
 	check_for_elite(newOpponents)
 	battleWindow.welcome_back(newOpponents, currentArea)
 	toggle_map_windows(false)
+	inventoryWindow.inventory_blackouts(true)
 
 func check_for_elite(opponents):
 	for enemy in opponents:
@@ -718,6 +719,7 @@ func analyze_points(one, two):
 	var distance = one.position.distance_to(two.position)
 	if two.visible:
 		if distance < KILLDISTANCE: #kill points too close to one another
+			#print("hiding close point")
 			one.visible = false #visibility toggle instead of deletion to keep the indexing functional
 		elif distance <= MAXDISTANCE: #any points further away than MAXDISTANCE are usually too close to an incoming point and deleted anyway, but still
 			var pointLine = Line.instance()

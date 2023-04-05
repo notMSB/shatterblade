@@ -4,7 +4,7 @@ onready var Battle
 
 #Statuses are stored using a 2D array which is set by activation condition
 #When a condition occurs, functions are run if that condition's array has 1 or more items in it
-enum statusActivations {beforeTurn, gettingHit, usingAttack, gettingKill, afterHit, successfulHit, passive}
+enum statusActivations {beforeTurn, gettingHit, usingAttack, gettingKill, afterHit, successfulHit, moveUsed, passive}
 
 const COUNTDOWNVAL = 50
 
@@ -12,29 +12,36 @@ const COUNTDOWNVAL = 50
 var statusList = {
 	"Regen": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "regenerate"), "args": ["unit", 1], "tooltip": ""},
 	
-	"Poison": {"activation": statusActivations.beforeTurn, "subtractEarly": true, "system": true, "effect": funcref(self, "value_damage"), "args": ["unit", "value",], "tooltip": "Poison \n Damage dealt at start of unit's turn."},
-	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -1, "value", "unit", "self"], "tooltip": "Burn \n Outgoing damage reduced by value with a limit of 0 damage. Value is then reduced by total reduction."},
-	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 1, "value", "unit", "self"], "tooltip": "Chill \n Incoming damage increased by value with a limit of double damage. Value is then reduced by total increase."},
-	"Stun": {"activation": statusActivations.beforeTurn, "subtractLate": true, "system": true, "effect": funcref(self, "stunned"), "args": ["unit"], "tooltip": "Stun \n Actions disabled at start of unit's turn."},
+	"Poison": {"activation": statusActivations.beforeTurn, "subtractEarly": true, "system": true, "effect": funcref(self, "value_damage"), "args": ["unit", "value",], "tooltip": "Damage dealt at start of unit's turn."},
+	"Burn": {"activation": statusActivations.usingAttack, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", -1, "value", "unit", "self"], "tooltip": "Outgoing damage reduced by value with a limit of 0 damage. Value is then reduced by total reduction."},
+	"Chill": {"activation": statusActivations.gettingHit, "system": true, "effect": funcref(self, "adjust_damage"), "args": ["damage", 1, "value", "unit", "self"], "tooltip": "Incoming damage increased by value with a limit of double damage. Value is then reduced by total increase."},
+	"Stun": {"activation": statusActivations.beforeTurn, "subtractLate": true, "system": true, "effect": funcref(self, "stunned"), "args": ["unit"], "tooltip": "Actions disabled at start of unit's turn."},
 	
-	"Provoke": {"activation": statusActivations.passive, "system": false, "tooltip": "Provoke \n Enemies more likely to target unit."},
-	"Stealth": {"activation": statusActivations.passive, "system": false, "tooltip": "Stealth \n Enemies will not target unit unless necessary."},
-	"Resist": {"activation": statusActivations.passive, "tooltip": "Resist \n Blocks incoming negative status."},
+	"Provoke": {"activation": statusActivations.passive, "system": false, "tooltip": "Enemies more likely to target unit."},
+	"Stealth": {"activation": statusActivations.passive, "system": false, "tooltip": "Enemies will not target unit unless necessary."},
+	"Resist": {"activation": statusActivations.passive, "tooltip": "Blocks incoming negative status."},
+	"Status Soak": {"activation": statusActivations.passive, "tooltip": "Incoming negative status is redirected to the Grim Portrait if possible."},
+	"Passive Income": {"activation": statusActivations.passive, "tooltip": "Surviving battle earns a coin."},
+	"Autoload": {"activation": statusActivations.passive, "tooltip": "The next Reload is skipped."},
 	
-	"Icarus": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "apply_icarus"), "args": ["unit", "damage"], "tooltip": "Icarus \n Absorbs all incoming damage."},
-	"IDamage": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "pop_icarus"), "args": ["unit", "value"], "neverCountdown": true, "tooltip": "Icarus Damage \n Unit takes damage at turn start if Icarus is not active."},
+	"Icarus": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "apply_icarus"), "args": ["unit", "damage"], "tooltip": "Absorbs all incoming damage."},
+	"IDamage": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "pop_icarus"), "args": ["unit", "value"], "neverCountdown": true, "tooltip": "Unit takes damage at turn start if Icarus is not active."},
 	
-	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "multiply_damage"), "args": ["damage", 1], "tooltip": "Double Damage"},
+	"Double Damage": {"activation": statusActivations.usingAttack, "system": false, "effect": funcref(self, "multiply_damage"), "args": ["damage", 1], "tooltip": ""},
 	"Blocking": {"activation": statusActivations.gettingHit, "system": false, "effect": funcref(self, "multiply_damage"), "args": ["damage", 0.5], "tooltip": ""},
-	"Durability Redirect": {"activation": statusActivations.passive, "system": false, "tooltip": "Durability Redirect \n Unit's durability usage is instead absorbed by Stabilizer if able."},
+	"Durability Redirect": {"activation": statusActivations.passive, "system": false, "tooltip": "Unit's durability usage is instead absorbed by Stabilizer if able."},
 	"Movecost Refund": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["usedMoveBox", "unit"], "tooltip": ""},
-	"Gain Mana": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["damage", "unit"], "tooltip": "Gain Mana \n Kills restore mana."},
+	"Gain Mana": {"activation": statusActivations.gettingKill, "effect": funcref(self, "refund_resource"), "args": ["damage", "unit"], "tooltip": "Kills restore mana equal to damage dealt."},
 	
-	"Venomous": {"activation": statusActivations.successfulHit, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 2], "tooltip": "Venomous \n Unit's direct attacks inflict 2 poison on connect."},
-	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "multiply_damage"), "args": ["damage", -1], "tooltip": "Dodgy \n Unit is immune to direct damage."},
-	"Thorns": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5], "tooltip": "Thorns \n Unit deals back 5 damage when attacked."},
-	"Firewall": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", "shield"], "tooltip": "Firewall \n Unit deals back value of own shield after being attacked."},
+	"Venomous": {"activation": statusActivations.successfulHit, "effect": funcref(self, "add_status"), "args": ["target", "Poison", 2], "tooltip": "Unit's direct attacks inflict 2 poison on connect."},
+	"Dodgy": {"activation": statusActivations.gettingHit, "effect": funcref(self, "multiply_damage"), "args": ["damage", -1], "tooltip": "Unit is immune to direct damage."},
+	"Thorns": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", 5], "tooltip": "Unit deals back 5 damage when attacked."},
+	"Firewall": {"activation": statusActivations.afterHit, "system": false, "effect": funcref(self, "counter_attack"), "args": ["attacker", "shield"], "tooltip": "Unit deals back value of own shield after being attacked."},
 	"Constricting": {"activation": statusActivations.beforeTurn, "effect": funcref(self, "constrict_attack"), "args": ["unit", "intent"], "targetlock": true, "hittable": true, "tooltip": ""},
+	
+	"Buckler": {"activation": statusActivations.moveUsed, "effect": funcref(self, "add_shield"), "args": ["unit", 2], "tooltip": "Using moves adds 2 shield."},
+	"Safety Charge": {"activation": statusActivations.moveUsed, "effect": funcref(self, "safety_charge"), "args": ["unit", "usedMoveBox", 10], "tooltip": "Charging moves adds 10 shield."},
+	"Spell Soak": {"activation": statusActivations.moveUsed, "system": false, "effect": funcref(self, "mana_conduit"), "args": ["unit", "usedMoveBox"], "tooltip": "Spells are refunded."},
 }
 
 func initialize_statuses(unit):
@@ -71,13 +78,16 @@ func add_status(unit, status, value = 0): #If value is not sent, status does not
 		if find_status(unit, "Resist"):
 			reduce_status(unit, "Resist", 1) #If the unit can resist certain statuses, do that instead of applying the status
 			return 
+		elif find_status(unit, "Status Soak"):
+			calculate_soak(unit)
+			return
 	var addedStatus = find_status(unit, status) #need to see if it's on already
 	if addedStatus: #if so, just increment the values of the existing one
 		if value > 0:
 			addedStatus["value"] += floor(value)
 	else: #if not, generate a new instance
 		addedStatus = {"name": status}
-		addedStatus["tooltip"] = statusList[status]["tooltip"]
+		addedStatus["tooltip"] = str(status, "\n", statusList[status]["tooltip"])
 		if statusList[status].has("system"):
 			if statusList[status]["system"]: addedStatus["color"] = Color.red
 			else: addedStatus["color"] = Color.blue
@@ -92,6 +102,18 @@ func add_status(unit, status, value = 0): #If value is not sent, status does not
 	if unit.ui: unit.update_status_ui()
 	#print(unit.statuses)
 
+func calculate_soak(unit):
+	reduce_status(unit, "Status Soak", 1) #If the unit can resist certain statuses, do that instead of applying the status
+	if unit.real:
+		for i in unit.boxHolder.get_child_count():
+			if i == 0 or i == 1:
+				var box = unit.boxHolder.get_child(i)
+				if box.moves[0] == "Grim Portrait" and box.currentUses > 0: 
+					box.reduce_uses(1)
+					break
+			else: break
+	return
+
 func reduce_status(unit, status, value):
 	var targetInfo = find_status(unit, status, true)
 	if targetInfo:
@@ -102,6 +124,8 @@ func reduce_status(unit, status, value):
 		if targetStatus["value"] <= 0:
 			remove_status(unit, targetList, targetStatus)
 		if unit.ui: unit.update_status_ui()
+		return true
+	else: return false
 
 func remove_status(unit, list, cond):
 	if !unit.isPlayer and statusList[cond["name"]].has("targetlock"): #If the status in the above list has target lock, remove the enemy's lock
@@ -180,6 +204,34 @@ func value_damage(unit, value, multiplier = 1):
 
 func counter_attack(target, value):
 	if value > 0: target.take_damage(value)
+
+func add_shield(unit, value):
+	unit.shield += value
+	if unit.real: unit.update_hp()
+
+func safety_charge(unit, box, value):
+	if box.moves.size() > 1:
+		if box.moves[1] == "Charge" or box.moves[1] == "Quick Charge":
+			unit.shield += value
+			if unit.real: unit.update_hp()
+
+func mana_conduit(unit, box):
+	if unit.real:
+		var refundNeeded = Battle.Moves.moveList[box.moves[0]]["resVal"]
+		var bankBox
+		for i in unit.boxHolder.get_child_count():
+			if i > 1: break
+			var checkBox = unit.boxHolder.get_child(i)
+			if checkBox.moves[0] == "Mana Conduit": 
+				bankBox = checkBox
+				if bankBox.currentUses > refundNeeded:
+					unit.update_resource(refundNeeded, unit.types.magic, true)
+					bankBox.reduce_uses(refundNeeded)
+					break
+				else:
+					unit.update_resource(bankBox.currentUses, unit.types.magic, true)
+					refundNeeded -= bankBox.currentUses
+					bankBox.reduce_uses(bankBox.currentUses)
 
 func regenerate(unit, healing):
 	unit.heal(healing)

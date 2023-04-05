@@ -20,7 +20,7 @@ func check_hit(_usedMoveBox, targetHealth, moveUser, _real, battle):
 		moveUser.update_hp()
 
 func end_battle(_endingHealth, battle):
-	if !battle.canSee: Boons.grant_favor(REWARD)
+	if battle.get_node("Peek").visible: Boons.grant_favor(REWARD)
 
 func peek(turnCount):
 	if turnCount <= 1:

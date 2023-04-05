@@ -27,6 +27,7 @@ script = ExtResource( 4 )
 [node name="Button" type="Button" parent="."]
 margin_right = 280.0
 margin_bottom = 85.0
+mouse_filter = 1
 custom_fonts/font = SubResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -37,6 +38,7 @@ margin_top = -3.0
 margin_right = 279.0
 margin_bottom = 112.0
 rect_pivot_offset = Vector2( 685.172, -123.365 )
+mouse_filter = 1
 custom_fonts/font = SubResource( 2 )
 align = 1
 __meta__ = {
@@ -57,6 +59,7 @@ margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
+mouse_filter = 1
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -95,6 +98,7 @@ margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
+mouse_filter = 1
 border_color = Color( 1, 1, 1, 1 )
 editor_only = false
 __meta__ = {
@@ -106,6 +110,7 @@ margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 39.0
+mouse_filter = 1
 flat = true
 __meta__ = {
 "_edit_use_anchors_": false
@@ -184,6 +189,7 @@ margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
+mouse_filter = 1
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -222,6 +228,7 @@ margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
+mouse_filter = 1
 border_color = Color( 1, 1, 1, 1 )
 editor_only = false
 __meta__ = {
@@ -233,6 +240,7 @@ margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 39.0
+mouse_filter = 1
 flat = true
 __meta__ = {
 "_edit_use_anchors_": false

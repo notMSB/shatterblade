@@ -53,6 +53,7 @@ func create_move(unit, playerCount, posIndex):
 	unit.boxHolder.add_child(moveBox)
 	var xPos = moveBox.position.x
 	if posIndex < DEFAULTMOVES: #set up attack and defend defaults
+		moveBox.get_node("Tooltip").position.y -= 30
 		moveBox.position.x = xPos - 100 if playerCount % 2 == 0 else xPos + 100
 		moveBox.get_node("ColorRect").rect_size.y = 40
 		move = moveBox.get_node("Name").text
@@ -64,6 +65,7 @@ func create_move(unit, playerCount, posIndex):
 			moveBox.position.y += PLAYERINCREMENT*.25
 			moveBox.get_node("ColorRect").margin_bottom = 20
 			moveBox.get_node("ReferenceRect").margin_bottom = 20
+			moveBox.get_node("Blackout").margin_bottom = 20
 			moveBox.get_node("Sprite").position.y = 0
 	else: #set up other moves
 		if unit.moves.size() < posIndex - DEFAULTMOVES + 1:
