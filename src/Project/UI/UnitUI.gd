@@ -21,10 +21,10 @@ func _on_Button_pressed():
 
 func position_preview_rect(projectedHP, unit):
 	$BattleElements/HPBar/PreviewText.text = str(projectedHP, "/", $BattleElements/HPBar.max_value)
-	if !unit.isPlayer and projectedHP <= 0: #might want to make this check faster down the line
-		if ((Battle.Boons.playerBoons.has("Wings" and projectedHP == 0))
-		or (Battle.Boons.playerBoons.has("Lion") and unit.killedMove == "") 
-		or (Battle.Boons.playerBoons.has("Crown") and unit.killedMove == "Crown")):
+	if !unit.isPlayer: #might want to make this check faster down the line
+		if ((Battle.Boons.playerBoons.has("Wings") and projectedHP == 0)
+		or (Battle.Boons.playerBoons.has("Lion") and unit.killedMove == "" and projectedHP <= 0) 
+		or (Battle.Boons.playerBoons.has("Crown") and unit.killedMove == "Crown" and projectedHP <= 0)):
 			$BattleElements/PreviewRect.color = Color(.447, .447, 0, .392)
 		else:
 			$BattleElements/PreviewRect.color = Color(.447, 0, 0, .392)
@@ -38,7 +38,7 @@ func position_preview_rect(projectedHP, unit):
 		previewRect.margin_right = ($BattleElements/HPBar.value / $BattleElements/HPBar.max_value) * multiplier - differential
 
 func _on_HPBar_mouse_entered():
-	if $BattleElements/PreviewRect.margin_left != $BattleElements/PreviewRect.margin_right:
+	if $BattleElements/PreviewRect.margin_left != $BattleElements/PreviewRect.margin_right and Battle.visible:
 		$BattleElements/HPBar/Text.visible = false
 		$BattleElements/HPBar/PreviewText.visible = true
 
@@ -48,4 +48,5 @@ func _on_HPBar_mouse_exited():
 		$BattleElements/HPBar/PreviewText.visible = false
 
 func _on_Button_mouse_entered():
-	Battle.check_drag(self)
+	if Battle.visible: Battle.check_drag(self)
+	else: Battle.get_node("../Inventory").check_drag(self)

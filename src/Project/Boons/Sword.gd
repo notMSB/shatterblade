@@ -11,7 +11,9 @@ func level_up(invNode, _upgradeIndex):
 func uses_reduced(user, usedBox, useNumber, real, battle):
 	if battle.Moves.moveList[usedBox.moves[0]].has("damage"):
 		var originalUses = useNumber
-		if real: originalUses = useNumber + 1
+		if real:
+			if battle.Map.currentBiome == battle.Map.biomesList.graveyard: originalUses = useNumber + 2
+			else: originalUses = useNumber + 1
 		if originalUses == usedBox.maxUses:
 			if real: Boons.grant_favor(REWARD)
 			if level[1]:

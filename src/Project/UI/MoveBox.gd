@@ -31,7 +31,8 @@ var timesEnabled = 0
 func updateInfo(targetName = null):
 	if targetName:
 		savedTargetName = targetName
-	$Info.text = str(usageOrder, ": ", savedTargetName)
+	$Info.text = str(savedTargetName)
+	if !$Info.visible: $Info.visible = true
 
 func set_mode_scene():
 	if CheckScene.name == "DisplayHolder": 
@@ -116,13 +117,17 @@ func _on_mouse_entered():
 
 func _on_mouse_exited():
 	$Tooltip.visible = false
+	boxModeScene = set_mode_scene()
+	if boxModeScene.name == "Inventory" or boxModeScene.name == "Battle": boxModeScene.check_undrag(self)
 
 func _on_Button_pressed():
+	$Tooltip.visible = false
 	boxModeScene = set_mode_scene()
 	#print(boxModeScene)
 	match boxModeScene.name:
 		"Inventory": #inventory
-			boxModeScene.drag = !boxModeScene.drag
+			if boxModeScene.otherSelection == null and Input.is_action_pressed("left_click"): boxModeScene.drag = true
+			#if boxModeScene.drag and $Sprite.visible: Input.set_custom_mouse_cursor($Sprite.texture)
 			var map = boxModeScene.get_node("../Map")
 			if map.battleWindow.visible == true:
 				pass #cannot click inventory items in battle
@@ -135,7 +140,7 @@ func _on_Button_pressed():
 				boxModeScene.select_box(self)
 			#else: boxModeScene.set_description($Name.text)
 		"Battle":
-			boxModeScene.drag = !boxModeScene.drag
+			if Input.is_action_pressed("left_click"): boxModeScene.drag = true
 			#boxModeScene.set_description($Name.text)
 			if buttonMode:
 				boxModeScene.evaluate_targets(moves[moveIndex], user, self)
@@ -144,7 +149,6 @@ func _on_Button_pressed():
 		"Puzzle":
 			boxModeScene.show_grid(self)
 		"EquipmentHolder": #party or crafting grid
-			$Tooltip.visible = false
 			var Puzzle = boxModeScene.get_node("../../../Puzzle")
 			if Puzzle.selection:
 				Puzzle.set_box(moves[0])

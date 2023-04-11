@@ -11,6 +11,8 @@ const XINCREMENT = 80
 const YINCREMENT = 60
 const GAPSIZE = 305
 
+const NEWBOXES = 2
+
 const XMAX = 12
 const YMAX = 1
 const CRAFTBOXES = 3
@@ -50,6 +52,7 @@ enum oModes {remove, repair, reward}
 var mode = iModes.craft
 
 var drag = false
+var undrag = false
 
 var repairBonus = false
 
@@ -72,13 +75,27 @@ func _ready():
 	else:
 		dHolder = get_node_or_null("../Map/HolderHolder/DisplayHolder")
 
-func check_drag(box):
+func check_undrag(_box): #when the mouse leaves a box
+	if otherSelection != null: undrag = true
+
+func check_drag(button): #dragging a box onto another box or a player profile
 	if drag:
-		box._on_Button_pressed()
+		button._on_Button_pressed()
+		undrag = false
+		drag = false
+		#Input.set_custom_mouse_cursor(null)
 
 func _process(_delta):
-	if drag and Input.is_action_just_released("left_click"):
+	if Input.is_action_just_released("left_click"):
 		drag = false
+		if undrag:
+			if otherSelection != null: 
+				if get_node("../Map").selectedMapMove != null:
+					get_node("../Map").end_map_move()
+				else:
+					deselect_multi([otherSelection])
+			undrag = false
+		#Input.set_custom_mouse_cursor(null)
 
 func welcome_back():
 	toggle_trade_visibility(true)
@@ -175,18 +192,26 @@ func set_text(tag, value, visibility = true):
 
 func make_grid():
 	dHolder.Moves = Moves
+	while YMAX > boxesCount.y: #fill out the rest of the grid
+		make_inventorybox("X", true)
 	for item in global.itemDict:
 		if item == MOVEHOLDER:
 			for move in global.itemDict[MOVEHOLDER]:
-				identify_product(make_inventorybox(move, true))
+				add_item(move, true)
 		else:
 			for i in global.itemDict[item]:
-				make_inventorybox(item, true)
-	while YMAX > boxesCount.y: #fill out the rest of the grid
-		make_inventorybox("X", true)
+				add_item(item)
 
 func make_inventorybox(boxName, useGap = false):
 	var box = MoveBox.instance()
+	if useGap:
+		var hotkey = InputEventKey.new()
+		hotkey.set_scancode(get_scancode(int(boxesCount.x)))
+		if boxesCount.x >= XMAX * .5: hotkey.set_shift(true)
+		box.get_node("Button").shortcut = ShortCut.new()
+		box.get_node("Button").shortcut.set_shortcut(hotkey)
+		if boxesCount.x < NEWBOXES or XMAX - boxesCount.x <= NEWBOXES: box.visible = false
+		
 	iHolder.add_child(box)
 	box.position.x = XSTART + (boxesCount.x * XINCREMENT)
 	if boxesCount.x >= XMAX * .5 and useGap: box.position.x += GAPSIZE
@@ -197,7 +222,15 @@ func make_inventorybox(boxName, useGap = false):
 	dHolder.box_move(box, boxName)
 	box.set_uses(Moves.get_uses(boxName))
 	return box
-	
+
+func get_scancode(boxIndex):
+	if boxIndex == 0 or boxIndex == 11: return KEY_H
+	if boxIndex == 1 or boxIndex == 10: return KEY_G
+	if boxIndex == 2 or boxIndex == 9: return KEY_F
+	if boxIndex == 3 or boxIndex == 8: return KEY_D
+	if boxIndex == 4 or boxIndex == 7: return KEY_S
+	if boxIndex == 5 or boxIndex == 6: return KEY_A
+
 func incrementBoxCount():
 	boxesCount.x += 1
 	if boxesCount.x >= XMAX:
@@ -213,6 +246,18 @@ func make_actionboxes(boxCount, rowLimit):
 		if Trading.stock.size() > i: dHolder.box_move(box, Trading.stock[i])
 		else: dHolder.box_move(box, "X")
 		identify_product(box)
+
+func unhide_boxes():
+	var hiddenBoxes = []
+	for iBox in iHolder.get_children():
+		if !iBox.visible:
+			hiddenBoxes.append(iBox)
+	if hiddenBoxes.size() > NEWBOXES:
+		hiddenBoxes[1].visible = true
+		hiddenBoxes[-2].visible = true
+	else:
+		hiddenBoxes[0].visible = true
+		hiddenBoxes[-1].visible = true
 
 func select_box(box = null):
 	box.get_node("ColorRect").color = Color(.5,.1,.5,.3)
@@ -325,8 +370,8 @@ func add_to_player(itemName):
 				identify_product(box)
 				box.set_uses(Moves.get_uses(itemName))
 				reset_and_update_itemDict()
-				return
-	add_item(itemName, true) #if no player slots open, add to inventory
+				return box
+	return add_item(itemName, true) #if no player slots open, add to inventory
 
 func isValidMove(boxName):
 	if Moves.moveList.has(boxName):
@@ -356,6 +401,7 @@ func toggle_action_button(toggle, buttonText = ""):
 	$ActionButton.text = buttonText
 
 func swap_boxes(one, two, check = false):
+	get_node("../Map").hide_undo()
 	one.get_node("Tooltip").visible = false
 	two.get_node("Tooltip").visible = false
 	var temp = [one.get_node("Name").text, one.maxUses, one.currentUses]
@@ -408,12 +454,22 @@ func restore_basics(boxes): #puts attack/defend back on non-relic boxes and remo
 			elif moveInfo.has("morph") and moveInfo["morph"].size() >= 2:
 				dHolder.box_move(box, moveInfo["morph"][2])
 
+func get_trader_components():
+	var tComponents = []
+	if tHolder.visible:
+		for box in tHolder.get_children():
+			if global.itemDict.has(box.get_node("Name").text):
+				tComponents.append(box.get_node("Name").text)
+	return tComponents
+
 func assess_trade_value():
 	var newStock = []
+	var stockBoxes = []
 	for child in tHolder.get_children():
 		if child.get_child_count() > 0: #if it has a name node
 			newStock.append(child.get_node("Name").text)
-	currentTraderValue = Trading.get_inventory_value(newStock)
+			stockBoxes.append(child)
+	currentTraderValue = Trading.get_inventory_value(newStock, stockBoxes)
 	$Current.text = String(currentTraderValue)
 	$ExitButton.visible = true if currentTraderValue >= initialTraderValue else false
 	if $ExitButton.visible: $ExitButton.visible = check_for_curses(newStock)
@@ -462,10 +518,15 @@ func get_all_gear():
 			if Moves.moveList[boxName]["slot"] == Moves.equipType.gear and box.currentUses < box.maxUses and box.currentUses > 0:
 				allGear.append(box)
 	for iBox in iHolder.get_children():
-		var iName = iBox.get_node("Name").text
-		if Moves.moveList.has(iName) and Moves.moveList[iName]["slot"] == Moves.equipType.gear and iBox.currentUses < iBox.maxUses:
-			allGear.append(iBox)
+		if is_box_damaged(iBox): allGear.append(iBox)
+	if tHolder.visible: for tBox in tHolder.get_children():
+		if is_box_damaged(tBox): allGear.append(tBox)
 	return allGear
+
+func is_box_damaged(box):
+	var iName = box.get_node("Name").text
+	if Moves.moveList.has(iName) and Moves.moveList[iName]["slot"] == Moves.equipType.gear and box.currentUses < box.maxUses: return true
+	else: return false
 
 func find_box(boxName):
 	for iBox in iHolder.get_children():
@@ -474,10 +535,11 @@ func find_box(boxName):
 func xCheck(count = false): #returns an empty inventory space, todo: scenario for full inventory
 	var xCount = 0
 	for iBox in iHolder.get_children():
-		var iName = iBox.get_node("Name").text
-		if iName == "X":
-			if count: xCount += 1
-			else: return iBox
+		if iBox.visible:
+			var iName = iBox.get_node("Name").text
+			if iName == "X":
+				if count: xCount += 1
+				else: return iBox
 	return xCount
 
 func clear_box(box):
@@ -499,7 +561,8 @@ func add_item(itemName, newUses = false): #todo: case for full inventory
 		dHolder.box_move(openBox, itemName)
 		identify_product(openBox)
 		if newUses: openBox.set_uses(Moves.get_uses(itemName))
-		reset_and_update_itemDict()
+		if global.storedParty[0].boxHolder != null: reset_and_update_itemDict()
+		return openBox
 	else: #full inventory
 		pass #owned lol
 		#activate_offer(itemName)
@@ -508,6 +571,11 @@ func remove_component(componentName): #some redundancy with xCheck
 	for iBox in iHolder.get_children():
 		if iBox.get_node("Name").text == componentName:
 			clear_box(iBox)
+			return true
+	if tHolder.visible: for tBox in tHolder.get_children():
+		if tBox.get_node("Name").text == componentName:
+			clear_box(tBox)
+			assess_trade_value()
 			return true
 	return false
 
@@ -534,7 +602,7 @@ func check_and_award_component(box, flip = false):
 	if flip: add_item(Crafting.break_down(box.moves[0])[1])
 	else: add_item(Crafting.break_down(box.moves[0])[0])
 
-func exit(): #Save inventory and leave, todo: make the passives and discounts apply somewhere other than here
+func exit(): #Save trader inventory and leave
 	deselect_multi([otherSelection])
 	var tStock = []
 	for box in tHolder.get_children():

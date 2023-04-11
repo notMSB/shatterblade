@@ -90,6 +90,7 @@ margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 39.0
+focus_mode = 0
 mouse_filter = 1
 action_mode = 0
 flat = true

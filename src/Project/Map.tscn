@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=2]
+[gd_scene load_steps=27 format=2]
 
 [ext_resource path="res://src/Project/Map.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/UI/Favor.tscn" type="PackedScene" id=2]
@@ -21,18 +21,24 @@
 [ext_resource path="res://src/Project/UI/QuickRepair.tscn" type="PackedScene" id=19]
 [ext_resource path="res://src/Project/UI/UICircle.tscn" type="PackedScene" id=20]
 
-[sub_resource type="StyleBoxFlat" id=2]
+[sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.192157, 0.32549, 0.737255, 1 )
 
-[sub_resource type="StyleBoxFlat" id=3]
+[sub_resource type="StyleBoxFlat" id=2]
 bg_color = Color( 0.647059, 0.647059, 0.647059, 0.294118 )
 
-[sub_resource type="DynamicFont" id=4]
+[sub_resource type="DynamicFont" id=3]
 font_data = ExtResource( 13 )
 
-[sub_resource type="DynamicFont" id=1]
+[sub_resource type="DynamicFont" id=4]
 size = 20
 font_data = ExtResource( 13 )
+
+[sub_resource type="InputEventKey" id=5]
+scancode = 32
+
+[sub_resource type="ShortCut" id=6]
+shortcut = SubResource( 5 )
 
 [node name="Map" type="Node2D"]
 script = ExtResource( 1 )
@@ -87,8 +93,8 @@ margin_left = -1.0
 margin_top = 462.0
 margin_right = 1279.0
 margin_bottom = 479.0
-custom_styles/fg = SubResource( 2 )
-custom_styles/bg = SubResource( 3 )
+custom_styles/fg = SubResource( 1 )
+custom_styles/bg = SubResource( 2 )
 percent_visible = false
 __meta__ = {
 "_edit_use_anchors_": false
@@ -97,7 +103,7 @@ __meta__ = {
 [node name="Label" type="Label" parent="XPBar"]
 margin_right = 1280.0
 margin_bottom = 20.0
-custom_fonts/font = SubResource( 4 )
+custom_fonts/font = SubResource( 3 )
 text = "0/5"
 align = 1
 __meta__ = {
@@ -108,6 +114,7 @@ __meta__ = {
 margin_top = 80.0
 margin_right = 280.0
 margin_bottom = 460.0
+mouse_filter = 1
 color = Color( 0, 0.478431, 0.478431, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -117,6 +124,7 @@ __meta__ = {
 margin_top = 80.0
 margin_right = 640.0
 margin_bottom = 460.0
+mouse_filter = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -125,6 +133,7 @@ __meta__ = {
 margin_right = 280.0
 margin_bottom = 1000.0
 rect_min_size = Vector2( 280, 1000 )
+mouse_filter = 1
 color = Color( 0, 0.478431, 0.478431, 1 )
 
 [node name="RepairPanel" type="ColorRect" parent="."]
@@ -132,6 +141,7 @@ margin_left = 1000.0
 margin_top = 80.0
 margin_right = 1280.0
 margin_bottom = 460.0
+mouse_filter = 1
 color = Color( 0, 0.478431, 0.478431, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -142,6 +152,7 @@ margin_left = 641.0
 margin_top = 80.0
 margin_right = 1280.0
 margin_bottom = 460.0
+mouse_filter = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -150,6 +161,7 @@ __meta__ = {
 margin_right = 280.0
 margin_bottom = 1000.0
 rect_min_size = Vector2( 280, 1000 )
+mouse_filter = 1
 color = Color( 0, 0.478431, 0.478431, 1 )
 
 [node name="HolderHolder" type="Node2D" parent="."]
@@ -195,10 +207,15 @@ color = Color( 0.215686, 0.278431, 0.54902, 1 )
 [node name="ColorRect" type="ColorRect" parent="HolderHolder/CornerHolder/Time"]
 margin_right = 280.0
 margin_bottom = 80.0
+mouse_filter = 2
 color = Color( 0.286275, 0.176471, 0.176471, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Biome" parent="HolderHolder/CornerHolder/Time/ColorRect" instance=ExtResource( 20 )]
+position = Vector2( 240, 40 )
+z_index = 1
 
 [node name="Favor" type="Node2D" parent="HolderHolder/CornerHolder"]
 
@@ -226,12 +243,13 @@ position = Vector2( 238, 36 )
 
 [node name="Events" type="Node2D" parent="."]
 visible = false
+z_index = 1
 script = ExtResource( 11 )
 
 [node name="EventDescription" type="Label" parent="Events"]
 margin_right = 350.0
 margin_bottom = 120.0
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = SubResource( 4 )
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -247,3 +265,18 @@ __meta__ = {
 }
 
 [node name="Choices" type="Node2D" parent="Events"]
+
+[node name="Undo" type="Button" parent="."]
+visible = false
+modulate = Color( 0.984314, 0.945098, 0, 1 )
+margin_left = 8.0
+margin_top = 6.0
+margin_right = 78.0
+margin_bottom = 74.0
+shortcut = SubResource( 6 )
+text = "UNDO"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="Undo" to="." method="_on_Undo_pressed"]

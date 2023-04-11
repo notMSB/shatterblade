@@ -38,6 +38,7 @@ var hits
 var hitBonus = 0
 var logIndex = 0
 
+var bossFight = false
 var gameOver = false
 var battleDone = true
 var previewBattleDone = false
@@ -53,7 +54,10 @@ var executionOrder = [] #box, move, user, target
 enum e {box, move, user, target}
 var targetType
 
+enum a {xpGain, useDeducted, hitBonus, damageBuff, turnStart, battleStart}
+
 var drag = false
+var undrag = null
 
 func _ready(): #Generate units and add to turn order
 	Moves.Battle = self
@@ -62,11 +66,23 @@ func _ready(): #Generate units and add to turn order
 	targetType = Moves.targetType
 	randomize() #funny rng
 
-func check_drag(targetButton):
-	if drag: targetButton._on_Button_pressed()
+func check_undrag(box): #when the mouse leaves a box
+	if box == usedMoveBox: undrag = box
+
+func check_drag(targetButton): #dragging a box onto a button
+	if drag: 
+		targetButton._on_Button_pressed()
+		undrag = null
+		drag = false
+		#Input.set_custom_mouse_cursor(null)
 
 func _process(_delta):
-	if drag and Input.is_action_just_released("left_click"): drag = false
+	if visible and Input.is_action_just_released("left_click"): 
+		drag = false
+		if undrag != null: 
+			if undrag == usedMoveBox: undrag._on_Button_pressed()
+			undrag = null
+		#Input.set_custom_mouse_cursor(null)
 
 func setup_party():
 	$BattleUI.set_holder()
@@ -148,6 +164,7 @@ func welcome_back(newOpponents = null, currentArea = 0): #reusing an existing ba
 	turnIndex = -1
 	Boons.call_boon("start_battle", [get_partyHealth(), self])
 	yield(create_enemies(currentArea, newOpponents), "completed")
+	evaluate_aura(a.battleStart)
 	if !canSee: toggle_blind(false)
 	if autoPreview: toggle_previews(true)
 	play_turn(false)
@@ -183,6 +200,33 @@ func get_partyHealth():
 	for unit in global.storedParty:
 		total += unit.currentHealth
 	return total
+
+func evaluate_aura(activationTiming):
+	if !Map: return 0
+	if activationTiming == a.battleStart:
+		if Map.currentBiome == Map.biomesList.mountain:
+			for unit in $Units.get_children():
+				StatusManager.add_status(unit, "Resist", 1)
+	elif activationTiming == a.turnStart:
+		if Map.currentBiome == Map.biomesList.forest:
+			for unit in $Units.get_children():
+				if unit.currentHealth == unit.maxHealth: 
+					unit.shield += 5
+					unit.update_hp()
+	elif activationTiming == a.hitBonus:
+		if Map.currentBiome == Map.biomesList.battlefield and chosenMove.has("hits"): if chosenMove["hits"] > 1: return 1
+		return 0
+	elif activationTiming == a.damageBuff:
+		if Map.currentBiome == Map.biomesList.city:
+			if chosenMove["target"] == Moves.targetType.enemy or chosenMove["target"] == Moves.targetType.ally or chosenMove["target"] == Moves.targetType.user: return 2
+			else: return -2
+		return 0
+	elif activationTiming == a.useDeducted:
+		if Map.currentBiome == Map.biomesList.graveyard: return 1
+		else: return 0
+	elif activationTiming == a.xpGain:
+		if Map.currentBiome == Map.biomesList.graveyard: return 1
+		else: return 0
 
 func play_turn(notFirstTurn = true):
 	if battleDone:
@@ -225,6 +269,7 @@ func play_turn(notFirstTurn = true):
 				var boxName = box.get_node("Name").text
 				if box.currentUses > 0 and (boxName == "Reload" or boxName == "Catch") and !unit.isStunned and unit.currentHealth > 0: box._on_Button_pressed()
 		Boons.call_boon("start_turn")
+		evaluate_aura(a.turnStart)
 		log_turn()
 		logIndex = 0
 		if autoPreview: yield(preview_turn(), "completed")
@@ -341,6 +386,7 @@ func evaluate_targets(move, user, box):
 			target_chosen()
 			usedMoveBox = null
 			drag = false
+			undrag = null
 		elif chosenMove["target"] <= targetType.enemyTargets: #If an enemy is targeted
 			$BattleUI.toggle_buttons(true, get_team(false))
 		elif chosenMove["target"] <= targetType.allies: #If an ally is targeted
@@ -350,9 +396,12 @@ func evaluate_targets(move, user, box):
 			target_chosen(user.get_index())
 			usedMoveBox = null
 			drag = false
+			undrag = null
 		if usedMoveBox: usedMoveBox.change_rect_color(Color(.6,.6,.6,1)) #color indicating this is the selected box
 
 func target_chosen(index = null):
+	drag = false
+	undrag = null
 	moveTarget = $Units.get_child(index) if index != null else null
 	executionOrder.append([usedMoveBox, chosenMove, moveUser, moveTarget])
 	usedMoveBox.usageOrder = executionOrder.size()
@@ -375,11 +424,11 @@ func go_button_press():
 	$Peek.disabled = true
 	remove_blind(false)
 	for moveData in executionOrder: #box, move, user, target
-		moveName = moveData[0].moves[moveData[0].moveIndex]
-		usedMoveBox = moveData[0]
-		chosenMove = moveData[1]
-		moveUser = moveData[2]
-		moveTarget = moveData[3]
+		moveName = moveData[e.box].moves[moveData[e.box].moveIndex]
+		usedMoveBox = moveData[e.box]
+		chosenMove = moveData[e.move]
+		moveUser = moveData[e.user]
+		moveTarget = moveData[e.target]
 		focus_log()
 		if moveUser.currentHealth <= 0: continue
 		yield(execute_move(), "completed")
@@ -412,11 +461,11 @@ func cut_from_order(box):
 	#Restoring UI involving quick actions: If a quick is cut, toggle only that. For non-quick, toggle everything on except for committed quicks
 	if !foundAction[e.move].has("quick"): #non-quick case, cutting a committed action while retaining any chosen quicks
 		box.buttonMode = true #Needed to properly reset it in the toggle 
-		$BattleUI.toggle_moveboxes(foundAction[e.box].get_parent(), true, true, checkChannel(foundAction[2]))
+		$BattleUI.toggle_moveboxes(foundAction[e.box].get_parent(), true, true, checkChannel(foundAction[e.user]))
 	else: #quick case
 		$BattleUI.toggle_single(box, !userCommitted)  #If the user is already committed (non-quick), disable the box. Otherwise enable it.
 		if userCommitted: box.buttonMode = true #Needed or else the cut box stays disabled for the turn 
-		$BattleUI.toggle_moveboxes(foundAction[0].get_parent(), !userCommitted, true, checkChannel(foundAction[2])) #Checks to re-enable other actions due to earlier refund
+		$BattleUI.toggle_moveboxes(foundAction[e.box].get_parent(), !userCommitted, true, checkChannel(foundAction[e.user])) #Checks to re-enable other actions due to earlier refund
 	log_turn()
 	if autoPreview: yield(preview_turn(), "completed")
 	
@@ -455,7 +504,7 @@ func log_turn():
 	for i in executionOrder.size(): #box, move, user, target
 		var entry = LogEntry.instance()
 		$BattleLog/Scroll/Control.add_child(entry)
-		entry.assemble(executionOrder[i][2], executionOrder[i][3], executionOrder[i][0].moves[0])
+		entry.assemble(executionOrder[i][e.user], executionOrder[i][e.target], executionOrder[i][e.box].moves[e.box])
 		entry.position.x = logIncrement * totalLogs
 		totalLogs += 1
 	
@@ -492,11 +541,11 @@ func preview_turn():
 				2: fakeOrder[i].append(convert_unit(executionOrder[i][j]))
 				3: fakeOrder[i].append(convert_unit(executionOrder[i][j]))
 	for moveData in fakeOrder: #box, move, user, target
-		moveName = moveData[0].moves[moveData[0].moveIndex]
-		usedMoveBox = moveData[0]
-		chosenMove = moveData[1]
-		moveUser = moveData[2]
-		moveTarget = moveData[3]
+		moveName = moveData[e.box].moves[moveData[e.box].moveIndex]
+		usedMoveBox = moveData[e.box]
+		chosenMove = moveData[e.move]
+		moveUser = moveData[e.user]
+		moveTarget = moveData[e.target]
 		yield(execute_move(false), "completed")
 	if !previewBattleDone: #now for enemies
 		usedMoveBox = null
@@ -520,8 +569,8 @@ func execute_move(real = true):
 	#Set up for multi target moves
 	var timeoutVal = 0.5 if real else 0.0
 	if real: previewBattleDone = false
-	hitBonus = 0
-	damageBuff = 0
+	hitBonus = 0 + evaluate_aura(a.hitBonus)
+	damageBuff = 0 + evaluate_aura(a.damageBuff)
 	var targets = []
 	if chosenMove["target"] == targetType.enemies:
 		targets = get_team(!moveUser.isPlayer, true, real)
@@ -548,18 +597,20 @@ func execute_move(real = true):
 		if usedMoveBox != null:
 			if real: usedMoveBox.timesUsed += 1
 			if chosenMove["type"] > Moves.moveType.basic and chosenMove["target"] != targetType.none and usedMoveBox.maxUses > 0: #durability does not go down for reloads and moves without a classtype
+				var reduction = 1 + evaluate_aura(a.useDeducted)
 				if StatusManager.find_status(moveUser, "Durability Redirect"): #This whole nest is dedicated to the stabilizer
 					if real:
 						for box in moveUser.boxHolder.get_children():
 							if box.maxUses > 0 and !box.buttonMode: #buttonMode clause only relevant for multiple stabilizers on same character (why)
-								if box.get_index() > 1: usedMoveBox.reduce_uses(1) #if it gets past the relic slots it can't be used
+								
+								if box.get_index() > 1: usedMoveBox.reduce_uses(reduction) #if it gets past the relic slots it can't be used
 								if box.currentUses > 0:
-									box.reduce_uses(1)
+									box.reduce_uses(reduction)
 									break
 								else: #if it's broken mid-turn
 									continue
 				else:
-					if real: usedMoveBox.reduce_uses(1)
+					if real: usedMoveBox.reduce_uses(reduction)
 					Boons.call_boon("uses_reduced", [moveUser, usedMoveBox, usedMoveBox.currentUses, real, self])
 			if real and (chosenMove["type"] == Moves.moveType.trick or chosenMove.has("cycle")):
 				if !StatusManager.reduce_status(moveUser, "Autoload", 1): $BattleUI.advance_box_move(usedMoveBox)
@@ -679,7 +730,9 @@ func activate_effect(effectName = "effect", argsName = "args"):
 func evaluate_completion(deadUnit):
 	if deadUnit.real:
 		if Map: 
-			Map.increment_xp(deadUnit.maxHealth, deadUnit, doubleXP)
+			var xp = deadUnit.maxHealth + evaluate_aura(a.xpGain) * deadUnit.maxHealth
+			if doubleXP: xp *= 2
+			Map.increment_xp(xp, deadUnit)
 			doubleXP = false
 		deadEnemies += 1
 		previewDeadEnemies += 1
@@ -713,6 +766,8 @@ func done(rewards = []):
 	if !get_parent().mapMode:
 		return get_tree().reload_current_scene()
 	else: #Map
+		drag = false
+		undrag = null
 		Boons.call_boon("end_battle", [get_partyHealth(), self])
 		for i in global.storedParty.size():
 			var unit = global.storedParty[i]
@@ -731,6 +786,9 @@ func done(rewards = []):
 		$BattleUI.toggle_movebox_buttons(true)
 		Map.set_quick_panels()
 		Map.toggle_map_windows(true)
+		if bossFight: 
+			bossFight = false
+			Map.boss_defeated()
 
 func _on_Preview_pressed():
 	$BattleUI.toggle_buttons(false)

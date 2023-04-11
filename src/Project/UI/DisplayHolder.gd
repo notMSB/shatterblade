@@ -49,6 +49,11 @@ func add_moves(unit, display, playerCount):
 func create_move(unit, playerCount, posIndex):
 	var move
 	var moveBox = PlayerMove.instance()
+	var hotkey = InputEventKey.new()
+	hotkey.set_scancode(get_scancode(playerCount <= 1, posIndex))
+	if playerCount % 2 != 0: hotkey.set_shift(true)
+	moveBox.get_node("Button").shortcut = ShortCut.new()
+	moveBox.get_node("Button").shortcut.set_shortcut(hotkey)
 	moveBox.user = unit
 	unit.boxHolder.add_child(moveBox)
 	var xPos = moveBox.position.x
@@ -78,6 +83,26 @@ func create_move(unit, playerCount, posIndex):
 	moveBox.set_uses(Moves.get_uses(move))
 	var button = moveBox.get_node("Button")
 	button.rect_size = moveBox.get_node("ColorRect").rect_size
+
+func get_scancode(topRow, posIndex):
+	if topRow:
+		match posIndex:
+			0: return KEY_Q
+			1: return KEY_W
+			2: return KEY_E
+			3: return KEY_R
+			4: return KEY_T
+			5: return KEY_Y
+			6: return KEY_U
+	else:
+		match posIndex:
+			0: return KEY_Z
+			1: return KEY_X
+			2: return KEY_C
+			3: return KEY_V
+			4: return KEY_B
+			5: return KEY_N
+			6: return KEY_M
 
 func set_boxes(boxes):
 	var boxName

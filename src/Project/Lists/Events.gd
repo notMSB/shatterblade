@@ -121,6 +121,7 @@ func quest_fetch(_neededComponment): #need for certain component
 	#Map.inventoryWindow.offerType = Map.inventoryWindow.oTypes.component
 	#Map.inventoryWindow.offerNeed = neededComponment
 	#Map.activate_inventory(Map.inventoryWindow.iModes.offer)
+	Map.inventoryWindow.reset_and_update_itemDict()
 	give_reward()
 
 func quest_labor(time): #task that takes X time

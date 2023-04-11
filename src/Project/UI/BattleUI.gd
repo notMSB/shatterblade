@@ -167,12 +167,19 @@ func clear_menus():
 
 func toggle_buttons(toggle, units = []):
 	if toggle:
+		
 		var usedHolder = playerHolder if units[0].isPlayer else $DisplayHolder
 		if units.size() == 1 and usedHolder == playerHolder:
 			usedHolder.get_child(units[0].get_index()).get_node("Button").visible = true
+			#usedHolder.get_child(units[0].get_index()).get_node("Button").shortcut.scancode = 0			
 		else:
 			for i in usedHolder.get_child_count(): #known to toggle on too many buttons if not in map mode
-				if i < units.size() and units[i].currentHealth > 0: usedHolder.get_child(i).get_node("Button").visible = true
+				if i < units.size() and units[i].currentHealth > 0: 
+					var hotkey = InputEventKey.new()
+					hotkey.set_scancode(49+i) #49 sets to 1 on the keyboard
+					usedHolder.get_child(i).get_node("Button").shortcut = ShortCut.new()
+					usedHolder.get_child(i).get_node("Button").shortcut.set_shortcut(hotkey)
+					usedHolder.get_child(i).get_node("Button").visible = true
 	else:
 		for child in playerHolder.get_children():
 			child.get_node("Button").visible = false

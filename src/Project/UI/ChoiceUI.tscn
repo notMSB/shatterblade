@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://src/Project/UI/ChoiceUI.gd" type="Script" id=2]
@@ -13,11 +13,17 @@ font_data = ExtResource( 1 )
 size = 12
 font_data = ExtResource( 1 )
 
-[sub_resource type="DynamicFont" id=3]
+[sub_resource type="InputEventKey" id=3]
+scancode = 79
+
+[sub_resource type="ShortCut" id=4]
+shortcut = SubResource( 3 )
+
+[sub_resource type="DynamicFont" id=5]
 size = 12
 font_data = ExtResource( 1 )
 
-[sub_resource type="DynamicFont" id=4]
+[sub_resource type="DynamicFont" id=6]
 size = 14
 font_data = ExtResource( 1 )
 
@@ -110,6 +116,7 @@ margin_right = 40.0
 margin_bottom = 39.0
 mouse_filter = 1
 action_mode = 0
+shortcut = SubResource( 4 )
 flat = true
 __meta__ = {
 "_edit_use_anchors_": false
@@ -129,7 +136,7 @@ __meta__ = {
 [node name="Text" type="Label" parent="Offerbox/Uses"]
 margin_right = 79.0
 margin_bottom = 15.0
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 5 )
 text = "1/1"
 align = 1
 valign = 1
@@ -165,7 +172,7 @@ margin_left = -112.0
 margin_top = -157.0
 margin_right = 113.0
 margin_bottom = -22.0
-custom_fonts/font = SubResource( 4 )
+custom_fonts/font = SubResource( 6 )
 text = "aaaaaaaaaaaaaa"
 align = 1
 valign = 1

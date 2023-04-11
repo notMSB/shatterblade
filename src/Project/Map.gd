@@ -49,13 +49,13 @@ var timeNode
 var favorNode
 
 const DIFFICULTYMODIFIER = -4
-const DUNGEONDIFFICULTY = [2, 3, 3, 4]
+const DUNGEONDIFFICULTY = [1, 2, 3, 4]
 const DAYTIME = 150
 var distanceTraveled = 0
 var time = DAYTIME
 var currentDay = 0
 var currentArea = 0
-const AREADIFFICULTYMOD = 3
+const AREADIFFICULTYMOD = 1
 const DAYDIFFICULTYMOD = 1
 var isDay = true
 var currentDungeon = null
@@ -76,6 +76,11 @@ enum pointTypes {start, battle, quest, visited, none, event, town, dungeon, repa
 
 var mascotList = ["Scorpion", "Kraken", "Phoenix"]
 var currentMascot
+var seenBosses = []
+var bossComponent
+
+
+var undoList = {}
 
 var canEnd = false
 var checkedLines = []
@@ -153,6 +158,26 @@ func set_biome():
 	currentMascot = mascotList[randi() % (mascotList.size())]
 	Trading.assign_component_values(currentBiome, currentMascot)
 	if inventoryWindow: inventoryWindow.revalue_all_gear()
+	set_boss()
+	set_biome_ui()
+
+func set_boss():
+	var biomeEnemies = []
+	for enemy in Enemies.enemyList:
+		if Enemies.enemyList[enemy]["biome"] == currentBiome and !seenBosses.has(Enemies.enemyList[enemy]["rewards"]): biomeEnemies.append(Enemies.enemyList[enemy]["rewards"][0])
+	bossComponent = biomeEnemies[randi() % biomeEnemies.size()]
+	
+
+func set_biome_ui():
+	$HolderHolder/CornerHolder/Time/ColorRect/Biome/Visuals/Sprite.modulate = $HolderHolder/ScrollContainer/ColorRect.color
+	$HolderHolder/CornerHolder/Time/ColorRect/Biome.set_letter(biomesList.keys()[currentBiome][0].to_upper())
+	match currentBiome:
+		biomesList.plains: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("Plains\nNo aura.")
+		biomesList.forest: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("Forest\nAll units at full health get 5 shield at turn start.")
+		biomesList.mountain: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("Mountain\nAll units start battles with 1 Resist.")
+		biomesList.city: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("City\nAll single target moves have 2 more base damage, while all multi target moves have 2 less.")
+		biomesList.battlefield: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("Battlefield\nMoves with more than 1 base hit gain 1 additional hit.")
+		biomesList.graveyard: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("Graveyard\nAll gear is used up twice as fast in battle, but XP gain is doubled.")
 
 func set_boon_text():
 	var index = Boons.playerBoons.size() - 1
@@ -181,6 +206,7 @@ func setup_battle():
 
 func activate_inventory():
 	inventoryWindow.welcome_back()
+	set_quick_crafts()
 
 func set_display_color(display):
 	var unitType = global.storedParty[display.get_index()].allowedType
@@ -189,12 +215,20 @@ func set_display_color(display):
 	elif unitType == Moves.moveType.trick: display.get_node("Sprite").modulate = Color(.3,.7,.3,1) #G
 
 func activate_point(point):
-	if $Events.visible: $Events.visible = false
+	hide_undo()
+	if $Events.visible: 
+		return_event_box()
+		finish_event(calledEvent)
 	var type = point.pointType
 	if type == pointTypes.none: pass
 	elif type == pointTypes.end: #todo: event asking if you want to end (and eventually a boss here)
 		#print("End")
-		regen_map(true)
+		battleWindow.bossFight = true
+		seenBosses.append(bossComponent)
+		for enemy in Enemies.enemyList:
+			if Enemies.enemyList[enemy]["locations"][0] == Enemies.l.special and Enemies.enemyList[enemy]["rewards"][0] == bossComponent:
+				activate_battle([enemy])
+				break
 	elif type == pointTypes.dungeon:
 		grab_event("Dungeon")
 	elif type == pointTypes.town:
@@ -229,6 +263,9 @@ func activate_point(point):
 					if list[option]["time"] >= $Events.timings.overworld: pool.append(option)
 			grab_event(pool[randi() % pool.size()])
 
+func boss_defeated():
+	regen_map(true)
+
 func check_delay():
 	if delayBattle:
 		var temp = delayBattle
@@ -249,7 +286,7 @@ func activate_battle(newOpponents = null, isHunt = false):
 		for i in currentArea: newOpponents.append(newOpponents[0]) #scale up hunts by area
 		if Enemies.enemyList[newOpponents[0]]["difficulty"] == 1: newOpponents.append(newOpponents[0])
 	battleWindow.visible = true
-	check_for_elite(newOpponents)
+	#check_for_elite(newOpponents)
 	battleWindow.welcome_back(newOpponents, currentArea)
 	toggle_map_windows(false)
 	inventoryWindow.inventory_blackouts(true)
@@ -331,12 +368,14 @@ func finish_event(checkName):
 
 func toggle_map_use(box):
 	if !(box.get_parent().name != "MoveBoxes" and box.resValue > 0 or inventoryWindow.tHolder.visible): #for moves that need to be equipped to be used, or when the trader is active
+		print("h")
 		selectedMapBox = box
 		selectedMapMove = box.moves[box.moveIndex]
 		for child in get_node("HolderHolder/DisplayHolder").get_children():
 			child.get_node("Button").visible = true
 
 func use_map_move(unit):
+	hide_undo()
 	var moveUser = null
 	if selectedMapBox.get_parent().name == "MoveBoxes": moveUser = global.storedParty[selectedMapBox.get_parent().get_parent().get_index()]
 	if moveUser == null or moveUser.mana >= Moves.moveList[selectedMapMove]["resVal"]:
@@ -531,6 +570,7 @@ func regen_map(newMember = false):
 	else: print("Bad map gen settings")
 
 func add_new_member():
+	inventoryWindow.unhide_boxes()
 	var unit = global.storedParty[-1]
 	unit.Battle = battleWindow
 	unit._ready()
@@ -735,9 +775,8 @@ func analyze_points(one, two):
 			one.lines.append(pointLine) #add line to points
 			two.lines.append(pointLine)
 
-func increment_xp(amount, rewardUnit, double):
-	var increment = amount * 2 if double else amount
-	var newValue = $XPBar.value + increment
+func increment_xp(amount, rewardUnit):
+	var newValue = $XPBar.value + amount
 	while newValue >= $XPBar.max_value:
 		if battleWindow.levelLock: newValue = $XPBar.max_value - 1
 		else:
@@ -796,6 +835,10 @@ func set_quick_crafts():
 	for child in $CraftScroll/ColorRect.get_children():
 		$CraftScroll/ColorRect.remove_child(child)
 		child.queue_free()
+	
+	if inventoryWindow.tHolder.visible:
+		for component in inventoryWindow.get_trader_components():
+			global.itemDict[component] += 1
 	
 	for item in global.itemDict:
 		if item != "moves": #components only
@@ -860,3 +903,19 @@ func fuzz_point(currentPoint):
 
 func rando_fuzz():
 	return randi() % (FUZZ * 2)
+
+func show_undo(productBox, leftName, rightName):
+	undoList["product"] = productBox
+	undoList["first"] = leftName
+	undoList["second"] = rightName
+	$Undo.visible = true
+
+func hide_undo():
+	undoList.clear()
+	$Undo.visible = false
+
+func _on_Undo_pressed():
+	inventoryWindow.clear_box(undoList["product"])
+	inventoryWindow.add_item(undoList["first"])
+	inventoryWindow.add_item(undoList["second"])
+	hide_undo()

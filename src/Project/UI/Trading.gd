@@ -49,8 +49,9 @@ func get_item_value(itemName, box = null):
 		value = max(ceil(value * box.currentUses / box.maxUses), 1) #subject to change, but currently broken weapons shouldn't have a value of 0
 	return value
 
-func get_inventory_value(inventory):
+func get_inventory_value(inventory, boxList = null):
 	var finalValue = 0
-	for item in inventory:
-		finalValue += get_item_value(item)
+	for i in inventory.size():
+		if boxList: finalValue += get_item_value(inventory[i], boxList[i])
+		else: finalValue += get_item_value(inventory[i])
 	return finalValue

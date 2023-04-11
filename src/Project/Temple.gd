@@ -63,7 +63,7 @@ func get_price(selectNode, boonName):
 
 func offer_made(box):
 	if Inventory.check_for_curses([box.get_node("Name").text]): #if the offer is not cursed
-		Boons.grant_favor(int(box.get_node("Info").text) * 3)
+		Boons.grant_favor(int(box.get_node("Info").text) * 2)
 		Inventory.clear_box(box)
 	else:
 		pass

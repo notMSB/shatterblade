@@ -38,7 +38,6 @@ margin_top = -3.0
 margin_right = 279.0
 margin_bottom = 112.0
 rect_pivot_offset = Vector2( 685.172, -123.365 )
-mouse_filter = 1
 custom_fonts/font = SubResource( 2 )
 align = 1
 __meta__ = {

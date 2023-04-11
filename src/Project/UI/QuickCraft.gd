@@ -16,9 +16,11 @@ func assemble(one, two):
 	Inventory.identify_product($Productbox)
 
 func _on_Button_pressed():
+	var addedBox
 	Inventory.remove_component($Leftbox.get_node("Name").text)
 	Inventory.remove_component($Rightbox.get_node("Name").text)
-	Inventory.add_to_player($Productbox.get_node("Name").text)
+	addedBox = Inventory.add_to_player($Productbox.get_node("Name").text)
+	Map.show_undo(addedBox, $Rightbox.get_node("Name").text, $Leftbox.get_node("Name").text)
 
 func _on_Button_mouse_entered():
 	if $Productbox/Tooltip/Label.text.length() > 0:

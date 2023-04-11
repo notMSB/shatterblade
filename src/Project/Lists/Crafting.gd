@@ -39,11 +39,11 @@ var products = {
 			 c.tentacle: "Submersion", c.flame: "Combust"},
 	
 	c.garbage: {c.garbage: "Concoction", c.darkness: "Dark Dive", c.blade: "Shiv",  c.tentacle: "Meat Harvest",
-				c.flame: "Wildfire"},
+				c.flame: "Firedance"},
 	
 	c.darkness: {c.darkness: "Dark Matter", c.blade: "Dark Spikes", c.tentacle: "Eldritch Forces", c.flame: "Midnight Flare"},
 	
-	c.blade: {c.blade: "Storm of Steel", c.tentacle: "Deep Cut", c.flame: "Firedance"},
+	c.blade: {c.blade: "Storm of Steel", c.tentacle: "Deep Cut", c.flame: "Wildfire"},
 	
 	c.tentacle: {c.tentacle: "Tentacle Jar", c.flame: "Monument"},
 	
