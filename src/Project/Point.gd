@@ -62,25 +62,26 @@ func set_name(text):
 	$Name.text = str(text)
 
 func _on_Button_pressed():
-	if Map.activePoint == self:
-		Map.activePoint.toggle_activation(false)
-		toggle_activation(true)
-		return
-	else:
-		var movementLine
-		for line in lines:
-			movementLine = check_neighbor(line, true) #exclude dungeon lines
-			if movementLine: #the nodes are adjacent
-				if Map.currentDungeon: 
-					Map.currentDungeon.evaluate_exit(self)
-					Map.subtract_time(1)
-				else:
-					Map.subtract_time(ceil(movementLine.points[0].distance_to(movementLine.points[1]) * Map.DISTANCE_TIME_MULT))
-				#Map.eval_darkness(Map.activePoint, self) 
-				#Map.move_map(position.x)
-				Map.activePoint.toggle_activation(false) #toggle off map's active node
-				toggle_activation(true) #this is now the map's active node
-				return #done
+	if !Map.get_node("BattleButton").visible:
+		if Map.activePoint == self:
+			Map.activePoint.toggle_activation(false)
+			toggle_activation(true)
+			return
+		else:
+			var movementLine
+			for line in lines:
+				movementLine = check_neighbor(line, true) #exclude dungeon lines
+				if movementLine: #the nodes are adjacent
+					if Map.currentDungeon: 
+						Map.currentDungeon.evaluate_exit(self)
+						Map.subtract_time(1)
+					else:
+						Map.subtract_time(ceil(movementLine.points[0].distance_to(movementLine.points[1]) * Map.DISTANCE_TIME_MULT))
+					#Map.eval_darkness(Map.activePoint, self) 
+					#Map.move_map(position.x)
+					Map.activePoint.toggle_activation(false) #toggle off map's active node
+					toggle_activation(true) #this is now the map's active node
+					return #done
 
 func _on_Button_mouse_entered():
 	#if sectionNum != Map.currentDay and !Map.currentDungeon: pass

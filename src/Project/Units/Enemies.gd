@@ -17,11 +17,11 @@ onready var enemyList = {
 	"PSkeleton": {"stats": [21, 32, 44, 58, 66], "specials": ["Power Attack", "Coldsteel"], 
 		"biome": b.plains, "rewards": ["bone"], "locations": [l.night], "difficulty": 2, "sprite": "Skeleton"},
 	
-	"FFlower": {"stats": [8, 16, 29, 41, 55], "passives": {"Venomous": 0}, "specials": ["Soul Sample"], "hardSpecials": ["Careful Strike"],
+	"FFlower": {"stats": [5, 11, 25, 36, 50], "passives": {"Venomous": 0}, "specials": ["Soul Sample"], "hardSpecials": ["Careful Strike"],
 		"biome": b.forest, "rewards": ["sap"], "locations": [l.day], "difficulty": 1, "sprite": "Flower"},
 	"FWolf": {"stats": [11, 20, 32, 44, 57], "specials": ["Frostfang"], "hardSpecials": ["Take Down"],
 		"biome": b.forest, "rewards": ["claw"], "locations": [l.day], "difficulty": 2, "sprite": "Wolf"},
-	"FSkeleton": {"stats": [15, 27, 39, 51, 66], "specials": ["Power Attack", "Careful Strike"], 
+	"FSkeleton": {"stats": [18, 27, 36, 45, 654], "specials": ["Power Attack", "Careful Strike"], 
 		"biome": b.forest, "rewards": ["bone"], "locations": [l.day], "difficulty": 3, "sprite": "Skeleton"},
 	"FRat": {"stats": [4, 8, 16, 26, 35], "passives": {"Dodgy": 1}, "specials": ["Plague"], 
 		"biome": b.forest, "rewards": ["fur"], "locations": [l.night], "difficulty": 1, "sprite": "Rat"},
@@ -34,7 +34,7 @@ onready var enemyList = {
 		"biome": b.mountain, "rewards": ["wing"], "locations": [l.day], "difficulty": 2, "sprite": "Bird"},
 	"MWolf": {"stats": [21, 32, 44, 58, 66], "specials": ["Frostfang"], "hardSpecials": ["Take Down"],
 		"biome": b.mountain, "rewards": ["claw"], "locations": [l.day], "difficulty": 3, "sprite": "Wolf"},
-	"MFlower": {"stats": [13, 20, 32, 44, 57], "specials": ["Growth"], "hardSpecials": ["Careful Strike"],
+	"MFlower": {"stats": [13, 20, 32, 44, 57], "passives": {"Thorns": 2}, "specials": ["Growth"], "hardSpecials": ["Careful Strike"],
 		"biome": b.mountain, "rewards": ["sap"], "locations": [l.night], "difficulty": 1, "sprite": "Flower"},
 	"MSnake": {"stats": [21, 32, 44, 58, 66], "passives": {"Venomous": 0}, "specials": ["Constrict"], "hardSpecials": ["Venoshock"],
 		"biome": b.mountain, "rewards": ["venom"], "locations": [l.night], "difficulty": 2, "sprite": "Snake"},
@@ -92,11 +92,11 @@ onready var enemyList = {
 	"BIG SNAKE": {"stats": [29, 38, 47, 56, 65], "passives": {"Venomous": 0}, "specials": ["Constrict", "Venoshock"],
 		"biome": b.none, "rewards": ["venom"], "locations": [l.special], "difficulty": 3, "sprite": "Snake", "elite": true},
 	"BIG GOBLIN": {"stats": [26, 33, 40, 47, 55], "passives": {"Dodgy": 2}, "specials": ["Shiv", "Meat Harvest", "Dark Dive"],
-		"biome": b.none, "rewards": ["garbage"], "locations": [l.special], "difficulty": 3, "sprite": "Snake", "elite": true},
+		"biome": b.none, "rewards": ["garbage"], "locations": [l.special], "difficulty": 3, "sprite": "Goblin", "elite": true},
 	"BIG ZOMBIE": {"stats": [37, 46, 55, 64, 73], "specials": ["Feeding Frenzy", "Mass Infection", "Dark Dive"],
-		"biome": b.none, "rewards": ["darkness"], "locations": [l.special], "difficulty": 3, "sprite": "Snake", "elite": true},
+		"biome": b.none, "rewards": ["darkness"], "locations": [l.special], "difficulty": 3, "sprite": "Zombie", "elite": true},
 	"BIG SKELETON": {"stats": [33, 44, 55, 66, 77], "specials": ["Submersion", "Frostfang", "Coldsteel", "Power Attack"],
-		"biome": b.none, "rewards": ["bone"], "locations": [l.special], "difficulty": 3, "sprite": "Snake", "elite": true},
+		"biome": b.none, "rewards": ["bone"], "locations": [l.special], "difficulty": 3, "sprite": "Skeleton", "elite": true},
 }
 
 func generate_encounter(rating, isDay, biome, dungeonEnemy = null, _seenElite = false): #dungeon will bring its own list of valid enemies

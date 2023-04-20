@@ -35,11 +35,11 @@ func add_rocks(i, invNode):
 		var boxCount = boxHolder.get_child_count()
 		invNode.dHolder.create_move(global.storedParty[i], i, boxCount) #boxCount becomes inaccurate due to adding a new box here, but that is ok
 		boxHolder.get_child(boxCount).trackerBar = boxHolder.get_child(2).trackerBar
-		for j in boxCount - 2:
+		for j in boxCount - 3:
 			invNode.swap_boxes(boxHolder.get_child(boxCount - j), boxHolder.get_child(boxCount - j - 1))
 	var rockName = "Snapshot" if !level[0] else "Snapshot+"
-	invNode.dHolder.box_move(boxHolder.get_child(2), rockName, true)
-	invNode.identify_product(boxHolder.get_child(2))
+	invNode.dHolder.box_move(boxHolder.get_child(3), rockName, true)
+	invNode.identify_product(boxHolder.get_child(3))
 
 func level_up(invNode, upgradeIndex):
 	for i in global.storedParty.size():

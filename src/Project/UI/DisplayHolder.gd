@@ -4,7 +4,7 @@ export (PackedScene) var UnitUI
 export (PackedScene) var PlayerProfile
 export (PackedScene) var PlayerMove
 
-const DEFAULTMOVES = 2
+const DEFAULTMOVES = 3
 const PLAYERXSTART = 572
 const PLAYERYSTART = 530
 const STARTXINCREMENT = 135
@@ -56,13 +56,26 @@ func create_move(unit, playerCount, posIndex):
 	moveBox.get_node("Button").shortcut.set_shortcut(hotkey)
 	moveBox.user = unit
 	unit.boxHolder.add_child(moveBox)
-	var xPos = moveBox.position.x
+	var drift = -23 if playerCount % 2 == 0 else 28
+	var xPos = moveBox.position.x + drift
 	if posIndex < DEFAULTMOVES: #set up attack and defend defaults
 		moveBox.get_node("Tooltip").position.y -= 30
 		moveBox.position.x = xPos - 100 if playerCount % 2 == 0 else xPos + 100
 		moveBox.get_node("ColorRect").rect_size.y = 40
 		move = moveBox.get_node("Name").text
 		if posIndex == 0:
+			moveBox.z_index = -3
+			if move == "X": move = "Take"
+			if playerCount >= 2: moveBox.position.y += PLAYERINCREMENT*.25
+			else: moveBox.position.y -= PLAYERINCREMENT*.25
+			moveBox.position.x = xPos - 20 if playerCount % 2 == 0 else xPos + 20
+			moveBox.get_node("ColorRect").margin_bottom = 20
+			moveBox.get_node("ReferenceRect").margin_bottom = 20
+			moveBox.get_node("Blackout").margin_bottom = 20
+			moveBox.get_node("Sprite").position.y = 0
+			#if playerCount % 2 == 0: moveBox.get_node("Name").margin_right = 0
+			#else: moveBox.get_node("Name").margin_left = 0
+		elif posIndex == 1:
 			if move == "X": move = "Attack"
 			moveBox.position.y -= PLAYERINCREMENT*.25
 		else:
@@ -76,7 +89,7 @@ func create_move(unit, playerCount, posIndex):
 		if unit.moves.size() < posIndex - DEFAULTMOVES + 1:
 			move = "X"
 		else: move = unit.moves[posIndex - DEFAULTMOVES]
-		moveBox.position.x = xPos - PLAYERINCREMENT*posIndex - 20 if playerCount % 2 == 0 else xPos + PLAYERINCREMENT*posIndex + 20
+		moveBox.position.x = xPos - PLAYERINCREMENT*(posIndex-1) - 20 if playerCount % 2 == 0 else xPos + PLAYERINCREMENT*(posIndex-1) + 20
 	if Moves.moveList[move].has("resVal"):
 		moveBox.resValue = Moves.moveList[move]["resVal"]
 	box_move(moveBox, move)
@@ -94,6 +107,7 @@ func get_scancode(topRow, posIndex):
 			4: return KEY_T
 			5: return KEY_Y
 			6: return KEY_U
+			7: return KEY_I
 	else:
 		match posIndex:
 			0: return KEY_Z
@@ -103,6 +117,7 @@ func get_scancode(topRow, posIndex):
 			4: return KEY_B
 			5: return KEY_N
 			6: return KEY_M
+			7: return KEY_COMMA
 
 func set_boxes(boxes):
 	var boxName

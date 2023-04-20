@@ -53,21 +53,23 @@ scale = Vector2( 0.172295, 0.172295 )
 texture = ExtResource( 3 )
 
 [node name="Name" type="Label" parent="."]
-margin_left = -38.2001
-margin_top = -19.1893
-margin_right = 1.79987
-margin_bottom = 4.81073
+margin_left = -38.0
+margin_top = -19.0
+margin_right = 38.0
+margin_bottom = 5.0
+grow_horizontal = 2
 custom_fonts/font = SubResource( 1 )
 text = "X"
+align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Info" type="Label" parent="."]
-margin_left = -38.2001
-margin_top = -3.1893
-margin_right = 1.79987
-margin_bottom = 20.8107
+margin_left = -38.0
+margin_top = -3.0
+margin_right = 36.0
+margin_bottom = 21.0
 custom_fonts/font = SubResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -122,7 +124,7 @@ __meta__ = {
 
 [node name="Tooltip" type="Node2D" parent="."]
 visible = false
-z_index = 5
+z_index = 20
 
 [node name="Background" type="ColorRect" parent="Tooltip"]
 margin_left = -120.0

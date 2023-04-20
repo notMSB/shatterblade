@@ -203,6 +203,7 @@ func setup_battle():
 	battleWindow = get_parent().get_node("Battle")
 	battleWindow.visible = false
 	battleWindow.set_map()
+	battleWindow.setup_virtue()
 
 func activate_inventory():
 	inventoryWindow.welcome_back()
@@ -368,7 +369,6 @@ func finish_event(checkName):
 
 func toggle_map_use(box):
 	if !(box.get_parent().name != "MoveBoxes" and box.resValue > 0 or inventoryWindow.tHolder.visible): #for moves that need to be equipped to be used, or when the trader is active
-		print("h")
 		selectedMapBox = box
 		selectedMapMove = box.moves[box.moveIndex]
 		for child in get_node("HolderHolder/DisplayHolder").get_children():
@@ -919,3 +919,8 @@ func _on_Undo_pressed():
 	inventoryWindow.add_item(undoList["first"])
 	inventoryWindow.add_item(undoList["second"])
 	hide_undo()
+
+func _on_BattleButton_pressed():
+	inventoryWindow.player_blackouts()
+	toggle_map_windows(false)
+	battleWindow.visible = true

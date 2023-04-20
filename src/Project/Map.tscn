@@ -279,4 +279,18 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="BattleButton" type="Button" parent="."]
+visible = false
+modulate = Color( 0.984314, 0.945098, 0, 1 )
+margin_left = 122.0
+margin_top = 390.0
+margin_right = 230.0
+margin_bottom = 458.0
+shortcut = SubResource( 6 )
+text = "BATTLE"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="Undo" to="." method="_on_Undo_pressed"]
+[connection signal="pressed" from="BattleButton" to="." method="_on_BattleButton_pressed"]

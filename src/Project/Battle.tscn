@@ -19,27 +19,27 @@ scancode = 32
 [sub_resource type="ShortCut" id=2]
 shortcut = SubResource( 1 )
 
-[sub_resource type="InputEventKey" id=6]
+[sub_resource type="InputEventKey" id=3]
 scancode = 80
 
-[sub_resource type="ShortCut" id=7]
-shortcut = SubResource( 6 )
+[sub_resource type="ShortCut" id=4]
+shortcut = SubResource( 3 )
 
-[sub_resource type="InputEventKey" id=8]
+[sub_resource type="InputEventKey" id=5]
 scancode = 76
 
-[sub_resource type="ShortCut" id=9]
-shortcut = SubResource( 8 )
+[sub_resource type="ShortCut" id=6]
+shortcut = SubResource( 5 )
 
-[sub_resource type="DynamicFont" id=3]
+[sub_resource type="DynamicFont" id=7]
 size = 20
 font_data = ExtResource( 4 )
 
-[sub_resource type="DynamicFont" id=4]
+[sub_resource type="DynamicFont" id=8]
 size = 20
 font_data = ExtResource( 4 )
 
-[sub_resource type="DynamicFont" id=5]
+[sub_resource type="DynamicFont" id=9]
 font_data = ExtResource( 4 )
 
 [node name="Battle" type="Node2D"]
@@ -103,9 +103,9 @@ mouse_filter = 1
 
 [node name="GoButton" type="Button" parent="."]
 modulate = Color( 0.984314, 0.945098, 0, 1 )
-margin_left = 586.0
+margin_left = 587.0
 margin_top = 390.0
-margin_right = 694.0
+margin_right = 695.0
 margin_bottom = 458.0
 shortcut = SubResource( 2 )
 text = "END TURN"
@@ -115,24 +115,48 @@ __meta__ = {
 
 [node name="Preview" type="Button" parent="."]
 modulate = Color( 0.984314, 0.945098, 0, 1 )
-margin_left = 290.0
+margin_left = 355.0
 margin_top = 390.0
-margin_right = 398.0
+margin_right = 463.0
 margin_bottom = 458.0
-shortcut = SubResource( 7 )
+shortcut = SubResource( 4 )
 text = "PREVIEW ON"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Map" type="Button" parent="."]
+modulate = Color( 0.984314, 0.945098, 0, 1 )
+margin_left = 125.0
+margin_top = 390.0
+margin_right = 233.0
+margin_bottom = 458.0
+shortcut = SubResource( 4 )
+text = "MAP"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Lock" type="Button" parent="."]
 modulate = Color( 0.984314, 0.945098, 0, 1 )
-margin_left = 882.0
+margin_left = 817.0
 margin_top = 390.0
-margin_right = 990.0
+margin_right = 925.0
 margin_bottom = 458.0
-shortcut = SubResource( 9 )
+shortcut = SubResource( 6 )
 text = "LOCK LEVEL"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Pray" type="Button" parent="."]
+modulate = Color( 0.984314, 0.945098, 0, 1 )
+margin_left = 1048.0
+margin_top = 390.0
+margin_right = 1156.0
+margin_bottom = 458.0
+shortcut = SubResource( 6 )
+text = "PRAY"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -165,7 +189,7 @@ margin_left = 2.51984
 margin_top = 35.744
 margin_right = 44.5198
 margin_bottom = 333.991
-custom_fonts/font = SubResource( 3 )
+custom_fonts/font = SubResource( 7 )
 text = "^"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -176,7 +200,7 @@ visible = false
 margin_top = 455.0
 margin_right = 1277.0
 margin_bottom = 560.0
-custom_fonts/font = SubResource( 4 )
+custom_fonts/font = SubResource( 8 )
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -208,7 +232,7 @@ margin_left = -0.00012207
 margin_top = -16.6527
 margin_right = 94.9999
 margin_bottom = 3.34729
-custom_fonts/font = SubResource( 5 )
+custom_fonts/font = SubResource( 9 )
 text = "Name"
 align = 1
 __meta__ = {
@@ -220,7 +244,7 @@ margin_left = -60.5005
 margin_top = 99.4008
 margin_right = 167.5
 margin_bottom = 119.401
-custom_fonts/font = SubResource( 5 )
+custom_fonts/font = SubResource( 9 )
 text = "MHP: X   P: X   S: X"
 align = 1
 __meta__ = {
@@ -231,7 +255,11 @@ __meta__ = {
 
 [node name="PreviewUnits" type="Node2D" parent="."]
 
+[node name="Virtue" parent="." instance=ExtResource( 10 )]
+
 [connection signal="pressed" from="GoButton" to="." method="go_button_press"]
 [connection signal="pressed" from="Preview" to="." method="_on_Preview_pressed"]
+[connection signal="pressed" from="Map" to="." method="_on_Map_pressed"]
 [connection signal="pressed" from="Lock" to="." method="_on_Lock_pressed"]
+[connection signal="pressed" from="Pray" to="." method="_on_Pray_pressed"]
 [connection signal="pressed" from="Peek" to="." method="_on_Peek_pressed"]

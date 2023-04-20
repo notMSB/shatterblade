@@ -7,8 +7,8 @@ onready var Boons = get_node("../Data/Boons")
 onready var Enemies = get_node("../Data/Enemies")
 onready var battleWindow = get_node("../Battle")
 
-const FIRSTMOVEBOX = 2 # 0/1 used for relics
-const LASTMOVEBOX = 6
+const FIRSTMOVEBOX = 3 # 0/1/2 used for relics
+const LASTMOVEBOX = 7
 const SCALESINDEX = 1
 const OFFSET = 2
 const DEFAULTOPTION = "none"
@@ -85,9 +85,10 @@ func set_box(boxName):
 func choose_type(display):
 	var i = 0
 	for box in display.get_node("MoveBoxes").get_children():
-		if i == 0: $HolderHolder/DisplayHolder.box_move(box, "Attack")
-		elif i == 1: $HolderHolder/DisplayHolder.box_move(box, "Defend")
-		elif i == 2 and display.get_node("MoveBoxes").get_child(LASTMOVEBOX).visible == true: box_scales_move(box)
+		if i == 0: $HolderHolder/DisplayHolder.box_move(box, "Take")
+		elif i == 1: $HolderHolder/DisplayHolder.box_move(box, "Attack")
+		elif i == 2: $HolderHolder/DisplayHolder.box_move(box, "Defend")
+		elif i == 3 and display.get_node("MoveBoxes").get_child(LASTMOVEBOX).visible == true: box_scales_move(box)
 		else: $HolderHolder/DisplayHolder.box_move(box, "X")
 		box.get_node("ColorRect").color = Color(.53,.3,.3,1) #Default
 		i+=1
@@ -96,7 +97,7 @@ func choose_type(display):
 func box_scales_move(box, moveName = SCALESMOVES[0]):
 	for i in playerBoons.size():
 		if playerBoons[i] == SCALESINDEX:
-			if boonLevels[i] == 0: $HolderHolder/DisplayHolder.box_move(box, moveName)
+			if boonLevels[i][0] == false: $HolderHolder/DisplayHolder.box_move(box, moveName)
 			else: $HolderHolder/DisplayHolder.box_move(box, str(moveName, "+"))
 
 func toggle_boon_choice(index, disabled:bool):

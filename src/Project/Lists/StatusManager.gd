@@ -140,6 +140,7 @@ func find_status(unit, status, returnList = false):
 			return cond
 
 func evaluate_statuses(unit, type, args = []):
+	if unit.virtue: return
 	var info = 0 if args.empty() else args[0] #has to return a number even if check for on hit activation comes up empty
 	if !unit.statuses[type].empty():
 		var list = unit.statuses[type]
@@ -199,7 +200,7 @@ func percentage_damage(unit, value, damage):
 	return unit.maxHealth * damage
 
 func value_damage(unit, value, multiplier = 1):
-	unit.take_damage(value * multiplier)
+	unit.take_damage(value * multiplier, true)
 	return unit.currentHealth
 
 func counter_attack(target, value):

@@ -290,13 +290,13 @@ func inventory_blackouts(toggle):
 	for box in iHolder.get_children():
 		box.get_node("Blackout").visible = toggle
 
-func player_blackouts(checkBox = null):
+func player_blackouts(checkBox = null, toggle = false):
 	for display in dHolder.get_children():
 		for box in display.get_node("MoveBoxes").get_children():
 			if checkBox and !player_inv_check(box, checkBox, false):
 				box.get_node("Blackout").visible = true
 			else:
-				box.get_node("Blackout").visible = false
+				box.get_node("Blackout").visible = toggle
 
 func check_swap(selectedBox):
 	if !otherSelection:
@@ -440,7 +440,9 @@ func restore_basics(boxes): #puts attack/defend back on non-relic boxes and remo
 		if box.get_parent().name == "MoveBoxes": #player box
 			if (box.get_index() <= 1 #X or attack/defend
 			and (moveInfo["type"] == Moves.moveType.basic or moveInfo["slot"] == Moves.equipType.any)): 
-				if box.get_index() == 0: #attack
+				if box.get_index() == 0:
+					dHolder.box_move(box, "Take")
+				elif box.get_index() == 1: #attack
 					dHolder.box_move(box, "Attack")
 				else: #defend
 					dHolder.box_move(box, "Defend")
@@ -652,7 +654,9 @@ func done():
 		for i in global.storedParty.size():
 			dHolder.manage_and_color_boxes(global.storedParty[i])
 		toggle_trade_visibility(false)
-		get_node("../Map").check_delay()
+		reset_and_update_itemDict()
+		#get_node("../Map").check_delay()
+		get_node("../Map").set_quick_panels()
 
 func reset_trade():
 	return get_tree().reload_current_scene()

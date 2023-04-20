@@ -14,9 +14,11 @@ enum statBoosts {health, resource}
 
 func _ready():
 	moveList = {
+	"Take": {"slot": equipType.relic, "type": moveType.basic, "uses": 0, "unusable": true, "description": "Does nothing, use as a slot for Relics."},
 	"Attack": {"target": targetType.enemy, "damage": 4, "resVal": 0, "slot": equipType.relic, "type": moveType.basic},
 	"Defend": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 6], "description": "Shields 6", "slot": equipType.relic, "type": moveType.basic},
 	
+	"Take+": {"slot": equipType.relic, "type": moveType.basic, "uses": 0, "unusable": true, "description": "Does nothing+, use as a slot for Relics."},
 	"Attack+": {"target": targetType.enemy, "damage": 8, "resVal": 0, "slot": equipType.relic, "type": moveType.none, "price": 0, "morph": ["Attack+", "Defend+", "Power Glove"]},
 	"Defend+": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", 12], "description": "Adds 12 shield", "slot": equipType.relic, "type": moveType.none, "price": 0, "morph": ["Attack+", "Defend+", "Power Glove"]},
 	
@@ -50,8 +52,8 @@ func _ready():
 	"Spit Shine": {"target": targetType.ally, "resVal": 5, "healing": 6, "slot": equipType.gear, "type": moveType.special, "quick": true, "status": "Poison", "value": 5},
 	"Bulwark": {"target": targetType.ally, "resVal": 15, "slot": equipType.gear, "type": moveType.special, "effect": funcref(self, "change_attribute"), "args": ["moveTarget", "shield", 15], "charge": true, "cycle": ["Quick Charge"], "description": "Shield an ally 15."},
 	
-	"Charge": {"target": targetType.none, "resVal": 10, "cycle": true, "slot": equipType.none, "type": moveType.special},
-	"Quick Charge": {"target": targetType.none, "resVal": 20, "cycle": true, "slot": equipType.none, "quick": true, "type": moveType.special},
+	"Charge": {"target": targetType.none, "resVal": 10, "cycle": [], "slot": equipType.none, "type": moveType.special},
+	"Quick Charge": {"target": targetType.none, "resVal": 20, "cycle": [], "slot": equipType.none, "quick": true, "type": moveType.special},
 	
 	"Constrict": {"target": targetType.enemy, "damage": 5, "resVal": 15, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Stun", funcref(self, "is_unit_poisoned")], "description": "Stuns target if they are poisoned", "slot": equipType.gear, "type": moveType.magic},
 	"Frostfang": {"target": targetType.enemy, "damage": 5, "resVal": 20, "status": "Chill", "value": 5, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", .5, true], "description": "Multiplies target chill by 1.5 after the hit", "slot": equipType.gear, "type": moveType.magic},
@@ -99,8 +101,8 @@ func _ready():
 	"Firedance": {"target": targetType.enemy, "resVal": 2, "slot": equipType.gear, "type": moveType.trick, "quick": true, "status": "Burn", "value": 5, "effect": funcref(self, "give_status"), "args": ["moveUser", "Burn", 5], "description": "Burns both the user and the target."},
 	"Wildfire": {"target": targetType.enemy, "resVal": 4, "status": "Burn", "value": 4, "hits": 9, "barrage": true, "bounceEveryone": true, "slot": equipType.gear, "type": moveType.trick, "description": "Hits bounce to EVERYONE."},
 	
-	"Reload": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "slot": equipType.none, "type": moveType.trick},
-	"Catch": {"target": targetType.none, "resVal": 2, "cycle": true, "quick": true, "slot": equipType.none, "type": moveType.trick, "turnlimit": 1, "description": "Use it or lose it."},
+	"Reload": {"target": targetType.none, "resVal": 2, "cycle": [], "quick": true, "slot": equipType.none, "type": moveType.trick},
+	"Catch": {"target": targetType.none, "resVal": 2, "cycle": [], "quick": true, "slot": equipType.none, "type": moveType.trick, "turnlimit": 1, "description": "Use it or lose it."},
 	
 	"Speed Potion": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "give_status"), "args": ["moveUser", "Dodgy", funcref(self, "get_enemy_targeters")], "description": "Gives 1 dodge for every enemy targeting user", "slot": equipType.gear, "type": moveType.item, "quick": true},
 	"Throwing Knife": {"target": targetType.enemy, "damage": 4, "resVal": 0, "slot": equipType.gear, "type": moveType.item, "quick": true},
@@ -126,15 +128,15 @@ func _ready():
 	"Coin": {"slot": equipType.none, "type": moveType.none, "unusable": true, "unequippable": true ,"price": 1},
 	
 	"Bracers": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "strength": 1, "price": 5, "description": "+1 strength"},
-	"Cape": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "passive": ["Dodgy", 1], "price": 5},
+	"Cape": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "passive": ["Dodgy", 1], "price": 5, "description": "Gives 1 Dodge"},
 	"Cloak of Visibility": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "passive": ["Provoke", 0], "description": "Enemies are more likely to target the wearer"},
 	"Buckler": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "passive": ["Buckler", 0], "description": "Every move used shields the wearer for 2."},
-	"Resistor": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "passive": ["Resist", 1]},
+	"Resistor": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "passive": ["Resist", 1], "description": "Gives 1 Resist"},
 	"Heavy Plate": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "passive": ["Stun", 1], "strength": 3, "description": "+3 strength, but start battle stunned"},
 	"Medkit": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.common, "unusable": true, "healing": 3, "price": 5, "description": "Heal 3 upon entering a battle."},
 	
-	"Power Glove": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.uncommon, "morph": ["Attack+", "Defend+"], "description": "Upgrades the basic moveslot it's placed in"},
-	"Silver": {"slot": equipType.none, "type": moveType.none, "unusable": true, "unequippable": true ,"price": 10, "obtainable": true, "rarity": rarities.uncommon},
+	"Power Glove": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.uncommon, "morph": ["Take+", "Attack+", "Defend+"], "description": "Upgrades the basic moveslot it's placed in"},
+	"Silver": {"slot": equipType.none, "type": moveType.none, "unusable": true, "unequippable": true ,"price": 10, "obtainable": true, "rarity": rarities.uncommon, "description": "Meant to be sold at the trader."},
 	"Health Seed": {"slot": equipType.none, "type": moveType.none, "unusable": true, "resVal": 0, "unequippable": true, "price": 6, "mapUsable": true, "statBoost": statBoosts.health, "uses": 1, "obtainable": true, "rarity": rarities.uncommon, "description": "Raises max health of unit by 5."},
 	"Resource Seed": {"slot": equipType.none, "type": moveType.none, "unusable": true, "resVal": 0, "unequippable": true, "price": 6, "mapUsable": true, "statBoost": statBoosts.resource, "uses": 1, "obtainable": true, "rarity": rarities.uncommon, "description": "Raises resource capacity of unit."},
 	
@@ -150,9 +152,13 @@ func _ready():
 	"Business Card": {"slot": equipType.relic, "type": moveType.none, "rarity": rarities.rare, "unusable": true, "passive": ["Passive Income", 0], "description": "A unit that survives battle with this equipped generates a Coin."},
 	
 	"Crown": {"slot": equipType.relic, "type": moveType.none, "cursed": true, "resVal": 0, "channel": true, "damage": 12, "target": targetType.enemy, "uselimit": 1, "price": 0, "description": "definitely not cursed"},
-	"Crown+": {"slot": equipType.relic, "type": moveType.none, "cursed": true, "resVal": 0, "channel": true, "damage": 12, "target": targetType.enemyTargets, "uselimit": 1, "price": 0},
+	"Crown+": {"slot": equipType.relic, "type": moveType.none, "cursed": true, "resVal": 0, "channel": true, "damage": 12, "target": targetType.enemyTargets, "uselimit": 1, "price": 0, "description": "yeah it's still cursed"},
 	
-	"X": {"slot": equipType.any, "type": moveType.none, "resVal": 999, "uses": 0} #temp
+	"X": {"slot": equipType.any, "type": moveType.none, "resVal": 999, "uses": 0, "unusable": true},
+	
+	"Justice": {"target": targetType.enemies, "damage": 10, "resVal": 0, "type": moveType.none},
+	"Strength": {"target": targetType.allies, "resVal": 0, "type": moveType.none, "effect": funcref(self, "change_attribute"), "args": ["moveTarget", "shield", 10], "description": "Shields all allies 10."},
+	"Temperance": {"target": targetType.enemies, "status": "Stun", "value": 1, "resVal": 0, "type": moveType.none},
 }
 
 func get_classname(type):

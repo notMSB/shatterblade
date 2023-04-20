@@ -38,6 +38,10 @@ var hits
 var hitBonus = 0
 var logIndex = 0
 
+var virtueCost = 5
+var virtueUsed = false
+var virtueMove = ""
+
 var bossFight = false
 var gameOver = false
 var battleDone = true
@@ -65,6 +69,13 @@ func _ready(): #Generate units and add to turn order
 	#if !get_parent().mapMode: battleDone = false
 	targetType = Moves.targetType
 	randomize() #funny rng
+
+func setup_virtue():
+	$Virtue.setup_virtue()
+	match Boons.chosen:
+		Boons.v.j: virtueMove = "Justice"
+		Boons.v.s: virtueMove = "Strength"
+		Boons.v.t: virtueMove = "Temperance"
 
 func check_undrag(box): #when the mouse leaves a box
 	if box == usedMoveBox: undrag = box
@@ -151,6 +162,8 @@ func toggle_blind(toggle, checkPreview = true):
 
 func welcome_back(newOpponents = null, currentArea = 0): #reusing an existing battle scene for a new battle
 	if !Map: $Lock.visible = false
+	virtueUsed = false
+	$Pray.disabled = check_prayer()
 	$BattleUI.toggle_trackers(true)
 	turnCount = 0
 	$BattleUI.enemyCount = 0
@@ -200,6 +213,10 @@ func get_partyHealth():
 	for unit in global.storedParty:
 		total += unit.currentHealth
 	return total
+
+func check_prayer():
+	if Boons.favor < virtueCost or virtueUsed: return true
+	else: return false
 
 func evaluate_aura(activationTiming):
 	if !Map: return 0
@@ -274,10 +291,7 @@ func play_turn(notFirstTurn = true):
 		logIndex = 0
 		if autoPreview: yield(preview_turn(), "completed")
 		lockPreview = false
-		$GoButton.visible = true
-		$Lock.disabled = false
-		$Preview.disabled = false
-		$Peek.disabled = false
+		disable_battle_buttons(false)
 		yield(self, "turn_taken")
 		#print("might be able to eval status here")
 	if currentUnit.isPlayer: #skip along
@@ -414,18 +428,28 @@ func target_chosen(index = null):
 	log_turn()
 	if autoPreview and !lockPreview: yield(preview_turn(), "completed")
 
+func disable_battle_buttons(toggle):
+	print(virtueUsed)
+	$GoButton.disabled = toggle
+	$Preview.disabled = toggle
+	$Lock.disabled = toggle
+	$Pray.disabled = true if toggle else check_prayer()
+	$Map.disabled = toggle
+	$Peek.disabled = toggle
+
 func go_button_press():
 	$BattleUI.toggle_buttons(false)
 	$BattleUI.toggle_movebox_buttons(false)
 	$BattleUI.clear_menus()
-	$GoButton.visible = false
-	$Preview.disabled = true
-	$Lock.disabled = true
-	$Peek.disabled = true
+	disable_battle_buttons(true)
 	remove_blind(false)
 	for moveData in executionOrder: #box, move, user, target
-		moveName = moveData[e.box].moves[moveData[e.box].moveIndex]
-		usedMoveBox = moveData[e.box]
+		if moveData[e.user].virtue:
+			moveName = virtueMove
+			usedMoveBox = null
+		else: 
+			moveName = moveData[e.box].moves[moveData[e.box].moveIndex]
+			usedMoveBox = moveData[e.box]
 		chosenMove = moveData[e.move]
 		moveUser = moveData[e.user]
 		moveTarget = moveData[e.target]
@@ -444,6 +468,7 @@ func focus_log():
 
 func cut_from_order(box):
 	box.change_rect_color(Color(.5,.1,.5,1)) #set any already selected box back to default color
+	if box.moveIndex == 0: box.get_node("Info").text = ""
 	var userCommitted = false
 	var foundAction
 	for action in executionOrder: #box, move, user, target
@@ -491,7 +516,8 @@ func create_preview_units():
 func convert_unit(target):
 	if !is_instance_valid(target): return target
 	if target == null: return target
-	elif typeof(target) == TYPE_STRING: return target
+	if typeof(target) == TYPE_STRING: return target
+	if target.virtue: return target
 	else: return $PreviewUnits.get_child(target.get_index())
 
 func log_turn():
@@ -504,7 +530,8 @@ func log_turn():
 	for i in executionOrder.size(): #box, move, user, target
 		var entry = LogEntry.instance()
 		$BattleLog/Scroll/Control.add_child(entry)
-		entry.assemble(executionOrder[i][e.user], executionOrder[i][e.target], executionOrder[i][e.box].moves[e.box])
+		if executionOrder[i][e.user].virtue: entry.assemble(executionOrder[i][e.user], null, virtueMove)
+		else: entry.assemble(executionOrder[i][e.user], executionOrder[i][e.target], executionOrder[i][e.box].moves[executionOrder[i][e.box].moveIndex], executionOrder[i][e.box])
 		entry.position.x = logIncrement * totalLogs
 		totalLogs += 1
 	
@@ -541,8 +568,12 @@ func preview_turn():
 				2: fakeOrder[i].append(convert_unit(executionOrder[i][j]))
 				3: fakeOrder[i].append(convert_unit(executionOrder[i][j]))
 	for moveData in fakeOrder: #box, move, user, target
-		moveName = moveData[e.box].moves[moveData[e.box].moveIndex]
-		usedMoveBox = moveData[e.box]
+		if moveData[e.user].virtue:
+			moveName = virtueMove
+			usedMoveBox = null
+		else: 
+			moveName = moveData[e.box].moves[moveData[e.box].moveIndex]
+			usedMoveBox = moveData[e.box]
 		chosenMove = moveData[e.move]
 		moveUser = moveData[e.user]
 		moveTarget = moveData[e.target]
@@ -563,6 +594,7 @@ func preview_turn():
 		if unit.isPlayer and !previewBattleDone:
 			StatusManager.evaluate_statuses(previewUnit, StatusManager.statusActivations.beforeTurn)
 		unit.ui.position_preview_rect(previewUnit.currentHealth, previewUnit)
+	usedMoveBox = null
 	yield(get_tree().create_timer(.5), "timeout")
 
 func execute_move(real = true):
@@ -653,7 +685,7 @@ func execute_move(real = true):
 				damageCalc = baseDamage
 				tempDamage = StatusManager.evaluate_statuses(target, StatusManager.statusActivations.gettingHit, [damageCalc]) 
 				if tempDamage != null: damageCalc = tempDamage
-				damageCalc = target.take_damage(damageCalc, moveName) #Returns the amount of damage dealt (for recoil reasons). Multihit moves recalculate damage.
+				damageCalc = target.take_damage(damageCalc, false, moveName) #Returns the amount of damage dealt (for recoil reasons). Multihit moves recalculate damage.
 				StatusManager.evaluate_statuses(target, StatusManager.statusActivations.afterHit, [damageCalc]) 
 				if damageCalc == null: damageCalc = 0 #nulls out sometimes when battle won
 				if damageCalc > 0: StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.successfulHit, [damageCalc])
@@ -815,3 +847,24 @@ func _on_Lock_pressed():
 		Map.get_node("XPBar").modulate = Color(1,.2,.2,1)
 	else: Map.get_node("XPBar").modulate = Color(1,1,1,1)
 	$Lock.text = textSet + "LOCK LEVEL"
+
+func _on_Map_pressed():
+	Map.inventoryWindow.player_blackouts(null, true)
+	Map.get_node("BattleButton").visible = true
+	Map.toggle_map_windows(true)
+	visible = false
+
+func _on_Pray_pressed():
+	virtueUsed = !virtueUsed
+	if virtueUsed:
+		Boons.grant_favor(-1 * virtueCost)
+		executionOrder.append([null, Moves.moveList[virtueMove], $Virtue, Moves.moveList[virtueMove]["target"]])
+	else:
+		Boons.grant_favor(virtueCost)
+		for i in executionOrder.size():
+			if executionOrder[i][e.user].virtue: 
+				executionOrder.remove(i)
+				break
+	log_turn()
+	if autoPreview and !lockPreview: yield(preview_turn(), "completed")
+	

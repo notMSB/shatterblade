@@ -4,6 +4,7 @@ export (PackedScene) var UICircle
 
 onready var Battle = get_node("../../")
 
+var virtue = false
 var isPlayer
 var maxHealth
 var identity = ""
@@ -52,9 +53,10 @@ func make_stats(hp):
 	maxHealth = hp
 	currentHealth = maxHealth
 
-func take_damage(damageVal, moveName = ""):
+func take_damage(damageVal, pierce = false, moveName = ""):
+	if virtue: return
 	if currentHealth > 0: #Can't be hitting someone that's dead
-		if shield > 0:
+		if shield > 0 and !pierce:
 			if shield - damageVal > 0:
 				shield -= damageVal
 				damageVal = 0
@@ -73,9 +75,10 @@ func take_damage(damageVal, moveName = ""):
 				Battle.evaluate_completion(self)
 			else:
 				Battle.evaluate_game_over()
-				if real: for box in boxHolder.get_children():
-					if box.currentUses > 0:
-						box.reduce_uses(1)
+				if real: 
+					for i in boxHolder.get_child_count():
+						if i > 2 and boxHolder.get_child[i].currentUses > 0:
+							boxHolder.get_child[i].reduce_uses(1)
 		return damageVal
 
 func heal(healVal):
@@ -126,4 +129,9 @@ func update_status_ui():
 				statusUI.set_tooltip_text(status["tooltip"], true)
 				statusUI.get_node("Visuals/Sprite").modulate = status["color"]
 				i+=1
-	
+
+func setup_virtue():
+	virtue = true
+	battleName = "Virtue"
+	maxHealth = 100
+	currentHealth = 100

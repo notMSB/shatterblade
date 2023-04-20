@@ -114,7 +114,7 @@ func set_trackers(display, boxes, classType):
 	
 	for box in boxes.get_children():
 		if box.visible:
-			if box.get_index() <= 1: continue #skip relic slots
+			if box.get_index() <= 2: continue #skip relic slots
 			boxCount.append(box)
 			if firstMargin:
 				lastMargin = box.position.x

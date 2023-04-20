@@ -121,6 +121,7 @@ func _on_mouse_exited():
 	if boxModeScene.name == "Inventory" or boxModeScene.name == "Battle": boxModeScene.check_undrag(self)
 
 func _on_Button_pressed():
+	if $Blackout.visible: return
 	$Tooltip.visible = false
 	boxModeScene = set_mode_scene()
 	#print(boxModeScene)
