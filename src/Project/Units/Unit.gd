@@ -77,8 +77,8 @@ func take_damage(damageVal, pierce = false, moveName = ""):
 				Battle.evaluate_game_over()
 				if real: 
 					for i in boxHolder.get_child_count():
-						if i > 2 and boxHolder.get_child[i].currentUses > 0:
-							boxHolder.get_child[i].reduce_uses(1)
+						if i > 2 and boxHolder.get_child(i).currentUses > 0:
+							boxHolder.get_child(i).reduce_uses(1)
 		return damageVal
 
 func heal(healVal):

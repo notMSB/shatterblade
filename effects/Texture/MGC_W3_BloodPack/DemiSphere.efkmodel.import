@@ -1,0 +1,14 @@
+[remap]
+
+importer="effekseer.resource"
+type="Resource"
+path="res://.import/DemiSphere.efkmodel-dfc3e46ee903123fa16705687a91d089.res"
+
+[deps]
+
+source_file="res://effects/Texture/MGC_W3_BloodPack/DemiSphere.efkmodel"
+dest_files=[ "res://.import/DemiSphere.efkmodel-dfc3e46ee903123fa16705687a91d089.res" ]
+
+[params]
+
+compress=true

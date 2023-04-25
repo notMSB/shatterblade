@@ -1,0 +1,14 @@
+[remap]
+
+importer="effekseer.resource"
+type="Resource"
+path="res://.import/Sphere.efkmodel-da75f560b5b7a6f399784717bb69f3d2.res"
+
+[deps]
+
+source_file="res://effects/Texture/MGC_W3_BloodPack/Sphere.efkmodel"
+dest_files=[ "res://.import/Sphere.efkmodel-da75f560b5b7a6f399784717bb69f3d2.res" ]
+
+[params]
+
+compress=true

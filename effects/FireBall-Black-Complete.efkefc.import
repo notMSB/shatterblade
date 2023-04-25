@@ -1,0 +1,16 @@
+[remap]
+
+importer="effekseer.effect"
+type="Resource"
+path="res://.import/FireBall-Black-Complete.efkefc-5115bd516809cd72d0e97bc5218ae2c7.res"
+
+[deps]
+
+source_file="res://effects/FireBall-Black-Complete.efkefc"
+dest_files=[ "res://.import/FireBall-Black-Complete.efkefc-5115bd516809cd72d0e97bc5218ae2c7.res" ]
+
+[params]
+
+scale=1.0
+data_type=0
+compress=true

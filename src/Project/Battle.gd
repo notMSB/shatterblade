@@ -9,8 +9,12 @@ onready var StatusManager = get_node("/root/Game/Data/StatusManager")
 onready var Enemies = get_node("/root/Game/Data/Enemies")
 onready var Formations = get_node("/root/Game/Data/Formations")
 onready var Boons = get_node("/root/Game/Data/Boons")
+onready var Animations = get_node("/root/Game/Data/Animations")
 
 var Map
+
+var useAnimations = true
+enum scope {single, players, enemies, all}
 
 var enemyNum = 0
 var deadEnemies = 0
@@ -429,7 +433,6 @@ func target_chosen(index = null):
 	if autoPreview and !lockPreview: yield(preview_turn(), "completed")
 
 func disable_battle_buttons(toggle):
-	print(virtueUsed)
 	$GoButton.disabled = toggle
 	$Preview.disabled = toggle
 	$Lock.disabled = toggle
@@ -604,21 +607,27 @@ func execute_move(real = true):
 	hitBonus = 0 + evaluate_aura(a.hitBonus)
 	damageBuff = 0 + evaluate_aura(a.damageBuff)
 	var targets = []
+	var animScope
 	if chosenMove["target"] == targetType.enemies:
 		targets = get_team(!moveUser.isPlayer, true, real)
+		animScope = scope.allies if !moveUser.isPlayer else scope.enemies
 	elif chosenMove["target"] == targetType.everyone:
 		targets = get_team(moveUser.isPlayer, true, real)
 		targets.append_array(get_team(!moveUser.isPlayer, true, real))
+		animScope = scope.all
 	elif chosenMove["target"] == targetType.enemyTargets:
 		var tempTargets = get_team(!moveUser.isPlayer, true, real)
+		animScope = scope.allies if !moveUser.isPlayer else scope.enemies
 		for unit in tempTargets:
 			if typeof(unit.storedTarget) == typeof(moveTarget.storedTarget):
 				if unit.storedTarget == moveTarget.storedTarget:
 					targets.append(unit)
 	elif chosenMove["target"] == targetType.allies:
 		targets = get_team(moveUser.isPlayer, true, real)
+		animScope = scope.allies if moveUser.isPlayer else scope.enemies
 	else: #single target
 		targets = [moveTarget] 
+		animScope = scope.single
 		if moveTarget.currentHealth <= 0:
 			yield(get_tree().create_timer(timeoutVal), "timeout")
 			return
@@ -673,6 +682,22 @@ func execute_move(real = true):
 				if bounceTarget != null: targets = [bounceTarget]
 				else: break
 		elif targets.size() == 1 and targets[0].currentHealth <= 0: break
+		if real and useAnimations and !battleDone:
+			var angle = 90
+			match animScope:
+				scope.single:
+					$EffekseerEmitter2D.position = targets[0].ui.position
+					#print(rad2deg(moveUser.ui.position.angle_to(targets[0].ui.position)))
+					if moveUser.isPlayer: angle = -4*abs(rad2deg(moveUser.ui.position.angle_to(targets[0].ui.position)))
+					#angle = 4*angle if moveUser.isPlayer else -4*angle
+				scope.players: $EffekseerEmitter2D.position = Vector2(650, 600)
+				scope.enemies: $EffekseerEmitter2D.position = Vector2(650, 400)
+				scope.all: $EffekseerEmitter2D.position = Vector2(650, 500)
+			var animationName = "Slash"
+			if chosenMove.has("animation"): animationName = chosenMove["animation"]
+			Animations.set_params($EffekseerEmitter2D, animationName, angle)
+			$EffekseerEmitter2D.play()
+			yield($EffekseerEmitter2D, "finished")
 		var baseDamage = 0
 		var tempDamage
 		if chosenMove.has("damage"): #base damage calculaed outside the target loop to account for burn on multitarget moves

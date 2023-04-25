@@ -118,8 +118,8 @@ __meta__ = {
 visible = false
 margin_right = 133.0
 margin_bottom = 24.0
-custom_fonts/font = SubResource( 4 )
 custom_colors/font_color = Color( 0, 0.976471, 1, 1 )
+custom_fonts/font = SubResource( 4 )
 align = 1
 valign = 1
 __meta__ = {
@@ -152,8 +152,8 @@ margin_left = 35.0
 margin_top = -23.0
 margin_right = 54.0
 margin_bottom = 1.0
-custom_fonts/font = SubResource( 1 )
 custom_colors/font_color = Color( 0.847059, 0.870588, 0.133333, 1 )
+custom_fonts/font = SubResource( 1 )
 align = 2
 valign = 1
 __meta__ = {
@@ -178,9 +178,6 @@ margin_top = 26.0
 margin_right = 60.0
 margin_bottom = 48.0
 mouse_filter = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Trackers" type="Node2D" parent="."]
 

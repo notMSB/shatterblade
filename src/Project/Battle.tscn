@@ -1,6 +1,7 @@
-[gd_scene load_steps=22 format=2]
+[gd_scene load_steps=23 format=2]
 
 [ext_resource path="res://src/Project/UI/LogEntry.tscn" type="PackedScene" id=1]
+[ext_resource path="res://addons/effekseer/src/EffekseerEmitter2D.gdns" type="Script" id=2]
 [ext_resource path="res://src/Project/UI/DisplayHolder.gd" type="Script" id=3]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=4]
 [ext_resource path="res://src/Project/UI/UnitUI.tscn" type="PackedScene" id=8]
@@ -256,6 +257,10 @@ __meta__ = {
 [node name="PreviewUnits" type="Node2D" parent="."]
 
 [node name="Virtue" parent="." instance=ExtResource( 10 )]
+
+[node name="EffekseerEmitter2D" type="Node2D" parent="."]
+script = ExtResource( 2 )
+autoplay = false
 
 [connection signal="pressed" from="GoButton" to="." method="go_button_press"]
 [connection signal="pressed" from="Preview" to="." method="_on_Preview_pressed"]

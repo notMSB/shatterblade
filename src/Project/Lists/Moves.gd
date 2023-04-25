@@ -57,12 +57,12 @@ func _ready():
 	
 	"Constrict": {"target": targetType.enemy, "damage": 5, "resVal": 15, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Stun", funcref(self, "is_unit_poisoned")], "description": "Stuns target if they are poisoned", "slot": equipType.gear, "type": moveType.magic},
 	"Frostfang": {"target": targetType.enemy, "damage": 5, "resVal": 20, "status": "Chill", "value": 5, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Chill", .5, true], "description": "Multiplies target chill by 1.5 after the hit", "slot": equipType.gear, "type": moveType.magic},
-	"Plague": {"target": targetType.enemies, "damaging": true, "resVal": 30, "status": "Poison", "value": 5, "slot": equipType.gear, "type": moveType.magic, "uses": 6},
+	"Plague": {"target": targetType.enemies, "damaging": true, "resVal": 30, "status": "Poison", "value": 5, "slot": equipType.gear, "type": moveType.magic, "uses": 6, "animation": "Poison"},
 	"Venoshock": {"target": targetType.enemy, "damaging": true, "resVal": 15, "status": "Poison", "value": 6, "effect": funcref(self, "change_attribute"), "args": ["moveUser", "shield", funcref(self, "get_unit_poison")],"description": "Shield 1 for every poison that enemy has.", "slot": equipType.gear, "type": moveType.magic},
 	"Belch": {"target": targetType.enemy, "resVal": 10, "quick": true, "effect": funcref(self, "give_status"), "args": ["moveTarget", "Poison", funcref(self, "get_unit_poison")], "description": "Poisons enemy as much as the user is poisoned", "slot": equipType.gear, "type": moveType.magic},
 	"Mass Infection": {"target": targetType.everyone, "damaging": true, "resVal": 30, "status": "Poison", "value": 10, "slot": equipType.gear, "type": moveType.magic, "uses": 6, "condition": funcref(self, "is_damaged"), "description": "Only affects damaged enemies."},
-	"Dark Spikes": {"target": targetType.enemy, "damage": 6, "resVal": 20, "barrage": true, "hits": 3, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", 1], "killeffect": funcref(self, "change_attribute"), "killargs": ["moveUser", "shield", 12], "description": "12 shield on kill, 100% recoil", "slot": equipType.gear, "type": moveType.magic},
-	"Seeker Volley": {"target": targetType.enemy, "damage": 3, "resVal": 20, "barrage": true, "hits": 4, "slot": equipType.gear, "type": moveType.magic, "condition": funcref(self, "is_damaged"), "description": "Followup hits only bounce to damaged enemies."},
+	"Dark Spikes": {"target": targetType.enemy, "damage": 6, "resVal": 20, "barrage": true, "hits": 3, "effect": funcref(self, "take_recoil"), "args": ["moveUser", "damageCalc", 1], "killeffect": funcref(self, "change_attribute"), "killargs": ["moveUser", "shield", 12], "animation": "Dark", "description": "12 shield on kill, 100% recoil", "slot": equipType.gear, "type": moveType.magic},
+	"Seeker Volley": {"target": targetType.enemy, "damage": 3, "resVal": 20, "barrage": true, "hits": 4, "slot": equipType.gear, "type": moveType.magic, "condition": funcref(self, "is_damaged"), "animation": "Dark", "description": "Followup hits only bounce to damaged enemies."},
 	"Soul Sample": {"target": targetType.enemy, "damage": 2, "resVal": 15, "slot": equipType.gear, "type": moveType.magic, "hits": 4, "barrage": true, "killeffect": funcref(self, "heal_team"), "killargs": ["moveUser", 5], "description": "Killing an enemy heals the entire party 5."},
 	"Fireball": {"target": targetType.enemies, "damage": 6, "resVal": 30, "slot": equipType.gear, "type": moveType.magic, "status": "Burn", "value": 6},
 	"Combust": {"target": targetType.enemy, "damage": 6, "resVal": 20, "slot": equipType.gear, "type": moveType.magic, "effect": funcref(self, "status_to_damage"), "args": ["moveTarget", "Burn"], "description": "Consumes enemy burn as additional damage."},
@@ -295,7 +295,7 @@ func give_status(unit, status, value = 0, stack = null, altZero = false): #for w
 	var StatusManager = get_node("../StatusManager")
 	if stack: #Multiply status based on its current value instead of adding
 		var statusInfo = StatusManager.find_status(unit, status)
-		StatusManager.add_status(unit, status, statusInfo["value"] * value)
+		if statusInfo != null: StatusManager.add_status(unit, status, statusInfo["value"] * value)
 	else:
 		if typeof(value) ==  TYPE_ARRAY: value = value.size() #the usual
 		if value > 0:

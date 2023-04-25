@@ -1,0 +1,16 @@
+[remap]
+
+importer="effekseer.effect"
+type="Resource"
+path="res://.import/FireBall-Purple-Complete.efkefc-0d1a50ba5632504f3e16c58a3c4eb93d.res"
+
+[deps]
+
+source_file="res://effects/FireBall-Purple-Complete.efkefc"
+dest_files=[ "res://.import/FireBall-Purple-Complete.efkefc-0d1a50ba5632504f3e16c58a3c4eb93d.res" ]
+
+[params]
+
+scale=1.0
+data_type=0
+compress=true
