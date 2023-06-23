@@ -234,6 +234,10 @@ position = Vector2( 140, 30 )
 script = ExtResource( 2 )
 canMove = false
 
+[node name="Background" type="Sprite" parent="Weapon"]
+visible = false
+position = Vector2( 0, 10 )
+
 [node name="Sprite" type="Sprite" parent="Weapon"]
 visible = false
 position = Vector2( 0, 10 )

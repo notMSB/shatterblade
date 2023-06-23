@@ -159,7 +159,12 @@ func sprite_move(box, boxName, isMove = true):
 	if isMove: spritePath = str("res://src/Assets/Icons/Moves/", boxName, ".png")
 	else: spritePath = str("res://src/Assets/Icons/Components/", boxName, ".png")
 	if ResourceLoader.exists(spritePath):
+		sprite.scale = Vector2(.75, .75)
 		sprite.texture = load(spritePath)
+		if sprite.texture.get_size().x < 80:
+			sprite.scale = Vector2(.75, .75)
+		else:
+			sprite.scale = Vector2(1, 1)
 		sprite.visible = true
 		cRect.visible = false
 	else:

@@ -1,0 +1,16 @@
+[remap]
+
+importer="effekseer.effect"
+type="Resource"
+path="res://.import/MGC_W2_Slash1.efkefc-325daeb0d4448b944d07c3ce70f342ba.res"
+
+[deps]
+
+source_file="res://effects/MGC_W2_Slash1.efkefc"
+dest_files=[ "res://.import/MGC_W2_Slash1.efkefc-325daeb0d4448b944d07c3ce70f342ba.res" ]
+
+[params]
+
+scale=1.0
+data_type=0
+compress=true

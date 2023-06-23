@@ -287,6 +287,11 @@ position = Vector2( 240, 30 )
 script = ExtResource( 3 )
 canMove = false
 
+[node name="Background" type="Sprite" parent="Productbox"]
+visible = false
+position = Vector2( 0, 10 )
+texture = ExtResource( 4 )
+
 [node name="Sprite" type="Sprite" parent="Productbox"]
 visible = false
 position = Vector2( 0, 10 )

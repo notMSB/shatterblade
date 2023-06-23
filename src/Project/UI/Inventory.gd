@@ -438,7 +438,7 @@ func restore_basics(boxes): #puts attack/defend back on non-relic boxes and remo
 	for box in boxes:
 		moveInfo = Moves.moveList[box.get_node("Name").text]
 		if box.get_parent().name == "MoveBoxes": #player box
-			if (box.get_index() <= 1 #X or attack/defend
+			if (box.get_index() <= 2 #X or attack/defend
 			and (moveInfo["type"] == Moves.moveType.basic or moveInfo["slot"] == Moves.equipType.any)): 
 				if box.get_index() == 0:
 					dHolder.box_move(box, "Take")
@@ -483,16 +483,25 @@ func check_for_curses(stock):
 
 func identify_product(box): #updates box color and trade value
 	var boxName = box.get_node("Name").text
-	if Moves.moveList.has(boxName) and !box.get_node("Sprite").visible:
+	box.get_node("Background").visible = true
+	box.get_node("ColorRect").visible = false
+	if Moves.moveList.has(boxName):
 		var productType = Moves.moveList[boxName]["type"]
+		var bgColor
 		box.moveType = productType
-		if productType == Moves.moveType.special: box.get_node("ColorRect").color = Color(.9,.3,.3,1) #R
-		elif productType == Moves.moveType.trick: box.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
-		elif productType == Moves.moveType.magic: box.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
-		elif productType == Moves.moveType.item or Moves.moveList[boxName]["slot"] == Moves.equipType.relic:  box.get_node("ColorRect").color = Color(.9,.7, 0,1) #Y
-		elif Moves.moveList[boxName].has("unequippable"): box.get_node("ColorRect").color = Color.orangered
+		if productType == Moves.moveType.special: bgColor = "red"
+		elif productType == Moves.moveType.trick: bgColor = "green"
+		elif productType == Moves.moveType.magic: bgColor = "blue"
+		elif productType == Moves.moveType.item or Moves.moveList[boxName]["slot"] == Moves.equipType.relic: bgColor = "yellow"
+		elif Moves.moveList[boxName].has("unequippable"): bgColor = "orange"
 		else: #X/other
+			box.get_node("Background").visible = false
+			box.get_node("ColorRect").visible = true
 			box.get_node("ColorRect").color = DEFAULTCOLOR
+		if box.get_node("Background").visible:
+			var spritePath = str("res://src/Assets/Icons/Backgrounds/", bgColor, ".png")
+			if(ResourceLoader.exists(spritePath)):
+				box.get_node("Background").texture = load(spritePath)
 	else: 
 		if box.get_node("Sprite").visible:
 			box.get_node("ColorRect").visible = false

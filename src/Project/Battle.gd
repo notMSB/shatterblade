@@ -624,7 +624,7 @@ func execute_move(real = true):
 					targets.append(unit)
 	elif chosenMove["target"] == targetType.allies:
 		targets = get_team(moveUser.isPlayer, true, real)
-		animScope = scope.allies if moveUser.isPlayer else scope.enemies
+		animScope = scope.players if moveUser.isPlayer else scope.enemies
 	else: #single target
 		targets = [moveTarget] 
 		animScope = scope.single
@@ -684,17 +684,22 @@ func execute_move(real = true):
 		elif targets.size() == 1 and targets[0].currentHealth <= 0: break
 		if real and useAnimations and !battleDone:
 			var angle = 90
-			match animScope:
-				scope.single:
-					$EffekseerEmitter2D.position = targets[0].ui.position
-					#print(rad2deg(moveUser.ui.position.angle_to(targets[0].ui.position)))
-					if moveUser.isPlayer: angle = -4*abs(rad2deg(moveUser.ui.position.angle_to(targets[0].ui.position)))
-					#angle = 4*angle if moveUser.isPlayer else -4*angle
-				scope.players: $EffekseerEmitter2D.position = Vector2(650, 600)
-				scope.enemies: $EffekseerEmitter2D.position = Vector2(650, 400)
-				scope.all: $EffekseerEmitter2D.position = Vector2(650, 500)
-			var animationName = "Slash"
+			var singleTarget = true if animScope == scope.single else false
+			if singleTarget:
+				$EffekseerEmitter2D.position = targets[0].ui.position
+				#print(rad2deg(moveUser.ui.position.angle_to(targets[0].ui.position)))
+				if moveUser.isPlayer: angle = -4*abs(rad2deg(moveUser.ui.position.angle_to(targets[0].ui.position)))
+				#angle = 4*angle if moveUser.isPlayer else -4*angle
+			else:
+				match animScope:
+					scope.players: $EffekseerEmitter2D.position = Vector2(650, 600)
+					scope.enemies: $EffekseerEmitter2D.position = Vector2(650, 400)
+					scope.all: $EffekseerEmitter2D.position = Vector2(650, 500)
+			var animationName
 			if chosenMove.has("animation"): animationName = chosenMove["animation"]
+			else:
+				if singleTarget: animationName = "Slash" if chosenMove.has("damage") or chosenMove.has("damaging") else "Hex"
+				else: animationName = "AoESlash" if chosenMove.has("damage") or chosenMove.has("damaging") else "Heal"
 			Animations.set_params($EffekseerEmitter2D, animationName, angle)
 			$EffekseerEmitter2D.play()
 			yield($EffekseerEmitter2D, "finished")

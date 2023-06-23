@@ -1,0 +1,16 @@
+[remap]
+
+importer="effekseer.effect"
+type="Resource"
+path="res://.import/MGC_Heal_3D.efkefc-fd10616374e64f0b379a79811177c1f6.res"
+
+[deps]
+
+source_file="res://effects/MGC_Heal_3D.efkefc"
+dest_files=[ "res://.import/MGC_Heal_3D.efkefc-fd10616374e64f0b379a79811177c1f6.res" ]
+
+[params]
+
+scale=1.0
+data_type=0
+compress=true

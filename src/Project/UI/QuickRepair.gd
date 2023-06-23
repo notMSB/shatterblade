@@ -15,6 +15,7 @@ func disassemble(weaponName):
 		DisplayHolder.box_move(usedBox, components[i])
 		if !Inventory.find_box(components[i]): usedBox.get_node("Blackout").visible = true
 	if $LeftComponent/Blackout.visible and $RightComponent/Blackout.visible: $Weapon/Blackout.visible = true
+	Inventory.identify_product($Weapon)
 
 func fix_and_reset():
 	originalBox.repair_uses(Inventory.repairBonus)

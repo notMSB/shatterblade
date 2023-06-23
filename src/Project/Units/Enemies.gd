@@ -87,7 +87,7 @@ onready var enemyList = {
 		"biome": b.none, "rewards": ["wing"], "locations": [l.special], "difficulty": 3, "sprite": "Bird", "elite": true},
 	"Dacula": {"stats": [44, 51, 58, 65, 72], "specials": ["Vampire", "Power Attack", "Take Down"], "hardSpecials": ["Feeding Frenzy"],
 		"biome": b.none, "rewards": ["fang"], "locations": [l.special], "difficulty": 3, "sprite": "Vampire", "elite": true},
-	"BIG FLOWER": {"stats": [28, 36, 44, 52, 60], "passives": {"Thorns": 2}, "specials": ["Seeker Volley", "Careful Strike, Fireball"],
+	"BIG FLOWER": {"stats": [28, 36, 44, 52, 60], "passives": {"Thorns": 2}, "specials": ["Seeker Volley", "Careful Strike", "Fireball"],
 		"biome": b.none, "rewards": ["sap"], "locations": [l.special], "difficulty": 3, "sprite": "Flower", "elite": true},
 	"BIG SNAKE": {"stats": [29, 38, 47, 56, 65], "passives": {"Venomous": 0}, "specials": ["Constrict", "Venoshock"],
 		"biome": b.none, "rewards": ["venom"], "locations": [l.special], "difficulty": 3, "sprite": "Snake", "elite": true},

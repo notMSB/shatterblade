@@ -29,9 +29,6 @@ margin_right = 280.0
 margin_bottom = 85.0
 mouse_filter = 1
 custom_fonts/font = SubResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Text" type="Label" parent="."]
 margin_top = -3.0
@@ -48,11 +45,6 @@ __meta__ = {
 position = Vector2( 72, 43 )
 script = ExtResource( 2 )
 
-[node name="Sprite" type="Sprite" parent="Left"]
-visible = false
-position = Vector2( 0, 10 )
-texture = ExtResource( 3 )
-
 [node name="ColorRect" type="ColorRect" parent="Left"]
 margin_left = -40.0
 margin_top = -20.0
@@ -60,9 +52,14 @@ margin_right = 40.0
 margin_bottom = 40.0
 mouse_filter = 1
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+
+[node name="Background" type="Sprite" parent="Left"]
+position = Vector2( 0, 10 )
+
+[node name="Sprite" type="Sprite" parent="Left"]
+visible = false
+position = Vector2( 0, 10 )
+texture = ExtResource( 3 )
 
 [node name="Scales" type="Sprite" parent="Left"]
 visible = false
@@ -178,11 +175,6 @@ __meta__ = {
 position = Vector2( 208, 43 )
 script = ExtResource( 2 )
 
-[node name="Sprite" type="Sprite" parent="Right"]
-visible = false
-position = Vector2( 0, 10 )
-texture = ExtResource( 3 )
-
 [node name="ColorRect" type="ColorRect" parent="Right"]
 margin_left = -40.0
 margin_top = -20.0
@@ -190,9 +182,14 @@ margin_right = 40.0
 margin_bottom = 40.0
 mouse_filter = 1
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+
+[node name="Background" type="Sprite" parent="Right"]
+position = Vector2( 0, 10 )
+
+[node name="Sprite" type="Sprite" parent="Right"]
+visible = false
+position = Vector2( 0, 10 )
+texture = ExtResource( 3 )
 
 [node name="Scales" type="Sprite" parent="Right"]
 visible = false

@@ -134,7 +134,22 @@ func setup_member(choice, member, currentType):
 	set_button_color(choice.get_node("Button"), currentType)
 	choice.get_node("Text").text = str(member, " | ", partyMembers[member]["stats"][0], "HP | ", partyMembers[member]["stats"][1], resStr)
 	$DisplayHolder.box_move(choice.get_node("Left"), partyMembers[member]["moves"][0])
+	assign_move_background(choice.get_node("Left"), currentType)
 	$DisplayHolder.box_move(choice.get_node("Right"), partyMembers[member]["moves"][1])
+	assign_move_background(choice.get_node("Right"), currentType)
+
+func assign_move_background(box, currentType):
+	var bgColor
+	match currentType:
+		types.fighter: bgColor = "red"
+		types.mage: bgColor = "blue"
+		types.rogue: bgColor = "green"
+	var spritePath = str("res://src/Assets/Icons/Backgrounds/", bgColor, ".png")
+	if(ResourceLoader.exists(spritePath)):
+		box.get_node("Background").visible = true
+		box.get_node("Background").texture = load(spritePath)
+	else:
+		box.get_node("Background").visible = false
 
 func choose_member(selection):
 	if Game.mapMode:
@@ -163,7 +178,9 @@ func set_current_party():
 		choice.get_node("Text").visible = false
 		set_button_color($CurrentParty.get_child(i).get_node("Button"), 3)
 		$DisplayHolder.box_move(choice.get_node("Left"), "X")
+		choice.get_node("Left/Background").visible = false
 		$DisplayHolder.box_move(choice.get_node("Right"), "X")
+		choice.get_node("Right/Background").visible = false
 	for i in tempParty.size():
 		$CurrentParty.get_child(i).get_node("Text").visible = true
 		setup_member($CurrentParty.get_child(i), tempParty[i].unitName, partyMembers[tempParty[i].unitName]["type"])
