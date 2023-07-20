@@ -82,6 +82,7 @@ func add_status(unit, status, value = 0): #If value is not sent, status does not
 			calculate_soak(unit)
 			return
 	var addedStatus = find_status(unit, status) #need to see if it's on already
+	if unit.ui: unit.ui.get_node("BattleElements/PopupManager").make_popup(str("+", status), Color.green)
 	if addedStatus: #if so, just increment the values of the existing one
 		if value > 0:
 			addedStatus["value"] += floor(value)
@@ -121,13 +122,14 @@ func reduce_status(unit, status, value):
 		var targetStatus = targetInfo[1]
 		if !targetStatus: return
 		targetStatus["value"] -= floor(value)
-		if targetStatus["value"] <= 0:
-			remove_status(unit, targetList, targetStatus)
+		if targetStatus["value"] <= 0: remove_status(unit, targetList, targetStatus)
+		else: if unit.ui: unit.ui.get_node("BattleElements/PopupManager").make_popup(str("-", status), Color.red)
 		if unit.ui: unit.update_status_ui()
 		return true
 	else: return false
 
 func remove_status(unit, list, cond):
+	if unit.ui: unit.ui.get_node("BattleElements/PopupManager").make_popup(str("-", cond["name"]), Color.red)
 	if !unit.isPlayer and statusList[cond["name"]].has("targetlock"): #If the status in the above list has target lock, remove the enemy's lock
 		unit.targetlock = false
 	list.erase(cond)

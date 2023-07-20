@@ -50,11 +50,11 @@ margin_left = 792.0
 margin_top = 284.0
 margin_right = 900.0
 margin_bottom = 352.0
-custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
 text = "Heal"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -66,11 +66,11 @@ margin_left = 380.0
 margin_top = 284.0
 margin_right = 488.0
 margin_bottom = 352.0
-custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
 text = "Offer"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -82,11 +82,11 @@ margin_left = 587.0
 margin_top = 371.0
 margin_right = 695.0
 margin_bottom = 439.0
-custom_fonts/font = SubResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 1, 1, 1 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_hover = Color( 1, 1, 1, 1 )
 custom_colors/font_color_pressed = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
 text = "Exit"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -98,16 +98,29 @@ __meta__ = {
 position = Vector2( 434, 382 )
 script = ExtResource( 4 )
 
-[node name="Sprite" type="Sprite" parent="Templebox"]
-visible = false
-position = Vector2( 0, 10 )
-texture = ExtResource( 5 )
-
-[node name="ColorRect" type="ColorRect" parent="Templebox"]
+[node name="Visuals" type="ReferenceRect" parent="Templebox"]
 margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
+border_color = Color( 1, 1, 1, 1 )
+editor_only = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Background" type="Sprite" parent="Templebox/Visuals"]
+visible = false
+position = Vector2( 40, 30 )
+
+[node name="Sprite" type="Sprite" parent="Templebox/Visuals"]
+visible = false
+position = Vector2( 40, 30 )
+texture = ExtResource( 5 )
+
+[node name="ColorRect" type="ColorRect" parent="Templebox/Visuals"]
+margin_right = 80.0
+margin_bottom = 60.0
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
 __meta__ = {
 "_edit_use_anchors_": false

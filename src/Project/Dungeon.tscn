@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://src/Project/Dungeon.gd" type="Script" id=1]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://src/Project/UI/UICircle.tscn" type="PackedScene" id=3]
 
 [sub_resource type="DynamicFont" id=1]
 size = 34
@@ -22,9 +23,19 @@ margin_left = 280.0
 margin_top = 1.0
 margin_right = 1000.0
 margin_bottom = 461.0
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Biomes" type="Node2D" parent="."]
+z_index = -5
+
+[node name="0" parent="Biomes" instance=ExtResource( 3 )]
+
+[node name="1" parent="Biomes" instance=ExtResource( 3 )]
+
+[node name="2" parent="Biomes" instance=ExtResource( 3 )]
 
 [node name="Points" type="Node2D" parent="."]
 

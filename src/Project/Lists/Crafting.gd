@@ -96,18 +96,18 @@ func setup_box(boxName, holderName, xMulti, yMulti):
 	get_node(holderName).add_child(box)
 	$DisplayHolder.box_move(box, boxName)
 	box.position = Vector2(xMulti * XINCREMENT + XSTART, yMulti * YINCREMENT + YSTART)
-	color_box(box, boxName)
+	box.set_background(boxName)
 	box.get_node("Tooltip").position.y += 200
 
 func color_box(box, boxName):
-	if Moves.moveList.has(boxName) and !box.get_node("Sprite").visible:
+	if Moves.moveList.has(boxName) and !box.get_node("Visuals/Sprite").visible:
 		var productType = Moves.moveList[boxName]["type"]
 		box.moveType = productType
-		if productType == Moves.moveType.special: box.get_node("ColorRect").color = Color(.9,.3,.3,1) #R
-		elif productType == Moves.moveType.trick: box.get_node("ColorRect").color = Color(.3,.7,.3,1) #G
-		elif productType == Moves.moveType.magic: box.get_node("ColorRect").color = Color(.3,.3,.9,1) #B
-		elif productType == Moves.moveType.item:  box.get_node("ColorRect").color = Color(.9,.7, 0,1) #Y
-		else: box.get_node("ColorRect").color = Color(.53,.3,.3,1) #Default
+		if productType == Moves.moveType.special: box.get_node("Visuals/ColorRect").color = Color(.9,.3,.3,1) #R
+		elif productType == Moves.moveType.trick: box.get_node("Visuals/ColorRect").color = Color(.3,.7,.3,1) #G
+		elif productType == Moves.moveType.magic: box.get_node("Visuals/ColorRect").color = Color(.3,.3,.9,1) #B
+		elif productType == Moves.moveType.item:  box.get_node("Visuals/ColorRect").color = Color(.9,.7, 0,1) #Y
+		else: box.get_node("Visuals/ColorRect").color = Color(.53,.3,.3,1) #Default
 
 func test():
 	break_down("Quick Attack")

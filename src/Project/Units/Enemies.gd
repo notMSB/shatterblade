@@ -79,7 +79,7 @@ onready var enemyList = {
 	"Scorpion": {"stats": [17, 22, 27, 32, 37], "specials": ["Crusher Claw"], "hardSpecials": ["Piercing Sting"],
 		"biome": b.none, "rewards": ["blade"], "locations": [l.dungeon], "difficulty": 3, "sprite": "Scorpion"},
 	
-	"BIG RAT": {"stats": [19, 25, 30, 34, 41], "passives": {"Dodgy": 5}, "specials": ["Careful Strike", "Mass Infection"], 
+	"BIG RAT": {"stats": [19, 25, 30, 34, 41], "passives": {"Dodgy": 3}, "specials": ["Careful Strike", "Mass Infection"], 
 		"biome": b.none, "rewards": ["fur"], "locations": [l.special], "difficulty": 3, "sprite": "Rat", "elite": true},
 	"BIG WOLF": {"stats": [35, 41, 47, 53, 59], "specials": ["Take Down", "Crusher Claw"],
 		"biome": b.none, "rewards": ["claw"], "locations": [l.special], "difficulty": 3, "sprite": "Wolf", "elite": true},
@@ -99,7 +99,7 @@ onready var enemyList = {
 		"biome": b.none, "rewards": ["bone"], "locations": [l.special], "difficulty": 3, "sprite": "Skeleton", "elite": true},
 }
 
-func generate_encounter(rating, isDay, biome, dungeonEnemy = null, _seenElite = false): #dungeon will bring its own list of valid enemies
+func generate_encounter(rating, isDay, biome, dungeonEnemy = null): #dungeon will bring its own list of valid enemies
 	var location = l.day if isDay else l.night
 	var strongestEnemy = 3 if isDay else 2
 	var encounter = []
@@ -120,7 +120,10 @@ func generate_encounter(rating, isDay, biome, dungeonEnemy = null, _seenElite = 
 	while rating > 0:
 		if validEnemies.size() > 1: validEnemies = evaluate_list(validEnemies, rating, MAXENCOUNTERSIZE - encounter.size(), strongestEnemy)
 		#print(validEnemies)
-		var nextEnemy = validEnemies[randi() % validEnemies.size()]
+		var enemyIndicator = randi() % validEnemies.size()
+		if rating == 4 and enemyIndicator == 0 and encounter.size() == 0:
+			enemyIndicator+=randi() % (validEnemies.size()-1) + 1 #prevent 4wide encounters of just 1 enemy by forcing a higher difficulty one
+		var nextEnemy = validEnemies[enemyIndicator]
 		encounter.append(nextEnemy)
 #		if enemyList[nextEnemy].has("elite"): 
 #			validEnemies.erase(nextEnemy) #only one elite per encounter

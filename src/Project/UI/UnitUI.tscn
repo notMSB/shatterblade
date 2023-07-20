@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://src/Project/UI/UnitUI.gd" type="Script" id=2]
 [ext_resource path="res://src/Assets/Enemies/test.png" type="Texture" id=3]
 [ext_resource path="res://src/Project/UI/PlayerMove.tscn" type="PackedScene" id=4]
+[ext_resource path="res://src/Project/UI/PopupManager.tscn" type="PackedScene" id=5]
 
 [sub_resource type="DynamicFont" id=1]
 size = 20
@@ -93,9 +94,6 @@ margin_top = 123.878
 margin_right = 150.0
 margin_bottom = 161.878
 percent_visible = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Text" type="Label" parent="BattleElements/HPBar"]
 margin_right = 196.0
@@ -112,8 +110,8 @@ __meta__ = {
 visible = false
 margin_right = 196.0
 margin_bottom = 36.0
-custom_fonts/font = SubResource( 2 )
 custom_colors/font_color = Color( 0, 0.976471, 1, 1 )
+custom_fonts/font = SubResource( 2 )
 text = "1/1"
 align = 1
 valign = 1
@@ -132,6 +130,8 @@ color = Color( 0.447059, 0, 0, 0.392157 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="PopupManager" parent="BattleElements" instance=ExtResource( 5 )]
 
 [node name="MoveBox" parent="." instance=ExtResource( 4 )]
 position = Vector2( 0, -74 )

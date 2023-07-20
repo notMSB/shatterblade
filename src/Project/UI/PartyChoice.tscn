@@ -45,20 +45,27 @@ __meta__ = {
 position = Vector2( 72, 43 )
 script = ExtResource( 2 )
 
-[node name="ColorRect" type="ColorRect" parent="Left"]
+[node name="Visuals" type="ReferenceRect" parent="Left"]
 margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
 mouse_filter = 1
+border_color = Color( 1, 1, 1, 1 )
+editor_only = false
+
+[node name="ColorRect" type="ColorRect" parent="Left/Visuals"]
+margin_right = 80.0
+margin_bottom = 60.0
+mouse_filter = 1
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
 
-[node name="Background" type="Sprite" parent="Left"]
-position = Vector2( 0, 10 )
+[node name="Background" type="Sprite" parent="Left/Visuals"]
+position = Vector2( 40, 30 )
 
-[node name="Sprite" type="Sprite" parent="Left"]
+[node name="Sprite" type="Sprite" parent="Left/Visuals"]
 visible = false
-position = Vector2( 0, 10 )
+position = Vector2( 40, 30 )
 texture = ExtResource( 3 )
 
 [node name="Scales" type="Sprite" parent="Left"]
@@ -97,9 +104,6 @@ margin_bottom = 40.0
 mouse_filter = 1
 border_color = Color( 1, 1, 1, 1 )
 editor_only = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Button" type="Button" parent="Left"]
 margin_left = -40.0
@@ -175,20 +179,27 @@ __meta__ = {
 position = Vector2( 208, 43 )
 script = ExtResource( 2 )
 
-[node name="ColorRect" type="ColorRect" parent="Right"]
+[node name="Visuals" type="ReferenceRect" parent="Right"]
 margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
 mouse_filter = 1
+border_color = Color( 1, 1, 1, 1 )
+editor_only = false
+
+[node name="ColorRect" type="ColorRect" parent="Right/Visuals"]
+margin_right = 80.0
+margin_bottom = 60.0
+mouse_filter = 1
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
 
-[node name="Background" type="Sprite" parent="Right"]
-position = Vector2( 0, 10 )
+[node name="Background" type="Sprite" parent="Right/Visuals"]
+position = Vector2( 40, 30 )
 
-[node name="Sprite" type="Sprite" parent="Right"]
+[node name="Sprite" type="Sprite" parent="Right/Visuals"]
 visible = false
-position = Vector2( 0, 10 )
+position = Vector2( 40, 30 )
 texture = ExtResource( 3 )
 
 [node name="Scales" type="Sprite" parent="Right"]
@@ -227,9 +238,6 @@ margin_bottom = 40.0
 mouse_filter = 1
 border_color = Color( 1, 1, 1, 1 )
 editor_only = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Button" type="Button" parent="Right"]
 margin_left = -40.0

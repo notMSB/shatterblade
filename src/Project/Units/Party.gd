@@ -134,22 +134,9 @@ func setup_member(choice, member, currentType):
 	set_button_color(choice.get_node("Button"), currentType)
 	choice.get_node("Text").text = str(member, " | ", partyMembers[member]["stats"][0], "HP | ", partyMembers[member]["stats"][1], resStr)
 	$DisplayHolder.box_move(choice.get_node("Left"), partyMembers[member]["moves"][0])
-	assign_move_background(choice.get_node("Left"), currentType)
+	choice.get_node("Left").set_background()
 	$DisplayHolder.box_move(choice.get_node("Right"), partyMembers[member]["moves"][1])
-	assign_move_background(choice.get_node("Right"), currentType)
-
-func assign_move_background(box, currentType):
-	var bgColor
-	match currentType:
-		types.fighter: bgColor = "red"
-		types.mage: bgColor = "blue"
-		types.rogue: bgColor = "green"
-	var spritePath = str("res://src/Assets/Icons/Backgrounds/", bgColor, ".png")
-	if(ResourceLoader.exists(spritePath)):
-		box.get_node("Background").visible = true
-		box.get_node("Background").texture = load(spritePath)
-	else:
-		box.get_node("Background").visible = false
+	choice.get_node("Right").set_background()
 
 func choose_member(selection):
 	if Game.mapMode:
@@ -178,9 +165,9 @@ func set_current_party():
 		choice.get_node("Text").visible = false
 		set_button_color($CurrentParty.get_child(i).get_node("Button"), 3)
 		$DisplayHolder.box_move(choice.get_node("Left"), "X")
-		choice.get_node("Left/Background").visible = false
+		choice.get_node("Left/Visuals/Background").visible = false
 		$DisplayHolder.box_move(choice.get_node("Right"), "X")
-		choice.get_node("Right/Background").visible = false
+		choice.get_node("Right/Visuals/Background").visible = false
 	for i in tempParty.size():
 		$CurrentParty.get_child(i).get_node("Text").visible = true
 		setup_member($CurrentParty.get_child(i), tempParty[i].unitName, partyMembers[tempParty[i].unitName]["type"])
@@ -297,11 +284,14 @@ func _on_Start_pressed(): #make units, put in global party, set boon
 		global.storedParty.append(create_unit(choice))
 	for n in $Choices.get_children():
 		n.queue_free()
+	z_index += 5
 	Game.mapMode = true
 	Game.add_child(MapScene.instance())
 	$Scrolls.visible = false
 	$CurrentParty.visible = false
 	$ColorRect/UI.visible = false
+	$"../Toggle".visible = false
+	$"../Table".visible = false
 	$ColorRect.margin_bottom = 460 #For between areas
 	visible = false
 

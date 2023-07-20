@@ -39,20 +39,28 @@ position = Vector2( 120, 30 )
 script = ExtResource( 2 )
 canMove = false
 
-[node name="Sprite" type="Sprite" parent="MoveBox"]
-visible = false
-position = Vector2( 0, 10 )
-texture = ExtResource( 3 )
-
-[node name="ColorRect" type="ColorRect" parent="MoveBox"]
+[node name="Visuals" type="ReferenceRect" parent="MoveBox"]
 margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
+rect_clip_content = true
+border_color = Color( 1, 1, 1, 1 )
+editor_only = false
+
+[node name="Background" type="Sprite" parent="MoveBox/Visuals"]
+visible = false
+position = Vector2( 40, 30 )
+
+[node name="Sprite" type="Sprite" parent="MoveBox/Visuals"]
+visible = false
+position = Vector2( 40, 30 )
+texture = ExtResource( 3 )
+
+[node name="ColorRect" type="ColorRect" parent="MoveBox/Visuals"]
+margin_right = 80.0
+margin_bottom = 60.0
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Name" type="Label" parent="MoveBox"]
 margin_left = -38.2001
@@ -82,9 +90,6 @@ margin_right = 40.0
 margin_bottom = 40.0
 border_color = Color( 1, 1, 1, 1 )
 editor_only = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Tooltip" type="Node2D" parent="MoveBox"]
 visible = false

@@ -1,10 +1,11 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://src/Project/UI/BoxHolder.gd" type="Script" id=1]
 [ext_resource path="res://src/Project/UI/PuzzleMenu.gd" type="Script" id=2]
 [ext_resource path="res://src/Assets/Images/QC.png" type="Texture" id=3]
 [ext_resource path="res://src/Fonts/BalsamiqSans-Bold.ttf" type="DynamicFontData" id=4]
 [ext_resource path="res://src/Project/UI/UnitUI.gd" type="Script" id=5]
+[ext_resource path="res://src/Project/UI/PopupManager.tscn" type="PackedScene" id=6]
 
 [sub_resource type="DynamicFont" id=1]
 font_data = ExtResource( 4 )
@@ -100,9 +101,6 @@ margin_bottom = 68.0
 custom_styles/fg = SubResource( 2 )
 custom_styles/bg = SubResource( 3 )
 percent_visible = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Text" type="Label" parent="BattleElements/HPBar"]
 margin_right = 133.0
@@ -178,6 +176,8 @@ margin_top = 26.0
 margin_right = 60.0
 margin_bottom = 48.0
 mouse_filter = 2
+
+[node name="PopupManager" parent="BattleElements" instance=ExtResource( 6 )]
 
 [node name="Trackers" type="Node2D" parent="."]
 

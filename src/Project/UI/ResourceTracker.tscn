@@ -20,9 +20,6 @@ margin_bottom = 20.0
 rect_pivot_offset = Vector2( 0, 10 )
 custom_styles/bg = SubResource( 3 )
 percent_visible = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Text" type="Label" parent="ResourceBar"]
 margin_right = 80.0
@@ -31,6 +28,11 @@ custom_fonts/font = SubResource( 2 )
 text = "1/1"
 align = 1
 valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+
+[node name="Rectangle" type="ReferenceRect" parent="."]
+margin_left = 300.0
+margin_right = 377.0
+margin_bottom = 21.0
+border_color = Color( 1, 1, 1, 1 )
+border_width = 2.0
+editor_only = false

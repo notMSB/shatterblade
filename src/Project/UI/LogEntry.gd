@@ -13,6 +13,8 @@ func assemble(user, target, move, box = null):
 	if target != null and typeof(target) != TYPE_STRING: $TargetText.text = target.battleName
 	else: $TargetText.text = ""
 	DisplayHolder.box_move($MoveBox, move)
+	$MoveBox.set_background()
+	
 	playerLog = user.isPlayer
 	if !box: $Button.visible = false
 	recolor()

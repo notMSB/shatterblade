@@ -12,6 +12,11 @@ var playerBoons = []
 var chosen = v.none
 var favor = 0
 
+#signal done
+var lookup = {} #tracks each boon's UI circle node
+var defaultLookup
+var currentBoon = null
+
 #At some point every boon will be its own node/script with functions activated from this one
 
 func _ready():
@@ -43,15 +48,19 @@ func create_boon(boonName):
 	babby.set_script(load(PATH + boonName + ".gd"))
 	babby.Boons = self
 
-func call_boon(callName, args = [], signalBase = null): #callName is a string representing a function in the individual boon scripts
+func call_boon(callName, args = []): #callName is a string representing a function in the individual boon scripts
 	var subFunc
 	var checkVal
 	var returnVal
+	
 	for boon in get_children():
+		#if currentBoon != null: yield(self, "done")
+		currentBoon = boon.name
 		subFunc = funcref(boon, callName)
 		if subFunc.is_valid(): checkVal = subFunc.call_funcv(args)
 		if checkVal != null: returnVal = checkVal
-	if signalBase: signalBase.boon_signal()
+		#emit_signal("done")
+	currentBoon = null
 	return returnVal if returnVal else 0
 
 func call_specific(callName, args = [], boonName = ""): #todo: reconcile this and above function
@@ -60,10 +69,12 @@ func call_specific(callName, args = [], boonName = ""): #todo: reconcile this an
 	var returnVal
 	for boon in get_children():
 		if boon.name == boonName:
+			currentBoon = boonName
 			subFunc = funcref(boon, callName)
 			if subFunc.is_valid(): checkVal = subFunc.call_funcv(args)
 			if checkVal != null: returnVal = checkVal
 			break
+	currentBoon = null
 	return returnVal if returnVal else 0
 
 func generate_tooltip(boonName):
@@ -104,5 +115,10 @@ func get_level(boonName):
 	return null
 
 func grant_favor(amount):
+	if Map:
+		var target = lookup[currentBoon] if currentBoon else defaultLookup
+		var textColor = Color.blueviolet if amount > 0 else Color.lightcoral
+		var pos = "+" if amount > 0 else ""
+		target.get_node("PopupManager").make_popup(str(pos, amount, " Favor"), textColor, false)
 	favor+=amount
 	if Map: Map.update_favor(favor)

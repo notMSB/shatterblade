@@ -10,9 +10,9 @@ func _ready():
 		"choices": ["Yes", "No"],
 		"outcomes": [[funcref(self, "enter_dungeon")], [funcref(self, "advance")]]},
 	"Town": {"time": timings.special, "description": "It's a town.",
-		"choices": ["Trade", "Smith", "Inn", "Leave"],
-		"conditions": [true, [funcref(self, "used_smith")], [funcref(self, "can_sleep")], true],
-		"outcomes": [[funcref(self, "activate_shop")], [funcref(self, "show_crafting_event")], [funcref(self, "rest")], [funcref(self, "advance")]]},
+		"choices": ["Trade", "Smith", "Inn", "Dungeon", "Leave"],
+		"conditions": [true, [funcref(self, "used_smith")], [funcref(self, "can_sleep")], true, true],
+		"outcomes": [[funcref(self, "activate_shop")], [funcref(self, "show_crafting_event")], [funcref(self, "rest")], [funcref(self, "enter_dungeon")], [funcref(self, "advance")]]},
 	"Temple": {"time": timings.special, "description": "Enter temple?",
 		"choices": ["Yes", "No"],
 		"outcomes": [[funcref(self, "enter_temple")], [funcref(self, "advance")]]},
@@ -106,9 +106,8 @@ func used_smith():
 	return true
 
 func can_sleep():
-	if Map.isDay and Map.activePoint.sectionNum <= Map.currentDay:
-		return false
-	return true
+	if Map.isDay: return true
+	return false
 
 #Outcomes
 
@@ -159,16 +158,13 @@ func place_quest():
 		Map.set_label(chosenPoint, "Quest", true)
 
 func enter_dungeon():
-	var index = Map.activePoint.info["dungeonIndex"]
 	var dungeons = Map.get_node("HolderHolder/DungeonHolder")
 	Map.savedPoint = Map.activePoint
-	dungeons.get_child(index).enter()
-	Map.currentDungeon = dungeons.get_child(index)
+	dungeons.get_child(0).enter()
+	Map.currentDungeon = dungeons.get_child(0)
 
 func enter_temple():
-	var index = Map.activePoint.info["templeIndex"]
-	var temples = Map.get_node("HolderHolder/TempleHolder")
-	temples.get_child(index).enter()
+	Map.get_node("HolderHolder/TempleHolder").get_child(0).enter()
 
 func show_crafting_event():
 	Map.grab_event("Crafting")
@@ -182,7 +178,12 @@ func activate_shop():
 	Map.activate_inventory()
 
 func rest():
-	var restTime = Map.time
+	var maxInjury = 0
+	var injury
+	for unit in global.storedParty:
+		injury = unit.maxHealth - unit.currentHealth
+		if injury > maxInjury: maxInjury = injury
+	var restTime = min(Map.time, maxInjury)
 	Map.subtract_time(restTime, true)
 	for unit in global.storedParty:
 		unit.heal(restTime)

@@ -59,53 +59,11 @@ QuickRepair = ExtResource( 19 )
 visible = false
 margin_left = 1.0
 margin_top = 1.0
-margin_right = 1280.0
+margin_right = 720.0
 margin_bottom = 457.0
 mouse_filter = 2
 border_color = Color( 1, 1, 1, 1 )
 editor_only = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Background" type="ColorRect" parent="."]
-visible = false
-margin_left = 280.0
-margin_right = 1002.0
-margin_bottom = 460.0
-mouse_filter = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="XPBorder" type="ColorRect" parent="."]
-modulate = Color( 0, 0, 0, 1 )
-show_behind_parent = true
-margin_top = 455.0
-margin_right = 1282.0
-margin_bottom = 482.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="XPBar" type="ProgressBar" parent="."]
-margin_left = -1.0
-margin_top = 462.0
-margin_right = 1279.0
-margin_bottom = 479.0
-custom_styles/fg = SubResource( 1 )
-custom_styles/bg = SubResource( 2 )
-percent_visible = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="XPBar"]
-margin_right = 1280.0
-margin_bottom = 20.0
-custom_fonts/font = SubResource( 3 )
-text = "0/5"
-align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -116,18 +74,13 @@ margin_right = 280.0
 margin_bottom = 460.0
 mouse_filter = 1
 color = Color( 0, 0.478431, 0.478431, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="CraftScroll" type="ScrollContainer" parent="."]
 margin_top = 80.0
-margin_right = 640.0
+margin_right = 281.0
 margin_bottom = 460.0
+rect_clip_content = false
 mouse_filter = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ColorRect" type="ColorRect" parent="CraftScroll"]
 margin_right = 280.0
@@ -148,14 +101,12 @@ __meta__ = {
 }
 
 [node name="RepairScroll" type="ScrollContainer" parent="."]
-margin_left = 641.0
+margin_left = 999.0
 margin_top = 80.0
 margin_right = 1280.0
 margin_bottom = 460.0
+rect_clip_content = false
 mouse_filter = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ColorRect" type="ColorRect" parent="RepairScroll"]
 margin_right = 280.0
@@ -164,7 +115,28 @@ rect_min_size = Vector2( 280, 1000 )
 mouse_filter = 1
 color = Color( 0, 0.478431, 0.478431, 1 )
 
+[node name="BG" type="Node2D" parent="."]
+position = Vector2( 0, 455 )
+
+[node name="Background" type="ColorRect" parent="BG"]
+margin_left = -37.0
+margin_top = 24.0
+margin_right = 1334.0
+margin_bottom = 325.0
+mouse_filter = 2
+color = Color( 0.113725, 0.352941, 0.270588, 1 )
+
+[node name="Border" type="Node2D" parent="."]
+position = Vector2( 0, 455 )
+
+[node name="XPBorder" type="ColorRect" parent="Border"]
+modulate = Color( 0, 0, 0, 1 )
+show_behind_parent = true
+margin_right = 1282.0
+margin_bottom = 27.0
+
 [node name="HolderHolder" type="Node2D" parent="."]
+z_index = 5
 
 [node name="DisplayHolder" type="Node2D" parent="HolderHolder"]
 script = ExtResource( 3 )
@@ -178,15 +150,12 @@ PlayerMove = ExtResource( 6 )
 margin_left = 280.0
 margin_right = 1000.0
 margin_bottom = 460.0
-mouse_filter = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+mouse_filter = 2
 
 [node name="ColorRect" type="ColorRect" parent="HolderHolder/ScrollContainer"]
-margin_right = 1280.0
+margin_right = 720.0
 margin_bottom = 460.0
-rect_min_size = Vector2( 1280, 460 )
+rect_min_size = Vector2( 720, 460 )
 mouse_filter = 2
 color = Color( 0.215686, 0.278431, 0.54902, 1 )
 
@@ -241,30 +210,47 @@ position = Vector2( 46, 35 )
 visible = false
 position = Vector2( 238, 36 )
 
+[node name="XPBar" type="ProgressBar" parent="."]
+margin_left = -1.0
+margin_top = 461.0
+margin_right = 1280.0
+margin_bottom = 479.0
+custom_styles/fg = SubResource( 1 )
+custom_styles/bg = SubResource( 2 )
+percent_visible = false
+
+[node name="Label" type="Label" parent="XPBar"]
+margin_right = 1280.0
+margin_bottom = 20.0
+custom_fonts/font = SubResource( 3 )
+text = "0/5"
+align = 1
+
 [node name="Events" type="Node2D" parent="."]
 visible = false
 z_index = 1
 script = ExtResource( 11 )
 
 [node name="EventDescription" type="Label" parent="Events"]
-margin_right = 350.0
-margin_bottom = 120.0
+margin_left = -35.0
+margin_top = 80.0
+margin_right = 315.0
+margin_bottom = 200.0
 custom_fonts/font = SubResource( 4 )
 align = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ColorRect" type="ColorRect" parent="Events/EventDescription"]
 modulate = Color( 0, 0, 0, 1 )
 show_behind_parent = true
-margin_right = 350.0
-margin_bottom = 478.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+margin_right = 320.0
+margin_bottom = 380.0
+
+[node name="MoveBox" parent="Events/EventDescription" instance=ExtResource( 6 )]
+visible = false
+position = Vector2( 180, 70 )
 
 [node name="Choices" type="Node2D" parent="Events"]
+position = Vector2( 0, 75 )
 
 [node name="Undo" type="Button" parent="."]
 visible = false

@@ -65,6 +65,7 @@ func set_box(boxName):
 			if SCALESMOVES.has(boxName): box_scales_move(selection, boxName)
 			elif boxName == "Crown": check_crown(selection)
 			else: $HolderHolder/DisplayHolder.box_move(selection, boxName)
+			selection.set_background(boxName)
 			selection.set_uses(Moves.get_uses(boxName))
 			var moveInfo = Moves.moveList[boxName] #Now, make sure attack/defend is done right
 			if (selection.get_index() <= 1 #X or attack/defend
@@ -90,7 +91,7 @@ func choose_type(display):
 		elif i == 2: $HolderHolder/DisplayHolder.box_move(box, "Defend")
 		elif i == 3 and display.get_node("MoveBoxes").get_child(LASTMOVEBOX).visible == true: box_scales_move(box)
 		else: $HolderHolder/DisplayHolder.box_move(box, "X")
-		box.get_node("ColorRect").color = Color(.53,.3,.3,1) #Default
+		box.get_node("Visuals/ColorRect").color = Color(.53,.3,.3,1) #Default
 		i+=1
 	check_ready()
 
@@ -129,7 +130,7 @@ func set_boon_level(selectorIndex, value):
 				if box.moves[0] == "Crown" or box.moves[0] == "Crown+": check_crown(box)
 
 func check_crown(box):
-	var level
+	var level = false
 	for boonIndex in playerBoons.size():
 		var boonName = $"HolderHolder/BoonHolder/Boon 0/Choice".get_item_text(playerBoons[boonIndex])
 		if boonName == "Crown": level = boonLevels[boonIndex][0]
@@ -153,7 +154,7 @@ func check_special_boons(boonIndex, enabled:bool):
 			if enabled:
 				box_scales_move(boxes.get_child(FIRSTMOVEBOX))
 				boxes.get_child(FIRSTMOVEBOX).set_uses(-1)
-				display.get_node("MoveBoxes").get_child(FIRSTMOVEBOX).get_node("ColorRect").color = Color(.53,.3,.3,1)
+				display.get_node("MoveBoxes").get_child(FIRSTMOVEBOX).get_node("Visuals/ColorRect").color = Color(.53,.3,.3,1)
 			else:
 				$HolderHolder/DisplayHolder.box_move(boxes.get_child(LASTMOVEBOX), "X")
 

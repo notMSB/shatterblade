@@ -3,6 +3,16 @@ extends Node2D
 var Battle
 var checkNode
 
+var fadeout = false
+
+func _process(_delta):
+	if fadeout:
+		$Sprite.modulate.a -= .02
+		if $Sprite.modulate.a <= 0 and $BattleElements/PopupManager.get_child_count() <= 0: faded()
+
+func faded():
+	visible = false
+
 func _ready():
 	checkNode = $"../../../"
 	Battle = checkNode if checkNode.name == "Battle" else null

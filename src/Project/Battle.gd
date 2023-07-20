@@ -58,6 +58,8 @@ var canSee = true
 var enemyBonus = false
 var currentLevel = 0
 
+var lastUnit = null
+
 var executionOrder = [] #box, move, user, target
 enum e {box, move, user, target}
 var targetType
@@ -166,6 +168,7 @@ func toggle_blind(toggle, checkPreview = true):
 
 func welcome_back(newOpponents = null, currentArea = 0): #reusing an existing battle scene for a new battle
 	if !Map: $Lock.visible = false
+	lastUnit = null
 	virtueUsed = false
 	$Pray.disabled = check_prayer()
 	$BattleUI.toggle_trackers(true)
@@ -196,7 +199,8 @@ func set_ui(unit, setPassives = false):
 	unit.update_strength()
 	if battleDone: unit.shield = 0
 	if setPassives:
-		unit.currentHealth = min(unit.currentHealth + unit.baseHealing, unit.maxHealth)
+		unit.heal(unit.baseHealing)
+		#unit.currentHealth = min(unit.currentHealth + unit.baseHealing, unit.maxHealth)
 		for passive in unit.passives:
 			if passive == "Status Soak": assess_status_soak(unit)
 			else: StatusManager.add_status(unit, passive, unit.passives[passive])
@@ -232,7 +236,7 @@ func evaluate_aura(activationTiming):
 		if Map.currentBiome == Map.biomesList.forest:
 			for unit in $Units.get_children():
 				if unit.currentHealth == unit.maxHealth: 
-					unit.shield += 5
+					unit.give_shield(5)
 					unit.update_hp()
 	elif activationTiming == a.hitBonus:
 		if Map.currentBiome == Map.biomesList.battlefield and chosenMove.has("hits"): if chosenMove["hits"] > 1: return 1
@@ -250,6 +254,8 @@ func evaluate_aura(activationTiming):
 		else: return 0
 
 func play_turn(notFirstTurn = true):
+	if lastUnit != null:
+		yield(lastUnit.ui.get_node("BattleElements/PopupManager"), "done")
 	if battleDone:
 		if gameOver: return get_tree().change_scene("res://src/Project/Lose.tscn")
 		var rewards = []
@@ -466,7 +472,7 @@ func go_button_press():
 func focus_log():
 	if logIndex > 0: $BattleLog/Scroll/Control.get_child(logIndex - 1).recolor()
 	$BattleLog/Scroll/Control.get_child(logIndex).focus()
-	if logIndex > 4: $BattleLog/Scroll.scroll_horizontal = 240 * logIndex
+	if logIndex > 2: $BattleLog/Scroll.scroll_horizontal = 240 * logIndex
 	logIndex += 1
 
 func cut_from_order(box):
@@ -610,14 +616,14 @@ func execute_move(real = true):
 	var animScope
 	if chosenMove["target"] == targetType.enemies:
 		targets = get_team(!moveUser.isPlayer, true, real)
-		animScope = scope.allies if !moveUser.isPlayer else scope.enemies
+		animScope = scope.players if !moveUser.isPlayer else scope.enemies
 	elif chosenMove["target"] == targetType.everyone:
 		targets = get_team(moveUser.isPlayer, true, real)
 		targets.append_array(get_team(!moveUser.isPlayer, true, real))
 		animScope = scope.all
 	elif chosenMove["target"] == targetType.enemyTargets:
 		var tempTargets = get_team(!moveUser.isPlayer, true, real)
-		animScope = scope.allies if !moveUser.isPlayer else scope.enemies
+		animScope = scope.players if !moveUser.isPlayer else scope.enemies
 		for unit in tempTargets:
 			if typeof(unit.storedTarget) == typeof(moveTarget.storedTarget):
 				if unit.storedTarget == moveTarget.storedTarget:
@@ -670,6 +676,8 @@ func execute_move(real = true):
 		activate_effect()
 	StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.moveUsed, [usedMoveBox])
 	while i < hits: #repeat for every hit, while loop enables it to be modified on the fly by move effects from outside this file
+		if real and targets[0].ui.get_node("BattleElements/PopupManager").get_child_count() > 0:
+			yield(targets[0].ui.get_node("BattleElements/PopupManager"), "done")
 		if battleDone or previewBattleDone or moveUser.currentHealth <= 0: break
 		if bounceHits:
 			var bounce = true if i > 0 else false
@@ -745,7 +753,9 @@ func execute_move(real = true):
 		i+=1
 	if moveUser.isPlayer:
 		if usedMoveBox != null:
-			Boons.call_boon("check_move", [usedMoveBox, moveTarget.currentHealth, moveUser, real])
+			var targetHealth = 1
+			if moveTarget != null: targetHealth = moveTarget.currentHealth
+			Boons.call_boon("check_move", [usedMoveBox, targetHealth, moveUser, real])
 	else:
 		Boons.call_specific("check_move", [null, null, moveUser, real], "Lion")
 	yield(get_tree().create_timer(0), "timeout") #needed to prevent a crash
@@ -799,6 +809,8 @@ func evaluate_completion(deadUnit):
 		deadEnemies += 1
 		previewDeadEnemies += 1
 		if deadEnemies >= enemyNum:
+			lastUnit = deadUnit
+			yield(deadUnit.ui.get_node("BattleElements/PopupManager"), "done")
 			battleDone = true
 			#print("Battle Ready To Complete")
 	else:

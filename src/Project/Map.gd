@@ -31,7 +31,7 @@ const MIDPOINT = 640
 const RIGHTBOUND = 960
 
 const NIGHTLENGTH = 50
-const TOTALSECTIONS = 2
+const TOTALSECTIONS = 1
 const BASEXP = 5
 const XPINCREMENT = 5
 
@@ -48,9 +48,9 @@ var calledEvent
 var timeNode
 var favorNode
 
-const DIFFICULTYMODIFIER = -4
-const DUNGEONDIFFICULTY = [1, 2, 3, 4]
-const DAYTIME = 150
+const DIFFICULTYMODIFIER = 2
+const DUNGEONDIFFICULTY = [1, 2, 2, 3]
+const DAYTIME = 120
 var distanceTraveled = 0
 var time = DAYTIME
 var currentDay = 0
@@ -60,10 +60,12 @@ const DAYDIFFICULTYMOD = 1
 var isDay = true
 var currentDungeon = null
 var currentTemple = null
+
 var biomesList
 var availableBiomes = []
+var dungeonBiomes = []
+var nextBiome = null
 var currentBiome
-var seenElite = false
 
 var selectedMapMove = null
 var selectedMapBox = null
@@ -72,7 +74,7 @@ var delayBattle = null
 
 var battleWindow
 var inventoryWindow
-enum pointTypes {start, battle, quest, visited, none, event, town, dungeon, repair, trader, temple, end} #Points to the left of "visited" turn off after being activated
+enum pointTypes {start, battle, quest, visited, none, event, dungeon, repair, trader, temple, boss, end} #Points to the left of "visited" turn off after being activated
 
 var mascotList = ["Scorpion", "Kraken", "Phoenix"]
 var currentMascot
@@ -109,6 +111,7 @@ func _ready():
 			global.storedParty[i].update_hp()
 		for display in $HolderHolder/DisplayHolder.get_children():
 			set_display_color(display)
+	$Events/EventDescription/MoveBox/Button.disabled = true
 	bottomRight = Vector2($ReferenceRect.margin_right, $ReferenceRect.margin_bottom)
 	timeNode.position.x += 60
 	favorNode.position.x += 75
@@ -145,21 +148,37 @@ func set_quick_panels():
 	set_quick_crafts()
 	set_quick_repairs()
 
+func curate_biomes(amount):
+	var tempAvailables = [] + availableBiomes
+	var curation = []
+	var checkBiome
+	while amount > 0:
+		checkBiome = tempAvailables[randi() % tempAvailables.size()]
+		curation.append(checkBiome)
+		tempAvailables.erase(checkBiome)
+		amount -= 1
+	return curation
+	
+
 func set_biome():
-	currentBiome = availableBiomes[randi() % availableBiomes.size()]
+	if nextBiome == null: currentBiome = availableBiomes[randi() % availableBiomes.size()]
+	else: currentBiome = nextBiome
 	availableBiomes.erase(currentBiome)
-	match currentBiome:
-		biomesList.plains: $HolderHolder/ScrollContainer/ColorRect.color = Color("00005f") #Blue
-		biomesList.forest: $HolderHolder/ScrollContainer/ColorRect.color = Color("005c00") #Green
-		biomesList.mountain: $HolderHolder/ScrollContainer/ColorRect.color = Color("923b3b") #Red
-		biomesList.city: $HolderHolder/ScrollContainer/ColorRect.color = Color("6f7300") #Yellow
-		biomesList.battlefield: $HolderHolder/ScrollContainer/ColorRect.color = Color("923e00") #Orange
-		biomesList.graveyard: $HolderHolder/ScrollContainer/ColorRect.color = Color("4e004e") #Purple
+	$HolderHolder/ScrollContainer/ColorRect.color = get_biome_color(currentBiome)
 	currentMascot = mascotList[randi() % (mascotList.size())]
 	Trading.assign_component_values(currentBiome, currentMascot)
 	if inventoryWindow: inventoryWindow.revalue_all_gear()
 	set_boss()
 	set_biome_ui()
+
+func get_biome_color(biome):
+	match biome:
+		biomesList.plains: return Color("00005f") #Blue
+		biomesList.forest: return Color("005c00") #Green
+		biomesList.mountain: return Color("923b3b") #Red
+		biomesList.city: return Color("6f7300") #Yellow
+		biomesList.battlefield: return Color("923e00") #Orange
+		biomesList.graveyard: return Color("4e004e") #Purple
 
 func set_boss():
 	var biomeEnemies = []
@@ -168,16 +187,18 @@ func set_boss():
 	bossComponent = biomeEnemies[randi() % biomeEnemies.size()]
 	
 
-func set_biome_ui():
-	$HolderHolder/CornerHolder/Time/ColorRect/Biome/Visuals/Sprite.modulate = $HolderHolder/ScrollContainer/ColorRect.color
-	$HolderHolder/CornerHolder/Time/ColorRect/Biome.set_letter(biomesList.keys()[currentBiome][0].to_upper())
-	match currentBiome:
-		biomesList.plains: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("Plains\nNo aura.")
-		biomesList.forest: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("Forest\nAll units at full health get 5 shield at turn start.")
-		biomesList.mountain: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("Mountain\nAll units start battles with 1 Resist.")
-		biomesList.city: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("City\nAll single target moves have 2 more base damage, while all multi target moves have 2 less.")
-		biomesList.battlefield: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("Battlefield\nMoves with more than 1 base hit gain 1 additional hit.")
-		biomesList.graveyard: $HolderHolder/CornerHolder/Time/ColorRect/Biome.set_tooltip_text("Graveyard\nAll gear is used up twice as fast in battle, but XP gain is doubled.")
+func set_biome_ui(biomeNode = null, biomeUsed = null):
+	if biomeNode == null: biomeNode = $HolderHolder/CornerHolder/Time/ColorRect/Biome
+	if biomeUsed == null: biomeUsed = 0 + currentBiome
+	biomeNode.get_node("Visuals/Sprite").modulate = get_biome_color(biomeUsed)
+	biomeNode.set_letter(biomesList.keys()[biomeUsed][0].to_upper())
+	match biomeUsed:
+		biomesList.plains: biomeNode.set_tooltip_text("Plains\nNo aura.")
+		biomesList.forest: biomeNode.set_tooltip_text("Forest\nAll units at full health get 5 shield at turn start.")
+		biomesList.mountain: biomeNode.set_tooltip_text("Mountain\nAll units start battles with 1 Resist.")
+		biomesList.city: biomeNode.set_tooltip_text("City\nAll single target moves have 2 more base damage, while all multi target moves have 2 less.")
+		biomesList.battlefield: biomeNode.set_tooltip_text("Battlefield\nMoves with more than 1 base hit gain 1 additional hit.")
+		biomesList.graveyard: biomeNode.set_tooltip_text("Graveyard\nAll gear is used up twice as fast in battle, but XP gain is doubled.")
 
 func set_boon_text():
 	var index = Boons.playerBoons.size() - 1
@@ -185,6 +206,8 @@ func set_boon_text():
 	checkBoon.visible = true
 	checkBoon.set_tooltip_text(Boons.generate_tooltip(Boons.playerBoons[index]))
 	checkBoon.set_letter(Boons.playerBoons[index][0])
+	if Boons.lookup.empty(): Boons.defaultLookup = checkBoon
+	Boons.lookup[Boons.playerBoons[index]] = checkBoon
 	if index == 1: checkBoon.reposition_tooltip(100)
 	elif index == 2: checkBoon.reposition_tooltip(-100)
 
@@ -217,26 +240,22 @@ func set_display_color(display):
 
 func activate_point(point):
 	hide_undo()
+	var eventBox = $Events/EventDescription/MoveBox
+	eventBox.visible = false
 	if $Events.visible: 
 		return_event_box()
 		finish_event(calledEvent)
 	var type = point.pointType
 	if type == pointTypes.none: pass
-	elif type == pointTypes.end: #todo: event asking if you want to end (and eventually a boss here)
-		#print("End")
+	elif type == pointTypes.end:
+		grab_event("Town")
+	elif type == pointTypes.boss:
 		battleWindow.bossFight = true
 		seenBosses.append(bossComponent)
 		for enemy in Enemies.enemyList:
 			if Enemies.enemyList[enemy]["locations"][0] == Enemies.l.special and Enemies.enemyList[enemy]["rewards"][0] == bossComponent:
 				activate_battle([enemy])
 				break
-	elif type == pointTypes.dungeon:
-		grab_event("Dungeon")
-	elif type == pointTypes.town:
-		var townValue = 0 if isDay else 1 #towns should close on their night
-		townValue += currentDay
-		if townValue <= point.sectionNum: grab_event("Town")
-		else: pass #todo: event saying town is closed
 	elif type == pointTypes.battle or !isDay or point.sectionNum != currentDay: #no events at night
 		activate_battle()
 	elif type == pointTypes.visited:
@@ -251,7 +270,15 @@ func activate_point(point):
 		print("Start")
 	elif type == pointTypes.event:
 		if point.pointQuest:
-			$Events/EventDescription.text = str(point.pointQuest["description"], "\nfor\n", point.pointQuest["prize"])
+			$Events/EventDescription.text = str(point.pointQuest["description"], "\nfor\n")
+			var prize = point.pointQuest["prize"]
+			if prize.length() > 0:
+				if prize == "repair" or prize == "trade": 
+					$Events/EventDescription.text += prize
+				else:
+					$HolderHolder/DisplayHolder.box_move(eventBox, prize)
+					inventoryWindow.identify_product(eventBox)
+					eventBox.visible = true
 			run_event(point.pointQuest)
 		else:
 			var list = $Events.eventList
@@ -265,7 +292,10 @@ func activate_point(point):
 			grab_event(pool[randi() % pool.size()])
 
 func boss_defeated():
+	nextBiome = activePoint.info["biome"]
 	regen_map(true)
+	$CraftScroll.visible = false
+	$RepairScroll.visible = false
 
 func check_delay():
 	if delayBattle:
@@ -276,13 +306,15 @@ func check_delay():
 func activate_battle(newOpponents = null, isHunt = false):
 	#if inventoryWindow.visible:
 		#delayBattle = newOpponents
-	if currentDungeon:
+	if currentDungeon and !newOpponents:
 		var dungeonRando = DUNGEONDIFFICULTY[randi() % DUNGEONDIFFICULTY.size()]
 		newOpponents = Enemies.generate_encounter(dungeonRando + get_difficulty_mod(), false, currentBiome, currentDungeon.mascot)
 	elif !newOpponents and distanceTraveled > 1:
 		var dayEncounter = isDay
+		var battleMod = floor((distanceTraveled - 5) / 2) #3 different groupings of encounters
+		if randi() % 2 == 0: battleMod +=1 #fuzz it a bit
 		if isDay and activePoint.sectionNum != currentDay: dayEncounter = false #if it's day but you're out of bounds it counts as night
-		newOpponents = Enemies.generate_encounter(distanceTraveled + DIFFICULTYMODIFIER + get_difficulty_mod(), dayEncounter, currentBiome, null, seenElite)
+		newOpponents = Enemies.generate_encounter(battleMod + DIFFICULTYMODIFIER + get_difficulty_mod(), dayEncounter, currentBiome, null)
 	if isHunt: 
 		for i in currentArea: newOpponents.append(newOpponents[0]) #scale up hunts by area
 		if Enemies.enemyList[newOpponents[0]]["difficulty"] == 1: newOpponents.append(newOpponents[0])
@@ -291,12 +323,6 @@ func activate_battle(newOpponents = null, isHunt = false):
 	battleWindow.welcome_back(newOpponents, currentArea)
 	toggle_map_windows(false)
 	inventoryWindow.inventory_blackouts(true)
-
-func check_for_elite(opponents):
-	for enemy in opponents:
-		if Enemies.enemyList[enemy].has("elite"):
-			seenElite = true
-			return
 
 func get_difficulty_mod():
 	var nightMod = 0 if isDay else 1
@@ -307,6 +333,7 @@ func toggle_map_windows(toggle):
 	$RepairScroll.visible = toggle
 	$CraftPanel.visible = toggle
 	$CraftScroll.visible = toggle
+	if currentDungeon: $HolderHolder/DungeonHolder.visible = toggle
 	$HolderHolder/ScrollContainer.visible = toggle
 
 func grab_event(eventName): #used for premade events, generated events have their own system
@@ -353,7 +380,7 @@ func repair_event_box():
 	var repairName = $Events/Choices.get_child(0).get_node("Offerbox/Name").text
 	if repairName != "X":
 		inventoryWindow.add_to_player(repairName)
-		if activePoint.pointType != pointTypes.town: activePoint.mark_as_visited()
+		if activePoint.pointType != pointTypes.end: activePoint.mark_as_visited()
 
 func return_event_box():
 	var eBox = $Events/Choices.get_child(0).get_node("Offerbox")
@@ -423,98 +450,10 @@ func make_points(nextPos):
 		nextPos.x = INCREMENT
 	make_points(nextPos)
 
-func find_border_points():
-	var checkSection
-	var adjacentPoint
-	var possibleDungeons = [] #2D array of lines
-	var exitPoints = []
-	for i in TOTALSECTIONS - 1:
-		possibleDungeons.append([])
-		exitPoints.append([])
-	for point in $HolderHolder/ScrollContainer/ColorRect/PointHolder.get_children():
-		if point.visible and point.clicksFromStart and point.sectionNum != TOTALSECTIONS - 1: #no reason to check points in the last section
-			checkSection = point.sectionNum
-			for line in point.lines:
-				adjacentPoint = line.get_connection(point)
-				if adjacentPoint.sectionNum > checkSection:
-					possibleDungeons[checkSection].append(line)
-					exitPoints[checkSection].append(adjacentPoint)
-	place_dungeons(possibleDungeons, exitPoints)
-
-func place_dungeons(possibleDungeons, borderPoints): #dungeons start in one section and end in the next
-	var dungeonLine
-	var entrySection
-	for border in possibleDungeons:
-		if border.empty(): 
-			regen_map()
-			return print("dungeon shortage")
-		var newDungeon = Dungeon.instance()
-		$HolderHolder/DungeonHolder.add_child(newDungeon)
-		dungeonLine = border[randi() % border.size()]
-		entrySection = min(dungeonLine.linePoints[0].sectionNum, dungeonLine.linePoints[1].sectionNum)
-		for point in dungeonLine.linePoints: #border[rando] is a line
-			point.set_type(pointTypes.dungeon)
-			point.info["dungeonIndex"] = entrySection
-			point.info["direction"] = point.sectionNum - entrySection #0 for entry 1 for exit
-			if entrySection == point.sectionNum: 
-				newDungeon.originLocation = point
-				point.set_name(str(currentMascot, " Entry"))
-				var entryOK = false
-				for line in point.lines:
-					var checkPoint = line.get_connection(point)
-					if checkPoint.sectionNum == point.sectionNum:
-						entryOK = true
-						break
-				if !entryOK:
-					regen_map()
-					return print("invalid dungeon entry")
-				
-			else: 
-				newDungeon.exitLocation = point
-				point.set_name(str(currentMascot, " Exit"))
-		dungeonLine.dungeonize()
-		newDungeon.setup(dungeonLine)
-		place_town(newDungeon.exitLocation, borderPoints[entrySection])
-	classify_remaining_points()
-
-func place_temple(point):
-	var newTemple = Temple.instance()
-	#point.set_name("Temple")
-	$HolderHolder/TempleHolder.add_child(newTemple)
-	newTemple.setup()
-	point.set_type(pointTypes.temple)
-	point.info["templeIndex"] = point.sectionNum - 1
-
-func place_town(exitPoint, borderPoints): #towns are adjacent to dungeon exits and in the same section, if possible they are also on the border. ties broken by closeness to center
-	var checkPoint
-	var bestSpot
-	var bestDistance = bottomRight.y/2
-	var townSpots = []
-	var backupSpots = []
-	for line in exitPoint.lines:
-		checkPoint = line.get_connection(exitPoint)
-		if borderPoints.has(checkPoint): townSpots.append(checkPoint)
-		elif checkPoint.sectionNum == exitPoint.sectionNum: backupSpots.append(checkPoint)
-	if townSpots.empty(): 
-		if backupSpots.empty(): 
-			regen_map()
-			return print("no spots for town")
-		#print("backup spots")
-		townSpots = backupSpots
-	for i in townSpots.size():
-		if abs(townSpots[i].position.y - bottomRight.y/2) < bestDistance:
-			bestSpot = townSpots[i]
-			#print("swapping town to more central spot")
-	bestSpot.set_name("Town")
-	bestSpot.set_type(pointTypes.town)
-	#print(bottomRight.y/2)
-
 func clean_up():
-	var divider = bottomRight.x / TOTALSECTIONS
-	add_sections(divider)
 	for point in $HolderHolder/ScrollContainer/ColorRect/PointHolder.get_children():
-		point.sectionNum = floor(point.position.x / divider)
-		point.set_name(str(point.sectionNum, " | ", point.clicksFromStart))
+		point.sectionNum = 0
+		point.set_name(str(point.clicksFromStart))
 		if point.clicksFromStart == null and point.visible: 
 			print("hiding null point")
 			point.visible = false
@@ -524,13 +463,22 @@ func clean_up():
 		print("disaster")
 		regen_map()
 	else: 
-		find_border_points()
+		var newDungeon = Dungeon.instance()
+		$HolderHolder/DungeonHolder.add_child(newDungeon)
+		newDungeon.setup()
+		
+		var newTemple = Temple.instance()
+		$HolderHolder/TempleHolder.add_child(newTemple)
+		newTemple.setup()
+		
+		classify_remaining_points()
 		#categorize_points()
 
 func regen_map(newMember = false):
-	
 	print("---------------- New Map ----------------")
 	if newMember:
+		
+		if currentDungeon: currentDungeon.exit()
 		currentArea += 1
 		if global.storedParty.size() < 4:
 			var Party = get_parent().get_node_or_null("Party")
@@ -559,7 +507,6 @@ func regen_map(newMember = false):
 		advance_day(true)
 		make_points(Vector2(INCREMENT,INCREMENT*.5))
 		time = DAYTIME
-		seenElite = false
 		set_biome()
 		set_time_text()
 		for unit in global.storedParty:
@@ -570,6 +517,8 @@ func regen_map(newMember = false):
 	else: print("Bad map gen settings")
 
 func add_new_member():
+	$CraftScroll.visible = true
+	$RepairScroll.visible = true
 	inventoryWindow.unhide_boxes()
 	var unit = global.storedParty[-1]
 	unit.Battle = battleWindow
@@ -588,28 +537,6 @@ func add_new_member():
 	#for tracker in unit.ui.get_node("Trackers").get_children():
 	#	tracker.visible = false
 	Boons.call_boon("new_member", [inventoryWindow])
-
-func add_sections(divider):
-	var newSection
-	var sectionBG
-	var addedSections = []
-	for i in TOTALSECTIONS:
-		newSection = Section.instance()
-		$HolderHolder/ScrollContainer/ColorRect/SectionHolder.add_child(newSection)
-		addedSections.append(newSection)
-		sectionBG = newSection.get_node("BG")
-		sectionBG.margin_left = i * divider
-		sectionBG.margin_right = sectionBG.margin_left + divider
-	set_sections(addedSections)
-
-func set_sections(addedSections = null):
-	var sHolder = $HolderHolder/ScrollContainer/ColorRect/SectionHolder
-	if addedSections:
-		for i in addedSections.size():
-			addedSections[i].visible = false if currentDay == i else true
-	else:
-		for i in TOTALSECTIONS:
-			sHolder.get_child(i).visible = true if currentDay != i or !isDay else false
 
 func set_label(point, label, distance = false):
 	if distance: point.set_name(str(label, " ", point.clicksFromStart))
@@ -634,52 +561,32 @@ func classify_remaining_points():
 		if point.visible and point.pointType == pointTypes.none:
 			remainingPoints.append(point)
 		
-	for i in TOTALSECTIONS:
-		Quests.servicesMade = 0
-		var sectionPoints = []
-		for point in remainingPoints:
-			if point.sectionNum == i:
-				sectionPoints.append(point)
-		if sectionPoints.empty(): 
-			print("no points for quests")
-			regen_map() #needs to be a really messed up mapgen for this, but if it happens it crashes
-			return 
-		if i > 0:
-			if i == TOTALSECTIONS - 1: #last section, put temple on point next to exit with most lines
-				var checkTemple
-				for line in endIndex.lines:
-					var checkPoint = line.get_connection(endIndex)
-					if !checkTemple: checkTemple = checkPoint
-					elif checkPoint.lines.size() > checkTemple.lines.size(): checkTemple = checkPoint
-				place_temple(checkTemple)
-				sectionPoints.erase(checkTemple)
-			else:
-				var randoPoint = sectionPoints[randi() % sectionPoints.size()]
-				place_temple(randoPoint)
-				sectionPoints.erase(randoPoint)
-		var battleCount = ceil(sectionPoints.size() * .5)
-		for line in startIndex.lines:
-			var checkPoint = line.get_connection(startIndex)
-			checkPoint.pointType = pointTypes.battle
-			sectionPoints.erase(checkPoint)
-			battleCount -= 1
-		while battleCount > 0:
-			var randoPoint = sectionPoints[randi() % sectionPoints.size()]
-			randoPoint.pointType = pointTypes.battle
-			sectionPoints.erase(randoPoint)
-			battleCount -= 1
-		sectionPoints.shuffle() #first 2 in the list get to be service rewards, so list needs to be randomized
-		for eventPoint in sectionPoints:
-			eventPoint.pointType = pointTypes.event
-			make_quest(eventPoint)
+	Quests.servicesMade = 0
+	if remainingPoints.empty(): 
+		print("no points for quests")
+		regen_map() #needs to be a really messed up mapgen for this, but if it happens it crashes
+		return 
+	var battleCount = ceil(remainingPoints.size() * .5)
+	for line in startIndex.lines:
+		var checkPoint = line.get_connection(startIndex)
+		checkPoint.pointType = pointTypes.battle
+		remainingPoints.erase(checkPoint)
+		battleCount -= 1
+	while battleCount > 0:
+		var randoPoint = remainingPoints[randi() % remainingPoints.size()]
+		randoPoint.pointType = pointTypes.battle
+		remainingPoints.erase(randoPoint)
+		battleCount -= 1
+	remainingPoints.shuffle() #first 2 in the list get to be service rewards, so list needs to be randomized
+	for eventPoint in remainingPoints:
+		eventPoint.pointType = pointTypes.event
+		make_quest(eventPoint)
 	set_point_displays()
 
 func set_point_displays():
 	for point in $HolderHolder/ScrollContainer/ColorRect/PointHolder.get_children():
-		if point.pointType == pointTypes.dungeon: point.set_type_text("D")
-		elif point.pointType == pointTypes.end: point.set_type_text("E")
+		if point.pointType == pointTypes.end: point.set_type_text("E")
 		elif point.pointType == pointTypes.start: point.set_type_text("S")
-		elif point.pointType == pointTypes.town: point.set_type_text("T")
 		elif point.sectionNum == currentDay and isDay:
 			if point.pointType > pointTypes.event:
 				point.set_type_text(pointTypes.keys()[point.pointType][0].to_upper())
@@ -791,17 +698,16 @@ func increment_xp(amount, rewardUnit):
 
 func subtract_time(diff, refillAllMana = false):
 	distanceTraveled = diff
-	time -= diff
+	if isDay:
+		time -= diff
+		if time <= 0:
+			time = time *-1
+			isDay = false
+			set_point_displays()
+	else:
+		time += diff
 	if refillAllMana: update_mana()
 	else: update_mana(diff)
-	if time <= 0:
-		time = DAYTIME + time
-		advance_day()
-		set_point_displays()
-	elif time <= 50: 
-		isDay = false
-		set_sections()
-		set_point_displays()
 	set_time_text()
 
 func set_time_text():
@@ -809,7 +715,7 @@ func set_time_text():
 	timeNode.get_node("Area").text = "Area " + String(currentArea + 1)
 	timeNode.get_node("Biome").text = biomeName[0].to_upper()+biomeName.substr(1, -1)
 	if isDay: 
-		timeNode.get_node("State").text = "Day " + String(currentDay + 1) + " - " + String(time - 50)
+		timeNode.get_node("State").text = "Day " + String(currentDay + 1) + " - " + String(time)
 	else: 
 		timeNode.get_node("State").text = "Night " + String(currentDay + 1) + " - " + String(time)
 
@@ -824,7 +730,6 @@ func advance_day(reset = false):
 	isDay = true
 	if reset: currentDay = 0
 	else: currentDay += 1
-	if !reset: set_sections()
 	set_point_displays()
 
 func set_quick_crafts():
@@ -923,4 +828,5 @@ func _on_Undo_pressed():
 func _on_BattleButton_pressed():
 	inventoryWindow.player_blackouts()
 	toggle_map_windows(false)
+	$BattleButton.visible = false
 	battleWindow.visible = true

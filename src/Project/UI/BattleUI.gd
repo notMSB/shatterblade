@@ -78,7 +78,7 @@ func toggle_single(box, toggle): #toggle true for purple, false for black
 	if toggle:
 		if box.moveType != Moves.moveType.item and box.trackerBar and box.trackerBar.value < box.resValue: #Check the resources before enabling a box
 			box.change_rect_color(Color(.53,.3,.3,1))
-			box.get_node("ColorRect").visible = true
+			box.get_node("Visuals/ColorRect").visible = true
 			toggle = false #needed to disable the button
 		else: #box can be enabled
 			box.change_rect_color(Color(.5,.1,.5,1))
@@ -160,6 +160,8 @@ func link_boxes(tracker, boxCount, firstMargin, lastMargin, barType):
 	else:
 		pass
 	barText.rect_position.x += PLAYERINCREMENT*.5*(boxCount.size() - 1) #center the text
+	tracker.get_node("Rectangle").rect_size = bar.rect_size
+	tracker.get_node("Rectangle").rect_position = bar.rect_position
 
 func clear_menus():
 	$Description.text = ""

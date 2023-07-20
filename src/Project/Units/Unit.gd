@@ -56,14 +56,16 @@ func make_stats(hp):
 func take_damage(damageVal, pierce = false, moveName = ""):
 	if virtue: return
 	if currentHealth > 0: #Can't be hitting someone that's dead
-		if shield > 0 and !pierce:
+		if shield > 0 and damageVal > 0 and !pierce:
+			if ui: ui.get_node("BattleElements/PopupManager").make_popup(str("-", min(damageVal, shield), " Shield"), Color.lightblue)
 			if shield - damageVal > 0:
 				shield -= damageVal
 				damageVal = 0
 			else:
 				damageVal -= shield
 				shield = 0
-		else:
+		if shield <= 0 or pierce:
+			if ui and damageVal > 0: ui.get_node("BattleElements/PopupManager").make_popup(str("-", min(damageVal, currentHealth), " HP"), Color.red)
 			currentHealth -= floor(max(0, damageVal))
 		update_hp()
 		if currentHealth <= 0:
@@ -71,7 +73,7 @@ func take_damage(damageVal, pierce = false, moveName = ""):
 			killedMove = moveName
 			damageVal += currentHealth #Returns amount of damage actually dealt for recoil reasons
 			if !isPlayer: 
-				if real: ui.visible = false
+				if real: ui.fadeout = true
 				Battle.evaluate_completion(self)
 			else:
 				Battle.evaluate_game_over()
@@ -81,7 +83,15 @@ func take_damage(damageVal, pierce = false, moveName = ""):
 							boxHolder.get_child(i).reduce_uses(1)
 		return damageVal
 
+func give_shield(shieldVal):
+	
+	shield += shieldVal
+	if ui: ui.get_node("BattleElements/PopupManager").make_popup(str("+",shieldVal, " Shield"), Color.lightblue)
+	update_hp()
+
 func heal(healVal):
+	var totalHeal = min(healVal, maxHealth - currentHealth)
+	if ui and totalHeal > 0: ui.get_node("BattleElements/PopupManager").make_popup(str("+", totalHeal, " HP"), Color.green)
 	currentHealth = min(maxHealth, currentHealth + healVal)
 	update_hp()
 
@@ -89,8 +99,9 @@ func update_hp(newMax = false):
 	if newMax:
 		ui.get_node("BattleElements/HPBar").max_value = maxHealth
 	if ui != null:
-		ui.get_node("BattleElements/HPBar").value = currentHealth
-		ui.get_node("BattleElements/HPBar/Text").text = str(currentHealth, "/", maxHealth)
+		var healthValue = max(currentHealth, 0)
+		ui.get_node("BattleElements/HPBar").value = healthValue
+		ui.get_node("BattleElements/HPBar/Text").text = str(healthValue, "/", maxHealth)
 		ui.get_node("BattleElements/Shield").text = "[" + String(shield) + "]"
 		if !isPlayer: ui.get_node("BattleElements/Shield").visible = true if shield > 0 else false
 

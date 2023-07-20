@@ -61,30 +61,36 @@ func create_move(unit, playerCount, posIndex):
 	if posIndex < DEFAULTMOVES: #set up attack and defend defaults
 		moveBox.get_node("Tooltip").position.y -= 30
 		moveBox.position.x = xPos - 100 if playerCount % 2 == 0 else xPos + 100
-		moveBox.get_node("ColorRect").rect_size.y = 40
+		moveBox.get_node("Visuals/ColorRect").rect_size.y = 40
 		move = moveBox.get_node("Name").text
 		if posIndex == 0:
-			moveBox.z_index = -3
+			moveBox.z_index = -2
 			if move == "X": move = "Take"
 			if playerCount >= 2: moveBox.position.y += PLAYERINCREMENT*.25
 			else: moveBox.position.y -= PLAYERINCREMENT*.25
 			moveBox.position.x = xPos - 20 if playerCount % 2 == 0 else xPos + 20
-			moveBox.get_node("ColorRect").margin_bottom = 20
 			moveBox.get_node("ReferenceRect").margin_bottom = 20
+			moveBox.get_node("Visuals").margin_bottom = 20
+			moveBox.get_node("Visuals/ColorRect").margin_top = 0
+			moveBox.get_node("Visuals/ColorRect").margin_bottom = 50
 			moveBox.get_node("Blackout").margin_bottom = 20
-			moveBox.get_node("Sprite").position.y = 0
+			moveBox.get_node("Visuals/Sprite").position.y = 0
 			#if playerCount % 2 == 0: moveBox.get_node("Name").margin_right = 0
 			#else: moveBox.get_node("Name").margin_left = 0
 		elif posIndex == 1:
 			if move == "X": move = "Attack"
 			moveBox.position.y -= PLAYERINCREMENT*.25
+			#moveBox.get_node("Visuals/Background").modulate.a = 0
 		else:
 			if move == "X": move = "Defend"
 			moveBox.position.y += PLAYERINCREMENT*.25
-			moveBox.get_node("ColorRect").margin_bottom = 20
 			moveBox.get_node("ReferenceRect").margin_bottom = 20
-			moveBox.get_node("Blackout").margin_bottom = 20
-			moveBox.get_node("Sprite").position.y = 0
+			moveBox.get_node("Visuals/ColorRect").margin_top = 10
+			moveBox.get_node("Visuals/ColorRect").margin_bottom = 50
+			moveBox.get_node("Visuals/Background").position = Vector2(40,40)
+			moveBox.get_node("Visuals").margin_top = -30
+			moveBox.get_node("Visuals").margin_bottom = 20
+			#moveBox.get_node("Visuals/Background").modulate.a = 0
 	else: #set up other moves
 		if unit.moves.size() < posIndex - DEFAULTMOVES + 1:
 			move = "X"
@@ -95,7 +101,7 @@ func create_move(unit, playerCount, posIndex):
 	box_move(moveBox, move)
 	moveBox.set_uses(Moves.get_uses(move))
 	var button = moveBox.get_node("Button")
-	button.rect_size = moveBox.get_node("ColorRect").rect_size
+	button.rect_size = moveBox.get_node("Visuals/ColorRect").rect_size
 
 func get_scancode(topRow, posIndex):
 	if topRow:
@@ -148,8 +154,8 @@ func box_move(moveBox, move, isUseless = false):
 		sprite_move(moveBox, move, false)
 
 func sprite_move(box, boxName, isMove = true):
-	var sprite = box.get_node("Sprite")
-	var cRect = box.get_node("ColorRect")
+	var sprite = box.get_node("Visuals/Sprite")
+	var cRect = box.get_node("Visuals/ColorRect")
 	var spritePath
 	if boxName[-1] == "+":
 		boxName.erase(boxName.length() - 1, 1)
@@ -183,7 +189,7 @@ func cleanup_moves(unit, boxColor = null): #makes all boxes perform the move the
 			move = unit.moves[i - DEFAULTMOVES]
 		box_move(box, move)
 		box.get_node("Info").text = ""
-		if boxColor: box.get_node("ColorRect").color = boxColor
+		if boxColor: box.get_node("Visuals/ColorRect").color = boxColor
 
 func manage_and_color_boxes(unit, invWindow = null): #Puts all of a unit's boxes in map mode and kills spent items
 	var move

@@ -28,20 +28,23 @@ script = ExtResource( 2 )
 position = Vector2( 40, 30 )
 script = ExtResource( 3 )
 
-[node name="Sprite" type="Sprite" parent="Leftbox"]
-visible = false
-position = Vector2( 0, 10 )
-texture = ExtResource( 4 )
-
-[node name="ColorRect" type="ColorRect" parent="Leftbox"]
+[node name="Visuals" type="ReferenceRect" parent="Leftbox"]
 margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
+border_color = Color( 1, 1, 1, 1 )
+editor_only = false
+
+[node name="Sprite" type="Sprite" parent="Leftbox/Visuals"]
+visible = false
+position = Vector2( 40, 30 )
+texture = ExtResource( 4 )
+
+[node name="ColorRect" type="ColorRect" parent="Leftbox/Visuals"]
+margin_right = 80.0
+margin_bottom = 60.0
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Scales" type="Sprite" parent="Leftbox"]
 visible = false
@@ -78,9 +81,6 @@ margin_right = 40.0
 margin_bottom = 40.0
 border_color = Color( 1, 1, 1, 1 )
 editor_only = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Button" type="Button" parent="Leftbox"]
 visible = false
@@ -157,20 +157,23 @@ __meta__ = {
 position = Vector2( 140, 30 )
 script = ExtResource( 3 )
 
-[node name="Sprite" type="Sprite" parent="Rightbox"]
-visible = false
-position = Vector2( 0, 10 )
-texture = ExtResource( 4 )
-
-[node name="ColorRect" type="ColorRect" parent="Rightbox"]
+[node name="Visuals" type="ReferenceRect" parent="Rightbox"]
 margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
+border_color = Color( 1, 1, 1, 1 )
+editor_only = false
+
+[node name="Sprite" type="Sprite" parent="Rightbox/Visuals"]
+visible = false
+position = Vector2( 40, 30 )
+texture = ExtResource( 4 )
+
+[node name="ColorRect" type="ColorRect" parent="Rightbox/Visuals"]
+margin_right = 80.0
+margin_bottom = 60.0
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Scales" type="Sprite" parent="Rightbox"]
 visible = false
@@ -207,9 +210,6 @@ margin_right = 40.0
 margin_bottom = 40.0
 border_color = Color( 1, 1, 1, 1 )
 editor_only = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Button" type="Button" parent="Rightbox"]
 visible = false
@@ -287,25 +287,28 @@ position = Vector2( 240, 30 )
 script = ExtResource( 3 )
 canMove = false
 
-[node name="Background" type="Sprite" parent="Productbox"]
-visible = false
-position = Vector2( 0, 10 )
-texture = ExtResource( 4 )
-
-[node name="Sprite" type="Sprite" parent="Productbox"]
-visible = false
-position = Vector2( 0, 10 )
-texture = ExtResource( 4 )
-
-[node name="ColorRect" type="ColorRect" parent="Productbox"]
+[node name="Visuals" type="ReferenceRect" parent="Productbox"]
 margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
+border_color = Color( 1, 1, 1, 1 )
+editor_only = false
+
+[node name="Background" type="Sprite" parent="Productbox/Visuals"]
+visible = false
+position = Vector2( 40, 30 )
+texture = ExtResource( 4 )
+
+[node name="Sprite" type="Sprite" parent="Productbox/Visuals"]
+visible = false
+position = Vector2( 40, 30 )
+texture = ExtResource( 4 )
+
+[node name="ColorRect" type="ColorRect" parent="Productbox/Visuals"]
+margin_right = 80.0
+margin_bottom = 60.0
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Scales" type="Sprite" parent="Productbox"]
 visible = false
@@ -342,9 +345,6 @@ margin_right = 40.0
 margin_bottom = 40.0
 border_color = Color( 1, 1, 1, 1 )
 editor_only = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Button" type="Button" parent="Productbox"]
 margin_left = -40.0

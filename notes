@@ -1,0 +1,8 @@
+put town at endpoint
+infinite night duration
+change resting
+put dungeon in town
+set dungeon length
+
+put temple in dungeon
+put boss in dungeon

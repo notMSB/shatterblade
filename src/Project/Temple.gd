@@ -100,10 +100,12 @@ func select_pressed(boonSelect):
 						select.visible = false
 
 func _on_HealButton_pressed():
+	var healed = false
 	for unit in global.storedParty:
 		if unit.currentHealth < unit.maxHealth and Boons.favor > 0:
 			unit.heal(1)
-			Boons.grant_favor(-1)
+			healed = true
+	if healed: Boons.grant_favor(-1)
 
 func _on_OfferButton_pressed():
 	offer_made($Templebox)

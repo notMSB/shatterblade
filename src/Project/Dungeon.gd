@@ -5,24 +5,23 @@ onready var Map = get_node("../../../")
 var index
 var type
 
-var totalPoints
+var totalPoints = 5
+var loadedExits
 const INCREMENT = 70
 const XSTART = 320
-const YPOS = 300
+const YPOS = 250
 
-var originLocation
-var exitLocation
-
-var enteredFromOrigin
 var originPoint
-var exitPoint
 var mascot = null
+var biomesUsed = []
 
-func setup(dLine): #dungeon line, links the two points
+func setup():
+	loadedExits = 0
+	totalPoints += Map.currentArea
+	biomesUsed = Map.curate_biomes(3)
 	if !mascot: 
 		mascot = Map.currentMascot
 		$Description.text = str(mascot, " Dungeon")
-	totalPoints = ceil(dLine.points[0].distance_to(dLine.points[1]) * Map.DISTANCE_TIME_MULT)
 	make_points(Vector2(XSTART, YPOS))
 
 func make_points(nextPos, prevPoint = false):
@@ -37,16 +36,32 @@ func make_points(nextPos, prevPoint = false):
 		originPoint = point
 	if (nextPos.x-XSTART) / INCREMENT < totalPoints:
 		make_points(nextPos, point)
+		if (nextPos.x-XSTART) / INCREMENT > totalPoints - 2:
+			point.pointType = Map.pointTypes.temple
+			point.set_type_text("T")
+			if Map.currentArea < 2:
+				split(point, true)
+				split(point, false)
 	else:
-		exitPoint = point
+		set_exit(point, Vector2(INCREMENT, 0))
 
-func determine_side():
-	if Map.activePoint.info["direction"] == 0: #0 is left 1 is right
-		originPoint.toggle_activation(true)
-		enteredFromOrigin = true
-	else:
-		exitPoint.toggle_activation(true)
-		enteredFromOrigin = false
+func split(prevPoint, direction):
+	var point = Map.Point.instance()
+	var posFix = INCREMENT if direction else INCREMENT * -1
+	$Points.add_child(point)
+	point.position = prevPoint.position
+	point.position.y += posFix
+	set_exit(point, Vector2(0, posFix))
+	make_line(prevPoint, point)
+
+func set_exit(point, posFix):
+	var exitBiomeUI = get_node(str("Biomes/", loadedExits))
+	exitBiomeUI.position = point.position + posFix
+	point.pointType = Map.pointTypes.boss
+	point.set_type_text("B")
+	point.info["biome"] = biomesUsed.pop_front()
+	Map.set_biome_ui(exitBiomeUI, point.info["biome"])
+	loadedExits+=1
 
 func make_line(one, two):
 	var line = Map.Line.instance()
@@ -60,27 +75,20 @@ func make_line(one, two):
 	two.lines.append(line)
 
 func evaluate_exit(point):
-	if point == originPoint or point == exitPoint:
+	if point == originPoint:
 		$Exit.visible = true
 	else:
 		$Exit.visible = false
 
 func enter():
-	determine_side()
+	originPoint.toggle_activation(true)
 	visible = true
 	Map.currentDungeon = self
 
-func switch_save(newSave): #If a player fully traversed the dungeon, switch the overworld's save point to the other side
-	Map.savedPoint.toggle_activation(false)
-	Map.savedPoint = newSave
-
-func _on_Exit_pressed():
-	if Map.activePoint == originPoint:
-		if !enteredFromOrigin: switch_save(originLocation)
-		originPoint.toggle_activation(false)
-	else:
-		if enteredFromOrigin: switch_save(exitLocation)
-		exitPoint.toggle_activation(false)
+func exit():
 	Map.savedPoint.toggle_activation(true, false) #Activate the overworld point, change false to true to skip activating the event
 	Map.currentDungeon = null
 	visible = false
+
+func _on_Exit_pressed():
+	exit()

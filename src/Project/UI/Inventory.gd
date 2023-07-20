@@ -260,8 +260,8 @@ func unhide_boxes():
 		hiddenBoxes[-1].visible = true
 
 func select_box(box = null):
-	box.get_node("ColorRect").color = Color(.5,.1,.5,.3)
-	box.get_node("ColorRect").visible = true
+	box.get_node("Visuals/ColorRect").color = Color(.5,.1,.5,.3)
+	box.get_node("Visuals/ColorRect").visible = true
 	check_swap(box)
 
 func deselect_box(box):
@@ -483,30 +483,8 @@ func check_for_curses(stock):
 
 func identify_product(box): #updates box color and trade value
 	var boxName = box.get_node("Name").text
-	box.get_node("Background").visible = true
-	box.get_node("ColorRect").visible = false
 	if Moves.moveList.has(boxName):
-		var productType = Moves.moveList[boxName]["type"]
-		var bgColor
-		box.moveType = productType
-		if productType == Moves.moveType.special: bgColor = "red"
-		elif productType == Moves.moveType.trick: bgColor = "green"
-		elif productType == Moves.moveType.magic: bgColor = "blue"
-		elif productType == Moves.moveType.item or Moves.moveList[boxName]["slot"] == Moves.equipType.relic: bgColor = "yellow"
-		elif Moves.moveList[boxName].has("unequippable"): bgColor = "orange"
-		else: #X/other
-			box.get_node("Background").visible = false
-			box.get_node("ColorRect").visible = true
-			box.get_node("ColorRect").color = DEFAULTCOLOR
-		if box.get_node("Background").visible:
-			var spritePath = str("res://src/Assets/Icons/Backgrounds/", bgColor, ".png")
-			if(ResourceLoader.exists(spritePath)):
-				box.get_node("Background").texture = load(spritePath)
-	else: 
-		if box.get_node("Sprite").visible:
-			box.get_node("ColorRect").visible = false
-		else:
-			box.get_node("ColorRect").color = DEFAULTCOLOR
+		box.set_background()
 	set_box_value(box, boxName)
 
 func revalue_all_gear():

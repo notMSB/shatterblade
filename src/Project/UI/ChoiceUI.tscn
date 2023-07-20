@@ -53,16 +53,30 @@ visible = false
 position = Vector2( 240, 22 )
 script = ExtResource( 3 )
 
-[node name="Sprite" type="Sprite" parent="Offerbox"]
-visible = false
-position = Vector2( 0, 10 )
-texture = ExtResource( 4 )
-
-[node name="ColorRect" type="ColorRect" parent="Offerbox"]
+[node name="Visuals" type="ReferenceRect" parent="Offerbox"]
 margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 40.0
+mouse_filter = 1
+border_color = Color( 1, 1, 1, 1 )
+editor_only = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Background" type="Sprite" parent="Offerbox/Visuals"]
+visible = false
+position = Vector2( 40, 30 )
+
+[node name="Sprite" type="Sprite" parent="Offerbox/Visuals"]
+visible = false
+position = Vector2( 40, 30 )
+texture = ExtResource( 4 )
+
+[node name="ColorRect" type="ColorRect" parent="Offerbox/Visuals"]
+margin_right = 80.0
+margin_bottom = 60.0
 mouse_filter = 1
 color = Color( 0.533333, 0.305882, 0.305882, 1 )
 __meta__ = {
@@ -180,6 +194,13 @@ autowrap = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="SpinBox" type="SpinBox" parent="."]
+visible = false
+margin_left = 201.0
+margin_top = 3.0
+margin_right = 275.0
+margin_bottom = 61.0
 
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
 [connection signal="mouse_entered" from="Offerbox/Button" to="Offerbox" method="_on_mouse_entered"]

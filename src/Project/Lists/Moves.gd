@@ -104,7 +104,7 @@ func _ready():
 	"Reload": {"target": targetType.none, "resVal": 2, "cycle": [], "quick": true, "slot": equipType.none, "type": moveType.trick},
 	"Catch": {"target": targetType.none, "resVal": 2, "cycle": [], "quick": true, "slot": equipType.none, "type": moveType.trick, "turnlimit": 1, "description": "Use it or lose it."},
 	
-	"Speed Potion": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "give_status"), "args": ["moveUser", "Dodgy", funcref(self, "get_enemy_targeters")], "description": "Gives 1 dodge for every enemy targeting user", "slot": equipType.gear, "type": moveType.item, "quick": true},
+	"Speed Potion": {"target": targetType.user, "resVal": 0, "effect": funcref(self, "give_status"), "args": ["moveUser", "Dodgy", funcref(self, "get_enemy_targeters")], "description": "Gives 1 dodge for every enemy targeting user", "slot": equipType.gear, "type": moveType.item},
 	"Throwing Knife": {"target": targetType.enemy, "damage": 4, "resVal": 0, "slot": equipType.gear, "type": moveType.item, "quick": true},
 	"Brass Knuckles": {"target": targetType.enemy, "status": "Stun", "value": 1, "resVal": 0, "slot": equipType.gear, "type": moveType.item},
 	"Health Potion": {"target": targetType.ally, "resVal": 0, "healing": 15, "slot": equipType.gear, "type": moveType.item, "mapUsable": true},
@@ -313,9 +313,10 @@ func take_recoil(unit, damage, modifier):
 func change_attribute(unit, attribute, amount, multiplier = 1):
 	if typeof(multiplier) == TYPE_ARRAY: #for when i am getting weird with passing arguments
 		multiplier = multiplier.size()
-	var temp = unit.get(attribute) + (amount * multiplier)
-	unit.set(attribute, temp)
-	if attribute == "shield": unit.update_hp()
+	if attribute == "shield": unit.give_shield(amount)
+	else:
+		var temp = unit.get(attribute) + (amount * multiplier)
+		unit.set(attribute, temp)
 	if attribute == "strength" or attribute == "tempStrength": unit.update_strength()
 
 func is_unit_poisoned(unit): #a little overly specific

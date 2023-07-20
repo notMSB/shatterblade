@@ -58,9 +58,6 @@ margin_top = 48.0
 margin_right = 487.0
 margin_bottom = 110.0
 text = "Toggle"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Table" type="Button" parent="."]
 margin_left = 780.0

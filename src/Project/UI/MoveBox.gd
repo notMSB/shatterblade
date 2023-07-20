@@ -1,6 +1,7 @@
 extends Node2D
 
 onready var CheckScene = $"../../../"
+onready var MovesNode = get_node("/root/Game/Data/Moves")
 
 export var canMove = true #cursed items and craft/repair product boxes get this set false
 
@@ -49,11 +50,13 @@ func set_mode_scene():
 func reduce_uses(amount):
 	currentUses = max(0, currentUses - amount)
 	currentUses = min(currentUses, maxUses) #in the event that an effect puts the current too high
+	$PopupManager.make_popup(str("-", amount), Color.violet)
 	set_uses()
 
 func repair_uses(bonus = false):
 	if bonus: currentUses = maxUses
 	else: currentUses = min(maxUses, currentUses + ceil(maxUses * REPAIRVALUE)) #round up for odds
+	$PopupManager.make_popup(str("Repaired"), Color.lightgreen)
 	set_uses()
 
 func set_uses(var newMax = null):
@@ -70,9 +73,9 @@ func set_uses(var newMax = null):
 		$Uses.rect_position.y = 7 if get_parent().name == "MoveBoxes" and get_index() <= 1 else 25
 
 func change_rect_color(color):
-	if $Sprite.visible: color.a = .5
-	$ColorRect.color = color
-	$ColorRect.visible = true
+	if $Visuals/Sprite.visible or $Visuals/Background.visible: color.a = .5
+	$Visuals/ColorRect.color = color
+	$Visuals/ColorRect.visible = true
 
 func set_tooltip_text(tip):
 	$Tooltip/Background.margin_left = -120 #Need to reset all of these to default for each time a new move needs a tooltip generated
@@ -109,6 +112,35 @@ func set_tooltip_text(tip):
 		$Tooltip/Label.margin_bottom += offset
 	$Tooltip/Label.text = tip
 
+func set_background(boxName = null):
+	$Visuals/Background.visible = true
+	$Visuals/ColorRect.visible = false
+	var bgColor
+	var moveName
+	if boxName: moveName = boxName
+	else: moveName = moves[0]
+	
+	if !MovesNode.moveList.has(moveName): return
+	
+	if moveType == MovesNode.moveType.special: bgColor = "red"
+	elif moveType == MovesNode.moveType.trick: bgColor = "green"
+	elif moveType == MovesNode.moveType.magic: bgColor = "blue"
+	elif moveType == MovesNode.moveType.item or MovesNode.moveList[moveName]["slot"] == MovesNode.equipType.relic: bgColor = "yellow"
+	elif MovesNode.moveList[moveName].has("unequippable"): bgColor = "orange"
+	else: #X/other
+		$Visuals/Background.visible = false
+		$Visuals/ColorRect.visible = true
+		$Visuals/ColorRect.color = Color(.53,.3,.3,1)
+	if $Visuals/Background.visible:
+		var spritePath = str("res://src/Assets/Icons/Backgrounds/", bgColor, ".png")
+		if(ResourceLoader.exists(spritePath)):
+			$Visuals/Background.texture = load(spritePath)
+	else: 
+		if $Visuals/Sprite.visible:
+			$Visuals/ColorRect.visible = false
+		else:
+			$Visuals/ColorRect.color = Color(.53,.3,.3,1)
+
 func _on_mouse_entered():
 	if $Tooltip/Label.text.length() > 0:
 		$Tooltip.visible = true
@@ -121,14 +153,14 @@ func _on_mouse_exited():
 	if boxModeScene.name == "Inventory" or boxModeScene.name == "Battle": boxModeScene.check_undrag(self)
 
 func _on_Button_pressed():
-	if $Blackout.visible: return
+	if get_node_or_null("Blackout") and $Blackout.visible: return
 	$Tooltip.visible = false
 	boxModeScene = set_mode_scene()
 	#print(boxModeScene)
 	match boxModeScene.name:
 		"Inventory": #inventory
 			if boxModeScene.otherSelection == null and Input.is_action_pressed("left_click"): boxModeScene.drag = true
-			#if boxModeScene.drag and $Sprite.visible: Input.set_custom_mouse_cursor($Sprite.texture)
+			#if boxModeScene.drag and $Visuals/Sprite.visible: Input.set_custom_mouse_cursor($Visuals/Sprite.texture)
 			var map = boxModeScene.get_node("../Map")
 			if map.battleWindow.visible == true:
 				pass #cannot click inventory items in battle
