@@ -676,7 +676,7 @@ func execute_move(real = true):
 		activate_effect()
 	StatusManager.evaluate_statuses(moveUser, StatusManager.statusActivations.moveUsed, [usedMoveBox])
 	while i < hits: #repeat for every hit, while loop enables it to be modified on the fly by move effects from outside this file
-		if real and targets[0].ui.get_node("BattleElements/PopupManager").get_child_count() > 0:
+		if real and targets[0].ui.get_node("BattleElements/PopupManager").popupQueue.size() > 0 and targets[0].currentHealth > 0:
 			yield(targets[0].ui.get_node("BattleElements/PopupManager"), "done")
 		if battleDone or previewBattleDone or moveUser.currentHealth <= 0: break
 		if bounceHits:
@@ -810,7 +810,6 @@ func evaluate_completion(deadUnit):
 		previewDeadEnemies += 1
 		if deadEnemies >= enemyNum:
 			lastUnit = deadUnit
-			yield(deadUnit.ui.get_node("BattleElements/PopupManager"), "done")
 			battleDone = true
 			#print("Battle Ready To Complete")
 	else:
